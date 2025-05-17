@@ -7,12 +7,12 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   return (
-    <nav className='sticky top-0 z-40 backdrop-blur-lg bg-[#1a1f2e]/80 border-b border-[#2563eb]/10 shadow-lg'>
+    <nav className='sticky top-0 z-40 backdrop-blur-lg bg-[var(--bg-secondary)]/80 border-b border-[var(--border-color)] shadow-lg'>
       <div className='container mx-auto px-4'>
         <div className='flex justify-between items-center h-16'>
           <Link
             to='/'
-            className='text-xl md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#2563eb] to-blue-400'
+            className='text-xl md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-tertiary)]'
           >
             GameCheck
           </Link>
@@ -20,7 +20,7 @@ export default function Navbar() {
           {/* Мобильная кнопка меню */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className='md:hidden p-2 text-gray-400 hover:text-gray-300'
+            className='md:hidden p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
           >
             <svg
               className='w-6 h-6'
@@ -52,14 +52,16 @@ export default function Navbar() {
               <>
                 <Link
                   to={`/profile/${user.id}`}
-                  className='flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-[#151b27]/50 transition-all duration-200'
+                  className='flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-[var(--bg-tertiary)]/50 transition-all duration-200'
                 >
                   <img
                     src={user.avatarUrl}
                     alt={user.displayName}
-                    className='w-8 h-8 rounded-full ring-2 ring-[#2563eb]/50'
+                    className='w-8 h-8 rounded-full ring-2 ring-[var(--accent-primary)]/50'
                   />
-                  <span className='text-gray-100'>{user.displayName}</span>
+                  <span className='text-[var(--text-primary)]'>
+                    {user.displayName}
+                  </span>
                 </Link>
                 <button
                   onClick={logout}
@@ -71,7 +73,7 @@ export default function Navbar() {
             ) : (
               <button
                 onClick={login}
-                className='flex items-center gap-2 px-4 py-2 bg-[#151b27]/90 text-white rounded-lg hover:bg-[#1a1f2e]/90 transition-all duration-200 border border-[#2563eb]/20'
+                className='flex items-center gap-2 px-4 py-2 bg-[var(--bg-tertiary)]/90 text-[var(--text-primary)] rounded-lg hover:bg-[var(--bg-secondary)]/90 transition-all duration-200 border border-[var(--border-color)]'
               >
                 Войти через Steam
               </button>
@@ -81,20 +83,22 @@ export default function Navbar() {
 
         {/* Мобильное меню */}
         {isMenuOpen && (
-          <div className='md:hidden py-4 border-t border-[#2563eb]/10'>
+          <div className='md:hidden py-4 border-t border-[var(--border-color)]'>
             {user ? (
               <div className='space-y-4'>
                 <Link
                   to={`/profile/${user.id}`}
-                  className='flex items-center gap-3 p-2 rounded-lg hover:bg-[#151b27]/50 transition-all duration-200'
+                  className='flex items-center gap-3 p-2 rounded-lg hover:bg-[var(--bg-tertiary)]/50 transition-all duration-200'
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <img
                     src={user.avatarUrl}
                     alt={user.displayName}
-                    className='w-8 h-8 rounded-full ring-2 ring-[#2563eb]/50'
+                    className='w-8 h-8 rounded-full ring-2 ring-[var(--accent-primary)]/50'
                   />
-                  <span className='text-gray-100'>{user.displayName}</span>
+                  <span className='text-[var(--text-primary)]'>
+                    {user.displayName}
+                  </span>
                 </Link>
                 <button
                   onClick={() => {
@@ -112,7 +116,7 @@ export default function Navbar() {
                   login()
                   setIsMenuOpen(false)
                 }}
-                className='w-full flex items-center justify-center gap-2 px-4 py-2 bg-[#151b27]/90 text-white rounded-lg hover:bg-[#1a1f2e]/90 transition-all duration-200 border border-[#2563eb]/20'
+                className='w-full flex items-center justify-center gap-2 px-4 py-2 bg-[var(--bg-tertiary)]/90 text-[var(--text-primary)] rounded-lg hover:bg-[var(--bg-secondary)]/90 transition-all duration-200 border border-[var(--border-color)]'
               >
                 Войти через Steam
               </button>

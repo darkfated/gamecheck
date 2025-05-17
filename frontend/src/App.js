@@ -3,6 +3,7 @@ import { useState } from "react"
 import Navbar from "./components/Navbar"
 import Feed from "./pages/Feed"
 import Profile from "./pages/Profile"
+import { useTheme } from "./contexts/ThemeContext"
 
 // Компонент приветствия
 function AuthCallback() {
@@ -14,7 +15,7 @@ function AuthCallback() {
 
   return (
     <div className='flex flex-col items-center pt-20 min-h-screen'>
-      <div className='bg-[#1a1f2e] rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden'>
+      <div className='bg-[var(--bg-secondary)] rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden'>
         <div className='bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4'>
           <h2 className='text-xl font-bold text-white'>
             Добро пожаловать в GameCheck!
@@ -41,11 +42,11 @@ function AuthCallback() {
             </div>
           </div>
 
-          <h3 className='text-white text-center text-lg font-semibold mb-4'>
+          <h3 className='text-[var(--text-primary)] text-center text-lg font-semibold mb-4'>
             Отслеживайте свой игровой прогресс
           </h3>
 
-          <p className='text-gray-300 mb-6 text-center'>
+          <p className='text-[var(--text-secondary)] mb-6 text-center'>
             GameCheck — это сервис для отслеживания прогресса в видеоиграх. Вы
             можете добавлять игры в свою коллекцию, отмечать их статус,
             оценивать, следить за активностью друзей и многое другое.
@@ -53,9 +54,9 @@ function AuthCallback() {
 
           <div className='flex flex-col space-y-4'>
             <div className='flex items-center'>
-              <div className='bg-blue-500/20 rounded-full p-1 mr-3'>
+              <div className='bg-[var(--accent-primary)]/20 rounded-full p-1 mr-3'>
                 <svg
-                  className='w-5 h-5 text-blue-400'
+                  className='w-5 h-5 text-[var(--accent-secondary)]'
                   fill='none'
                   stroke='currentColor'
                   viewBox='0 0 24 24'
@@ -68,15 +69,15 @@ function AuthCallback() {
                   />
                 </svg>
               </div>
-              <span className='text-gray-300'>
+              <span className='text-[var(--text-secondary)]'>
                 Отслеживайте прогресс в играх
               </span>
             </div>
 
             <div className='flex items-center'>
-              <div className='bg-blue-500/20 rounded-full p-1 mr-3'>
+              <div className='bg-[var(--accent-primary)]/20 rounded-full p-1 mr-3'>
                 <svg
-                  className='w-5 h-5 text-blue-400'
+                  className='w-5 h-5 text-[var(--accent-secondary)]'
                   fill='none'
                   stroke='currentColor'
                   viewBox='0 0 24 24'
@@ -89,15 +90,15 @@ function AuthCallback() {
                   />
                 </svg>
               </div>
-              <span className='text-gray-300'>
+              <span className='text-[var(--text-secondary)]'>
                 Следите за активностью друзей
               </span>
             </div>
 
             <div className='flex items-center'>
-              <div className='bg-blue-500/20 rounded-full p-1 mr-3'>
+              <div className='bg-[var(--accent-primary)]/20 rounded-full p-1 mr-3'>
                 <svg
-                  className='w-5 h-5 text-blue-400'
+                  className='w-5 h-5 text-[var(--accent-secondary)]'
                   fill='none'
                   stroke='currentColor'
                   viewBox='0 0 24 24'
@@ -110,7 +111,7 @@ function AuthCallback() {
                   />
                 </svg>
               </div>
-              <span className='text-gray-300'>
+              <span className='text-[var(--text-secondary)]'>
                 Делитесь своими впечатлениями
               </span>
             </div>
@@ -119,7 +120,7 @@ function AuthCallback() {
           <div className='flex justify-center mt-8'>
             <button
               onClick={handleContinue}
-              className='px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white text-lg rounded-lg transition-colors transform hover:scale-105 transition duration-200'
+              className='px-8 py-3 bg-[var(--accent-primary)] hover:bg-[var(--accent-secondary)] text-white text-lg rounded-lg transition-colors transform hover:scale-105 transition duration-200'
             >
               Начать
             </button>
@@ -132,7 +133,7 @@ function AuthCallback() {
 
 function App() {
   return (
-    <div className='min-h-screen bg-[#13172199] text-white'>
+    <div className='min-h-screen bg-[var(--bg-primary)]'>
       <Navbar />
       <main>
         <Routes>

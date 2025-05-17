@@ -28,17 +28,17 @@ export default function Feed() {
   if (!user) {
     return (
       <div className='container mx-auto px-4 py-8'>
-        <div className='text-center bg-[#1a1f2e] shadow rounded-lg p-8'>
-          <h2 className='text-2xl font-bold mb-4'>
+        <div className='text-center bg-[var(--card-bg)] shadow rounded-lg p-8'>
+          <h2 className='text-2xl font-bold mb-4 text-[var(--text-primary)]'>
             Добро пожаловать в GameCheck!
           </h2>
-          <p className='text-gray-400 mb-6'>
+          <p className='text-[var(--text-secondary)] mb-6'>
             Войдите через Steam, чтобы отслеживать свои игры и следить за
             активностью друзей.
           </p>
           <button
             onClick={login}
-            className='inline-flex items-center gap-2 bg-[#171a21] text-white px-6 py-3 rounded-lg hover:bg-[#2a475e] transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200'
+            className='inline-flex items-center gap-2 bg-[var(--accent-primary)] text-white px-6 py-3 rounded-lg hover:bg-[var(--accent-secondary)] transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200'
           >
             Войти через Steam
           </button>
@@ -55,10 +55,10 @@ export default function Feed() {
         </div>
 
         <div className='space-y-6'>
-          <div className='bg-[#1a1f2e] rounded-lg shadow-lg p-4 border border-[#2563eb]/10'>
-            <h2 className='text-lg font-semibold mb-4 flex items-center gap-2'>
+          <div className='bg-[var(--card-bg)] rounded-lg shadow-lg p-4 border border-[var(--border-color)]'>
+            <h2 className='text-lg font-semibold mb-4 flex items-center gap-2 text-[var(--text-primary)]'>
               <svg
-                className='w-5 h-5 text-[#2563eb]'
+                className='w-5 h-5 text-[var(--accent-primary)]'
                 fill='none'
                 stroke='currentColor'
                 viewBox='0 0 24 24'
@@ -76,7 +76,7 @@ export default function Feed() {
               <div className='relative'>
                 <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
                   <svg
-                    className='w-5 h-5 text-gray-400'
+                    className='w-5 h-5 text-[var(--text-tertiary)]'
                     fill='none'
                     stroke='currentColor'
                     viewBox='0 0 24 24'
@@ -94,13 +94,13 @@ export default function Feed() {
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   placeholder='Поиск по имени...'
-                  className='w-full pl-10 pr-4 py-2 bg-[#151b27] border border-[#2563eb]/20 rounded-lg text-gray-100 placeholder-gray-500 focus:ring-2 focus:ring-[#2563eb]/30 focus:border-[#2563eb]/30 transition-all shadow-inner'
+                  className='w-full pl-10 pr-4 py-2 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:ring-2 focus:ring-[var(--input-focus)] focus:border-[var(--input-focus)] transition-all shadow-inner'
                 />
               </div>
               <button
                 type='submit'
                 disabled={isSearching}
-                className='w-full bg-[#2563eb] text-white px-4 py-2 rounded-lg hover:bg-[#2563eb]/90 disabled:opacity-50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2'
+                className='w-full bg-[var(--accent-primary)] text-white px-4 py-2 rounded-lg hover:bg-[var(--accent-secondary)] disabled:opacity-50 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2'
               >
                 <svg
                   className='w-5 h-5'
@@ -121,10 +121,10 @@ export default function Feed() {
           </div>
 
           {searchResults.length > 0 && (
-            <div className='bg-[#1a1f2e] rounded-lg shadow-lg p-4 border border-[#2563eb]/10'>
-              <h3 className='text-lg font-semibold mb-4 flex items-center gap-2'>
+            <div className='bg-[var(--card-bg)] rounded-lg shadow-lg p-4 border border-[var(--border-color)]'>
+              <h3 className='text-lg font-semibold mb-4 flex items-center gap-2 text-[var(--text-primary)]'>
                 <svg
-                  className='w-5 h-5 text-[#2563eb]'
+                  className='w-5 h-5 text-[var(--accent-primary)]'
                   fill='none'
                   stroke='currentColor'
                   viewBox='0 0 24 24'
@@ -142,21 +142,21 @@ export default function Feed() {
                 {searchResults.map(user => (
                   <div
                     key={user.id}
-                    className='flex items-center gap-4 p-3 hover:bg-[#151b27] rounded-lg transition-all duration-200 border border-[#2563eb]/5 shadow hover:shadow-md'
+                    className='flex items-center gap-4 p-3 hover:bg-[var(--bg-tertiary)] rounded-lg transition-all duration-200 border border-[var(--border-color)] shadow hover:shadow-md'
                   >
                     <img
                       src={user.avatarUrl}
                       alt={user.displayName}
-                      className='w-10 h-10 rounded-full ring-2 ring-[#2563eb]/20'
+                      className='w-10 h-10 rounded-full ring-1 ring-[var(--border-color)]'
                     />
                     <Link
                       to={`/profile/${user.id}`}
-                      className='font-medium text-gray-200 hover:text-[#2563eb] transition-colors flex-grow'
+                      className='font-medium text-[var(--text-primary)] hover:text-[var(--accent-secondary)] transition-colors flex-grow'
                     >
                       {user.displayName}
                     </Link>
                     <svg
-                      className='w-5 h-5 text-gray-400'
+                      className='w-5 h-5 text-[var(--text-tertiary)]'
                       fill='none'
                       stroke='currentColor'
                       viewBox='0 0 24 24'

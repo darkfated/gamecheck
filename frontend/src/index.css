@@ -8,6 +8,83 @@
   --primary-darker: #151b27;
   --primary-darkest: #0f1520;
   --accent-blue: #2563eb;
+  --text-primary: #fff;
+  --text-secondary: #a0aec0;
+  --text-tertiary: #718096;
+
+  --bg-primary: #111827;
+  --bg-secondary: #1a1f2e;
+  --bg-tertiary: #151b27;
+
+  --accent-primary: #2563eb;
+  --accent-secondary: #3b82f6;
+  --accent-tertiary: #60a5fa;
+
+  --border-color: rgba(37, 99, 235, 0.1);
+  --border-color-hover: rgba(37, 99, 235, 0.2);
+
+  --card-bg: #1a1f2e;
+  --card-border: rgba(37, 99, 235, 0.1);
+  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+
+  --input-bg: #151b27;
+  --input-border: rgba(37, 99, 235, 0.2);
+  --input-focus: rgba(37, 99, 235, 0.3);
+}
+
+/* Тёмная тема (по умолчанию) */
+.dark-theme {
+  --text-primary: #fff;
+  --text-secondary: #a0aec0;
+  --text-tertiary: #718096;
+
+  --bg-primary: #111827;
+  --bg-secondary: #1a1f2e;
+  --bg-tertiary: #151b27;
+
+  --accent-primary: #2563eb;
+  --accent-secondary: #3b82f6;
+  --accent-tertiary: #60a5fa;
+
+  --border-color: rgba(37, 99, 235, 0.1);
+  --border-color-hover: rgba(37, 99, 235, 0.2);
+
+  --card-bg: #1a1f2e;
+  --card-border: rgba(37, 99, 235, 0.1);
+  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+
+  --input-bg: #151b27;
+  --input-border: rgba(37, 99, 235, 0.2);
+  --input-focus: rgba(37, 99, 235, 0.3);
+}
+
+/* Светлая тема */
+.light-theme {
+  --text-primary: #1a202c;
+  --text-secondary: #4a5568;
+  --text-tertiary: #718096;
+
+  --bg-primary: #f7fafc;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #edf2f7;
+
+  --accent-primary: #2563eb;
+  --accent-secondary: #3b82f6;
+  --accent-tertiary: #60a5fa;
+
+  --border-color: rgba(37, 99, 235, 0.1);
+  --border-color-hover: rgba(37, 99, 235, 0.2);
+
+  --card-bg: #ffffff;
+  --card-border: rgba(37, 99, 235, 0.1);
+  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05),
+    0 2px 4px -1px rgba(0, 0, 0, 0.03);
+
+  --input-bg: #edf2f7;
+  --input-border: rgba(37, 99, 235, 0.2);
+  --input-focus: rgba(37, 99, 235, 0.3);
 }
 
 body {
@@ -24,6 +101,8 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 code {

@@ -69,8 +69,10 @@ export const ActivityFeed = ({ userId = null, showFollowingOnly = false }) => {
         return (
           <span>
             добавил(а) игру{" "}
-            <span className='font-medium text-blue-400'>{progress.name}</span> в
-            список "{getStatusLabel(progress.status)}"
+            <span className='font-medium text-[var(--accent-tertiary)]'>
+              {progress.name}
+            </span>{" "}
+            в список "{getStatusLabel(progress.status)}"
           </span>
         )
       case "update_game":
@@ -79,7 +81,9 @@ export const ActivityFeed = ({ userId = null, showFollowingOnly = false }) => {
         return (
           <span>
             изменил(а) статус игры{" "}
-            <span className='font-medium text-blue-400'>{progress.name}</span>{" "}
+            <span className='font-medium text-[var(--accent-tertiary)]'>
+              {progress.name}
+            </span>{" "}
             на "{getStatusLabel(progress.status)}"
           </span>
         )
@@ -88,7 +92,9 @@ export const ActivityFeed = ({ userId = null, showFollowingOnly = false }) => {
         return (
           <span>
             оценил(а) игру{" "}
-            <span className='font-medium text-blue-400'>{progress.name}</span>{" "}
+            <span className='font-medium text-[var(--accent-tertiary)]'>
+              {progress.name}
+            </span>{" "}
             на {progress.rating}/10
           </span>
         )
@@ -99,7 +105,7 @@ export const ActivityFeed = ({ userId = null, showFollowingOnly = false }) => {
             подписался(ась) на{" "}
             <Link
               to={`/profile/${targetUser.id}`}
-              className='font-medium text-blue-400 hover:text-blue-300'
+              className='font-medium text-[var(--accent-tertiary)] hover:text-[var(--accent-secondary)]'
             >
               {targetUser.displayName}
             </Link>
@@ -113,14 +119,14 @@ export const ActivityFeed = ({ userId = null, showFollowingOnly = false }) => {
   if (loading) {
     return (
       <div className='flex justify-center items-center py-8'>
-        <div className='animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent'></div>
+        <div className='animate-spin rounded-full h-8 w-8 border-4 border-[var(--accent-primary)] border-t-transparent'></div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className='bg-[#1a1f2e] border border-red-400/30 rounded-lg p-4'>
+      <div className='bg-[var(--card-bg)] border border-red-400/30 rounded-lg p-4'>
         <p className='text-red-400 text-center'>
           Ошибка загрузки ленты: {error}
         </p>
@@ -130,7 +136,7 @@ export const ActivityFeed = ({ userId = null, showFollowingOnly = false }) => {
 
   return (
     <div className='space-y-4'>
-      <h2 className='text-xl font-semibold mb-4 text-white'>
+      <h2 className='text-xl font-semibold mb-4 text-[var(--text-primary)]'>
         {userId
           ? "Лента активности"
           : showFollowingOnly
@@ -138,8 +144,8 @@ export const ActivityFeed = ({ userId = null, showFollowingOnly = false }) => {
           : "Лента активности"}
       </h2>
       {activities.length === 0 ? (
-        <div className='bg-[#1a1f2e] border border-[#2563eb]/10 rounded-lg p-6 text-center'>
-          <p className='text-gray-400'>
+        <div className='bg-[var(--card-bg)] border border-[var(--border-color)] rounded-lg p-6 text-center'>
+          <p className='text-[var(--text-secondary)]'>
             {userId
               ? "У пользователя пока нет активности"
               : showFollowingOnly
@@ -152,7 +158,7 @@ export const ActivityFeed = ({ userId = null, showFollowingOnly = false }) => {
           {activities.map(activity => (
             <div
               key={activity.id}
-              className='flex items-start p-4 bg-[#1a1f2e] rounded-lg shadow-md border border-[#2563eb]/10 hover:border-[#2563eb]/20 transition-all'
+              className='flex items-start p-4 bg-[var(--card-bg)] rounded-lg shadow-md border border-[var(--border-color)] hover:border-[var(--border-color-hover)] transition-all'
             >
               <Link
                 to={`/profile/${activity.user.id}`}
@@ -161,22 +167,22 @@ export const ActivityFeed = ({ userId = null, showFollowingOnly = false }) => {
                 <img
                   src={activity.user.avatarUrl}
                   alt={activity.user.displayName}
-                  className='w-10 h-10 rounded-full ring-1 ring-[#2563eb]/20'
+                  className='w-10 h-10 rounded-full ring-1 ring-[var(--border-color)]'
                 />
               </Link>
               <div className='ml-3 flex-grow'>
                 <div>
                   <Link
                     to={`/profile/${activity.user.id}`}
-                    className='font-medium text-[#2563eb]'
+                    className='font-medium text-[var(--accent-primary)]'
                   >
                     {activity.user.displayName}
                   </Link>{" "}
-                  <span className='text-gray-300'>
+                  <span className='text-[var(--text-primary)]'>
                     {renderActivityContent(activity)}
                   </span>
                 </div>
-                <div className='text-sm text-gray-400 mt-1'>
+                <div className='text-sm text-[var(--text-tertiary)] mt-1'>
                   {new Date(activity.createdAt).toLocaleDateString("ru-RU")}
                 </div>
               </div>

@@ -115,7 +115,6 @@ export default function GameList({ games, onUpdate, editable }) {
       const response = await api.games.addGame(newGame)
       console.log("GameList: игра успешно добавлена:", response.data)
 
-      // Сбрасываем форму
       setNewGame({
         name: "",
         status: "plan_to_play",
@@ -125,7 +124,6 @@ export default function GameList({ games, onUpdate, editable }) {
         imageUrl: "https://via.placeholder.com/150",
       })
 
-      // Обновляем список игр
       onUpdate()
     } catch (error) {
       console.error("GameList: ошибка при добавлении игры:", error)
@@ -149,7 +147,6 @@ export default function GameList({ games, onUpdate, editable }) {
   const handleUpdateGame = async (gameId, updates) => {
     console.log("GameList: попытка обновления игры")
 
-    // Проверка аутентификации
     if (!checkAuth()) {
       alert("Для обновления игры необходимо авторизоваться")
       return
@@ -183,7 +180,6 @@ export default function GameList({ games, onUpdate, editable }) {
 
     console.log("GameList: попытка удаления игры")
 
-    // Проверка аутентификации
     if (!checkAuth()) {
       alert("Для удаления игры необходимо авторизоваться")
       return
@@ -215,7 +211,7 @@ export default function GameList({ games, onUpdate, editable }) {
         <p>Для управления списком игр необходимо выполнить вход через Steam.</p>
         <button
           onClick={() => api.auth.steamLogin()}
-          className='mt-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg'
+          className='mt-4 bg-[var(--accent-primary)] hover:bg-[var(--accent-secondary)] text-white px-4 py-2 rounded-lg'
         >
           Войти через Steam
         </button>
@@ -224,14 +220,14 @@ export default function GameList({ games, onUpdate, editable }) {
   }
 
   return (
-    <div className='space-y-8 text-gray-100'>
+    <div className='space-y-8 text-[var(--text-primary)]'>
       {/* Форма добавления игры */}
       {user && editable && isAuthenticated && (
         <motion.form
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           onSubmit={handleAddGame}
-          className='space-y-3 xs:space-y-4 p-4 xs:p-6 bg-[#1a1f2e] rounded-xl border border-[#2563eb]/10 shadow-lg'
+          className='space-y-3 xs:space-y-4 p-4 xs:p-6 bg-[var(--card-bg)] rounded-xl border border-[var(--border-color)] shadow-lg'
         >
           {authError && (
             <div className='bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-red-400 text-sm mb-3'>
@@ -244,13 +240,13 @@ export default function GameList({ games, onUpdate, editable }) {
             value={newGame.name}
             onChange={e => setNewGame({ ...newGame, name: e.target.value })}
             placeholder='Название игры'
-            className='w-full p-2 xs:p-3 text-sm xs:text-base bg-[#151b27] border border-[#2563eb]/20 rounded-lg text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-[#2563eb]/30 focus:border-[#2563eb]/30 transition-all'
+            className='w-full p-2 xs:p-3 text-sm xs:text-base bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:ring-2 focus:ring-[var(--input-focus)] focus:border-[var(--input-focus)] transition-all'
             required
           />
           <select
             value={newGame.status}
             onChange={e => setNewGame({ ...newGame, status: e.target.value })}
-            className='w-full p-2 xs:p-3 text-sm xs:text-base bg-[#151b27] border border-[#2563eb]/20 rounded-lg text-gray-100 focus:ring-2 focus:ring-[#2563eb]/30 focus:border-[#2563eb]/30 transition-all'
+            className='w-full p-2 xs:p-3 text-sm xs:text-base bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--input-focus)] focus:border-[var(--input-focus)] transition-all'
           >
             {statusOptions.map(option => (
               <option key={option.value} value={option.value}>
@@ -262,7 +258,7 @@ export default function GameList({ games, onUpdate, editable }) {
             value={newGame.review}
             onChange={e => setNewGame({ ...newGame, review: e.target.value })}
             placeholder='Заметки'
-            className='w-full p-2 xs:p-3 text-sm xs:text-base bg-[#151b27] border border-[#2563eb]/20 rounded-lg text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-[#2563eb]/30 focus:border-[#2563eb]/30 transition-all'
+            className='w-full p-2 xs:p-3 text-sm xs:text-base bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:ring-2 focus:ring-[var(--input-focus)] focus:border-[var(--input-focus)] transition-all'
             rows={3}
           />
           <select
@@ -273,7 +269,7 @@ export default function GameList({ games, onUpdate, editable }) {
                 rating: e.target.value ? Number(e.target.value) : null,
               })
             }
-            className='w-full p-2 xs:p-3 text-sm xs:text-base bg-[#151b27] border border-[#2563eb]/20 rounded-lg text-gray-100 focus:ring-2 focus:ring-[#2563eb]/30 focus:border-[#2563eb]/30 transition-all'
+            className='w-full p-2 xs:p-3 text-sm xs:text-base bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--input-focus)] focus:border-[var(--input-focus)] transition-all'
           >
             <option value=''>Без оценки</option>
             {[...Array(10)].map((_, i) => (
@@ -286,7 +282,7 @@ export default function GameList({ games, onUpdate, editable }) {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             type='submit'
-            className='w-full p-2 xs:p-3 text-sm xs:text-base bg-[#2563eb] text-white rounded-lg font-medium hover:bg-[#2563eb]/90 disabled:bg-[#2563eb]/50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
+            className='w-full p-2 xs:p-3 text-sm xs:text-base bg-[var(--accent-primary)] text-white rounded-lg font-medium hover:bg-[var(--accent-secondary)] disabled:bg-[var(--accent-primary)]/50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
             disabled={isSubmitting}
           >
             {isSubmitting ? "Добавление..." : "Добавить игру"}
@@ -296,8 +292,8 @@ export default function GameList({ games, onUpdate, editable }) {
 
       {/* Отображение сообщения об отсутствии игр */}
       {Array.isArray(games) && games.length === 0 && (
-        <div className='bg-[#1a1f2e] border border-[#2563eb]/10 rounded-lg p-6 text-center'>
-          <p className='text-gray-400'>
+        <div className='bg-[var(--card-bg)] border border-[var(--border-color)] rounded-lg p-6 text-center'>
+          <p className='text-[var(--text-secondary)]'>
             {editable
               ? "У вас пока нет игр в списке. Добавьте первую игру!"
               : "У пользователя пока нет игр в списке."}
@@ -318,7 +314,7 @@ export default function GameList({ games, onUpdate, editable }) {
             {groupedGames[status.value] &&
               groupedGames[status.value].length > 0 && (
                 <>
-                  <h2 className='text-lg xs:text-xl font-bold text-gray-100 flex items-center gap-2 px-1'>
+                  <h2 className='text-lg xs:text-xl font-bold text-[var(--text-primary)] flex items-center gap-2 px-1'>
                     <div
                       className={`w-2 h-2 rounded-full bg-${status.color}-500`}
                     />
@@ -328,10 +324,10 @@ export default function GameList({ games, onUpdate, editable }) {
                     {groupedGames[status.value].map(game => (
                       <div
                         key={game.id}
-                        className='group p-4 bg-[#1a1f2e]/90 backdrop-blur-sm border border-[#2563eb]/10 rounded-xl hover:border-[#2563eb]/30 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1'
+                        className='group p-4 bg-[var(--card-bg)] backdrop-blur-sm border border-[var(--border-color)] rounded-xl hover:border-[var(--border-color-hover)] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1'
                       >
                         <div className='flex justify-between items-start gap-2'>
-                          <h3 className='text-base font-semibold text-gray-100 line-clamp-2 flex-grow'>
+                          <h3 className='text-base font-semibold text-[var(--text-primary)] line-clamp-2 flex-grow'>
                             {game.name}
                           </h3>
                           {user && user.id === game.userId && editable && (
@@ -365,7 +361,7 @@ export default function GameList({ games, onUpdate, editable }) {
                                     status: e.target.value,
                                   })
                                 }
-                                className='p-2 w-full bg-[#151b27]/90 backdrop-blur-sm border border-[#2563eb]/20 rounded-lg text-gray-100 focus:ring-2 focus:ring-[#2563eb]/30 focus:border-[#2563eb]/30 transition-all duration-200 shadow-inner hover:bg-[#151b27] text-sm'
+                                className='p-2 w-full bg-[var(--input-bg)] backdrop-blur-sm border border-[var(--input-border)] rounded-lg text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--input-focus)] focus:border-[var(--input-focus)] transition-all duration-200 shadow-inner hover:bg-[var(--input-bg)] text-sm'
                               >
                                 {statusOptions.map(option => (
                                   <option
@@ -378,7 +374,7 @@ export default function GameList({ games, onUpdate, editable }) {
                               </select>
 
                               <div className='flex items-center gap-2'>
-                                <span className='text-gray-200 text-sm'>
+                                <span className='text-[var(--text-secondary)] text-sm'>
                                   Оценка:
                                 </span>
                                 <select
@@ -390,14 +386,14 @@ export default function GameList({ games, onUpdate, editable }) {
                                         : null,
                                     })
                                   }
-                                  className='p-2 flex-1 bg-[#151b27]/90 backdrop-blur-sm border border-[#2563eb]/20 rounded-lg text-gray-100 focus:ring-2 focus:ring-[#2563eb]/30 focus:border-[#2563eb]/30 transition-all duration-200 shadow-inner hover:bg-[#151b27] text-sm'
+                                  className='p-2 flex-1 bg-[var(--input-bg)] backdrop-blur-sm border border-[var(--input-border)] rounded-lg text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--input-focus)] focus:border-[var(--input-focus)] transition-all duration-200 shadow-inner hover:bg-[var(--input-bg)] text-sm'
                                 >
                                   <option value=''>Нет оценки</option>
                                   {[...Array(10)].map((_, i) => (
                                     <option
                                       key={i + 1}
                                       value={i + 1}
-                                      className='bg-[#151b27] text-gray-100'
+                                      className='bg-[var(--input-bg)] text-[var(--text-primary)]'
                                     >
                                       {i + 1}
                                     </option>
@@ -431,7 +427,7 @@ export default function GameList({ games, onUpdate, editable }) {
                                 }
                               </div>
                               {game.rating && (
-                                <div className='flex items-center gap-1 px-3 py-1 bg-[#2563eb]/10 text-blue-400 rounded-lg text-sm'>
+                                <div className='flex items-center gap-1 px-3 py-1 bg-[var(--accent-primary)]/10 text-[var(--accent-secondary)] rounded-lg text-sm'>
                                   <svg
                                     className='w-4 h-4'
                                     viewBox='0 0 20 20'
@@ -446,7 +442,7 @@ export default function GameList({ games, onUpdate, editable }) {
                           )}
 
                           {game.review && (
-                            <p className='text-gray-300 text-sm line-clamp-3'>
+                            <p className='text-[var(--text-secondary)] text-sm line-clamp-3'>
                               {game.review}
                             </p>
                           )}

@@ -32,17 +32,17 @@ export const Modal = ({ isOpen, onClose, title, children }) => {
                 duration: 0.5,
                 bounce: 0.3,
               }}
-              className='relative inline-block w-full max-w-lg p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-[#1a1f2e] border border-[#2563eb]/20 rounded-xl shadow-2xl'
+              className='relative inline-block w-full max-w-lg p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-[var(--card-bg)] border border-[var(--border-color)] rounded-xl shadow-2xl'
             >
               <div className='flex justify-between items-center mb-6'>
-                <h3 className='text-xl font-semibold leading-6 text-gray-100'>
+                <h3 className='text-xl font-semibold leading-6 text-[var(--text-primary)]'>
                   {title}
                 </h3>
                 <motion.button
                   whileHover={{ scale: 1.1, rotate: 90 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={onClose}
-                  className='text-gray-400 hover:text-gray-300 transition-colors'
+                  className='text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors'
                 >
                   <svg
                     className='w-6 h-6'
