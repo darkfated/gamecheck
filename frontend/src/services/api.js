@@ -142,6 +142,7 @@ const usersApi = {
 const activitiesApi = {
   getFeed: () => axiosInstance.get("/activity"),
   getUserActivity: userId => axiosInstance.get(`/activity/user/${userId}`),
+  getFollowingActivity: () => axiosInstance.get("/activity/following"),
 }
 
 const subscriptionsApi = {

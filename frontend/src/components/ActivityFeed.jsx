@@ -1,22 +1,31 @@
 import React, { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
+import { useAuth } from "../contexts/AuthContext"
 import api from "../services/api"
 import { ACTIVITY_TYPES } from "../constants"
 import { timeAgo } from "../utils/dateFormatter"
 
-export const ActivityFeed = ({ userId = null }) => {
+export const ActivityFeed = ({ userId = null, showFollowingOnly = false }) => {
   const [activities, setActivities] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const { user } = useAuth()
 
   useEffect(() => {
     const fetchActivities = async () => {
       try {
         setLoading(true)
         setError(null)
-        const response = userId
-          ? await api.activities.getUserActivity(userId)
-          : await api.activities.getFeed()
+
+        let response
+
+        if (userId) {
+          response = await api.activities.getUserActivity(userId)
+        } else if (showFollowingOnly || !userId) {
+          response = await api.activities.getFollowingActivity()
+        } else {
+          response = await api.activities.getFeed()
+        }
 
         console.log("Полученные активности:", response.data)
         setActivities(response.data)
@@ -28,8 +37,12 @@ export const ActivityFeed = ({ userId = null }) => {
       }
     }
 
-    fetchActivities()
-  }, [userId])
+    if (user || userId) {
+      fetchActivities()
+    } else {
+      setLoading(false)
+    }
+  }, [userId, user, showFollowingOnly])
 
   // Функция для получения соответствующего текста статуса
   const getStatusLabel = status => {
@@ -118,13 +131,19 @@ export const ActivityFeed = ({ userId = null }) => {
   return (
     <div className='space-y-4'>
       <h2 className='text-xl font-semibold mb-4 text-white'>
-        Лента активности
+        {userId
+          ? "Лента активности"
+          : showFollowingOnly
+          ? "Ваша лента"
+          : "Лента активности"}
       </h2>
       {activities.length === 0 ? (
         <div className='bg-[#1a1f2e] border border-[#2563eb]/10 rounded-lg p-6 text-center'>
           <p className='text-gray-400'>
             {userId
               ? "У пользователя пока нет активности"
+              : showFollowingOnly
+              ? "Нет активности в вашей ленте. Подпишитесь на других пользователей, чтобы видеть их обновления."
               : "Нет новых обновлений"}
           </p>
         </div>
