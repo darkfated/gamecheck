@@ -33,7 +33,7 @@ copy .env.example .env
 - JWT секретный ключ
 - Ключ Steam API (получите на [Steam Dev](https://steamcommunity.com/dev/apikey))
 
-3. **Создание базы данных: ** зайдите в PostgreSQL и создайте базу данных `gamecheck`
+3. **Создание базы данных:** зайдите в PostgreSQL и создайте базу данных `gamecheck`
 
 4. **Запуск приложения**
 
