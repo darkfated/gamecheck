@@ -44,6 +44,12 @@ export const useSubscriptions = () => {
       setLoading(true)
       setError(null)
       await api.subscriptions.follow(userId)
+
+      const updatedFollowing = await api.subscriptions.getFollowing(userId)
+      if (updatedFollowing && updatedFollowing.data) {
+        setFollowing(updatedFollowing.data)
+      }
+
       return true
     } catch (err) {
       setError(err.response?.data?.message || err.message)
@@ -59,6 +65,9 @@ export const useSubscriptions = () => {
       setLoading(true)
       setError(null)
       await api.subscriptions.unfollow(userId)
+
+      setFollowing(prev => prev.filter(user => user.id !== userId))
+
       return true
     } catch (err) {
       setError(err.response?.data?.message || err.message)

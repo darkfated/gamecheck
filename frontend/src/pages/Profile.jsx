@@ -35,30 +35,35 @@ export default function Profile() {
       setLoading(true)
       setError(null)
 
-      const [profileRes, gamesRes, followersRes, followingRes] =
-        await Promise.all([
-          api.users.getProfile(id),
-          api.games.getUserGames(id),
-          api.subscriptions.getFollowers(id),
-          api.subscriptions.getFollowing(id),
-        ])
+      const profileResponse = await api.users.getProfile(id)
+      const currentProfile = profileResponse.data
+      setProfile(currentProfile)
 
-      console.log("Данные профиля:", profileRes.data)
-      console.log("Данные игр:", gamesRes.data)
-      console.log("Список подписчиков:", followersRes.data)
-      console.log("Список подписок:", followingRes.data)
+      const gamesResponse = await api.games.getUserGames(id)
+      setGames(gamesResponse.data)
 
-      setProfile(profileRes.data)
-      setGames(gamesRes.data)
-      setFollowers(followersRes.data)
-      setFollowing(followingRes.data)
-    } catch (error) {
-      console.error("Error fetching profile:", error.response || error)
-      setError(
-        error.response?.data?.message ||
-          error.message ||
-          "Не удалось загрузить профиль"
-      )
+      const followersResponse = await api.subscriptions.getFollowers(id)
+      setFollowers(followersResponse.data)
+
+      const followingResponse = await api.subscriptions.getFollowing(id)
+      setFollowing(followingResponse.data)
+
+      if (currentUser && currentUser.id !== id) {
+        const myFollowingResponse = await api.subscriptions.getFollowing(
+          currentUser.id
+        )
+        const isFollowing = myFollowingResponse.data.some(
+          followedUser => followedUser.id === id
+        )
+
+        setProfile(prev => ({
+          ...prev,
+          isFollowing: isFollowing,
+        }))
+      }
+    } catch (err) {
+      console.error("Error fetching profile:", err)
+      setError(err.response?.data?.message || "Не удалось загрузить профиль")
     } finally {
       setLoading(false)
     }
@@ -66,13 +71,20 @@ export default function Profile() {
 
   const handleFollow = async () => {
     try {
-      if (profile.isFollowing) {
+      const isCurrentlyFollowing = profile.isFollowing
+
+      if (isCurrentlyFollowing) {
         await api.subscriptions.unfollow(id)
         setProfile(prev => ({
           ...prev,
           isFollowing: false,
-          followersCount: prev.followersCount - 1,
+          followersCount: Math.max(0, prev.followersCount - 1),
         }))
+
+        const followersResponse = await api.subscriptions.getFollowers(id)
+        setFollowers(followersResponse.data)
+
+        console.log("Успешно отписался от пользователя")
       } else {
         await api.subscriptions.follow(id)
         setProfile(prev => ({
@@ -80,9 +92,39 @@ export default function Profile() {
           isFollowing: true,
           followersCount: prev.followersCount + 1,
         }))
+
+        const followersResponse = await api.subscriptions.getFollowers(id)
+        setFollowers(followersResponse.data)
+
+        console.log("Успешно подписался на пользователя")
       }
     } catch (error) {
       console.error("Error following/unfollowing:", error)
+      try {
+        const profileResponse = await api.users.getProfile(id)
+        const profileData = profileResponse.data
+
+        if (currentUser && currentUser.id !== id) {
+          const myFollowingResponse = await api.subscriptions.getFollowing(
+            currentUser.id
+          )
+          const isFollowing = myFollowingResponse.data.some(
+            followedUser => followedUser.id === id
+          )
+
+          setProfile({
+            ...profileData,
+            isFollowing: isFollowing,
+          })
+        } else {
+          setProfile(profileData)
+        }
+      } catch (refreshError) {
+        console.error(
+          "Error refreshing profile after follow/unfollow error:",
+          refreshError
+        )
+      }
     }
   }
 
