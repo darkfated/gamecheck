@@ -23,4 +23,4 @@ GameCheck - это веб-приложение для отслеживания �
 
 ## Лицензия
 
-MIT
+[GNU General Public License v3.0](https://github.com/darkfated/gamecheck/blob/master/LICENSE)
