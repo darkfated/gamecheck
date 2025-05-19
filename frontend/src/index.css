@@ -16,9 +16,15 @@
   --bg-secondary: #1a1f2e;
   --bg-tertiary: #151b27;
 
+  --bg-primary-rgb: 17, 24, 39;
+  --bg-secondary-rgb: 26, 31, 46;
+  --bg-tertiary-rgb: 21, 27, 39;
+
   --accent-primary: #2563eb;
   --accent-secondary: #3b82f6;
   --accent-tertiary: #60a5fa;
+  --accent-primary-rgb: 37, 99, 235;
+  --accent-secondary-rgb: 59, 130, 246;
 
   --border-color: rgba(37, 99, 235, 0.1);
   --border-color-hover: rgba(37, 99, 235, 0.2);
@@ -43,9 +49,15 @@
   --bg-secondary: #1a1f2e;
   --bg-tertiary: #151b27;
 
+  --bg-primary-rgb: 17, 24, 39;
+  --bg-secondary-rgb: 26, 31, 46;
+  --bg-tertiary-rgb: 21, 27, 39;
+
   --accent-primary: #2563eb;
   --accent-secondary: #3b82f6;
   --accent-tertiary: #60a5fa;
+  --accent-primary-rgb: 37, 99, 235;
+  --accent-secondary-rgb: 59, 130, 246;
 
   --border-color: rgba(37, 99, 235, 0.1);
   --border-color-hover: rgba(37, 99, 235, 0.2);
@@ -70,9 +82,15 @@
   --bg-secondary: #ffffff;
   --bg-tertiary: #edf2f7;
 
+  --bg-primary-rgb: 247, 250, 252;
+  --bg-secondary-rgb: 255, 255, 255;
+  --bg-tertiary-rgb: 237, 242, 247;
+
   --accent-primary: #2563eb;
   --accent-secondary: #3b82f6;
   --accent-tertiary: #60a5fa;
+  --accent-primary-rgb: 37, 99, 235;
+  --accent-secondary-rgb: 59, 130, 246;
 
   --border-color: rgba(37, 99, 235, 0.1);
   --border-color-hover: rgba(37, 99, 235, 0.2);
@@ -130,7 +148,7 @@ code {
 
 /* Glass Effect */
 .glass {
-  @apply bg-[#1a1f2e]/90 border border-[#2563eb]/20 transition-all duration-300;
+  @apply bg-[#1a1f2e]/90 border border-[#2563eb]/20 backdrop-blur-md transition-all duration-300;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2),
     0 2px 4px -1px rgba(0, 0, 0, 0.1);
 }
@@ -178,18 +196,138 @@ code {
   animation: shine 3s linear infinite;
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slideInRight {
+  animation: slideInRight 0.3s ease-out forwards;
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slideInLeft {
+  animation: slideInLeft 0.3s ease-out forwards;
+}
+
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 5px 0px rgba(99, 102, 241, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 20px 5px rgba(99, 102, 241, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 5px 0px rgba(99, 102, 241, 0.4);
+  }
+}
+
+.animate-glow {
+  animation: glow 3s infinite;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.bg-gradient-animate {
+  background-size: 200% 200%;
+  animation: gradient 8s ease infinite;
+}
+
 /* Card Hover Effects */
 .card-hover {
-  @apply transition-all duration-300 ease-out bg-[#1a1f2e] border border-[#2563eb]/10;
+  @apply transition-all duration-300 ease-out bg-[var(--bg-secondary)] border border-[#2563eb]/10 rounded-xl;
   transform-style: preserve-3d;
   perspective: 1000px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .card-hover:hover {
-  @apply transform scale-[1.02] border-[#2563eb]/20;
-  transform: translateY(-5px) scale(1.02);
+  @apply transform border-[#2563eb]/20;
+  transform: translateY(-5px) scale(1.01);
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3),
     0 10px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+.modern-card {
+  @apply rounded-xl backdrop-blur-md border border-[var(--border-color)] p-5 shadow-lg transition-all duration-300 hover:shadow-xl;
+  background-color: rgba(var(--bg-secondary-rgb), 0.8);
+}
+
+.modern-card:hover {
+  @apply border-[var(--border-color-hover)] transform -translate-y-1;
+}
+
+.btn-modern {
+  @apply px-5 py-2.5 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium transition-all duration-300 shadow-md;
+}
+
+.btn-modern:hover {
+  @apply shadow-lg transform -translate-y-0.5 from-indigo-700 to-purple-700;
+}
+
+.btn-modern-outline {
+  @apply px-5 py-2.5 rounded-full border-2 border-indigo-500/30 text-indigo-400 font-medium transition-all duration-300;
+}
+
+.btn-modern-outline:hover {
+  @apply border-indigo-500/80 text-indigo-300 bg-indigo-500/10 transform -translate-y-0.5;
 }
 
 /* Button Styles */

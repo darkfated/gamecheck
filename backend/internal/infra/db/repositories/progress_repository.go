@@ -59,19 +59,36 @@ func (r *ProgressRepositoryImpl) UpdateProgress(ctx context.Context, progress *m
 
 // DeleteProgress удаляет прогресс из базы данных
 func (r *ProgressRepositoryImpl) DeleteProgress(ctx context.Context, id string, userID string) error {
-	result := r.db.WithContext(ctx).
-		Where("id = ? AND user_id = ?", id, userID).
-		Delete(&models.Progress{})
-
-	if result.Error != nil {
-		return result.Error
+	var progress models.Progress
+	if err := r.db.WithContext(ctx).Where("id = ? AND user_id = ?", id, userID).First(&progress).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return errors.New("прогресс не найден или не принадлежит пользователю")
+		}
+		return err
 	}
 
-	if result.RowsAffected == 0 {
-		return errors.New("прогресс не найден или не принадлежит пользователю")
+	tx := r.db.WithContext(ctx).Begin()
+	if tx.Error != nil {
+		return tx.Error
 	}
 
-	return nil
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if err := tx.Where("progress_id = ?", id).Delete(&models.Activity{}).Error; err != nil {
+		tx.Rollback()
+		return fmt.Errorf("ошибка при удалении связанных записей активности: %w", err)
+	}
+
+	if err := tx.Where("id = ? AND user_id = ?", id, userID).Delete(&models.Progress{}).Error; err != nil {
+		tx.Rollback()
+		return fmt.Errorf("ошибка при удалении прогресса: %w", err)
+	}
+
+	return tx.Commit().Error
 }
 
 // GetProgressByID возвращает прогресс по его ID

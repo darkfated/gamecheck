@@ -59,6 +59,8 @@ func (d *Database) migrateSchema() error {
 
 	log.Println("Успешное подключение к PostgreSQL")
 
+	d.DB.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"")
+
 	// Миграция схемы базы данных
 	if err := d.DB.AutoMigrate(
 		&models.User{},
@@ -69,8 +71,6 @@ func (d *Database) migrateSchema() error {
 	); err != nil {
 		return fmt.Errorf("ошибка автомиграции: %w", err)
 	}
-
-	d.DB.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"")
 
 	return nil
 }

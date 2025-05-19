@@ -23,7 +23,7 @@ type Activity struct {
 	User         User         `json:"user" gorm:"foreignKey:UserID"`
 	Type         ActivityType `json:"type"`
 	ProgressID   *string      `json:"progressId,omitempty" gorm:"type:uuid;index;default:null"`
-	Progress     *Progress    `json:"progress,omitempty" gorm:"foreignKey:ProgressID"`
+	Progress     *Progress    `json:"progress,omitempty" gorm:"foreignKey:ProgressID;references:ID;constraint:OnDelete:CASCADE"`
 	TargetUserID *string      `json:"targetUserId,omitempty" gorm:"type:uuid;default:null"`
 	TargetUser   *User        `json:"targetUser,omitempty" gorm:"foreignKey:TargetUserID"`
 	GameName     *string      `json:"gameName,omitempty" gorm:"default:null"`
