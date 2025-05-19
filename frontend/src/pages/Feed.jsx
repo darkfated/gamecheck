@@ -5,6 +5,7 @@ import { ActivityFeed } from "../components/feed/ActivityFeed"
 import { FeedTabs } from "../components/feed/FeedTabs"
 import { UserSearch } from "../components/feed/UserSearch"
 import GameQuizWidget from "../components/feed/GameQuizWidget"
+import { PopularGames } from "../components/feed/PopularGames"
 import api from "../services/api"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -177,15 +178,27 @@ export default function Feed() {
     )
   }
 
+  // Render appropriate content based on active tab
+  const renderFeedContent = () => {
+    switch (activeTab) {
+      case 'popular':
+        return <PopularGames />;
+      case 'following':
+      case 'all':
+      default:
+        return <ActivityFeed
+          showFollowingOnly={activeTab === "following"}
+          userId={activeTab === "user" ? user?.id : null}
+        />;
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           {user && <FeedTabs activeTab={activeTab} setActiveTab={setActiveTab} />}
-          <ActivityFeed
-            showFollowingOnly={activeTab === "following"}
-            userId={activeTab === "user" ? user?.id : null}
-          />
+          {renderFeedContent()}
         </div>
 
         <div className="space-y-6">
