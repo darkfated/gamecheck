@@ -11,6 +11,7 @@ export function GameList({ games, onUpdate, editable, isOwner }) {
   const { isSubmitting, authError, addGame, updateGame, deleteGame } =
     useGameManagement(onUpdate)
   const [isFormVisible, setIsFormVisible] = useState(false)
+  const [viewMode, setViewMode] = useState('grid') // 'grid' or 'list' view mode
   const [newGame, setNewGame] = useState({
     name: "",
     status: GAME_STATUSES.PLAYING,
@@ -236,12 +237,46 @@ export function GameList({ games, onUpdate, editable, isOwner }) {
 
   return (
     <div className='space-y-8'>
-      {isOwner && isAuthenticated && (
-        <div className='flex justify-between items-center'>
+      <div className='flex justify-between items-center'>
+        <div className='flex items-center gap-2'>
           <h2 className='text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-500'>
-            Моя коллекция игр
+            {isOwner ? 'Моя коллекция игр' : 'Коллекция игр'}
           </h2>
+          
+          {/* View mode toggle buttons */}
+          <div className='ml-4 flex bg-[var(--bg-secondary)] p-1 rounded-md'>
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-1.5 rounded-md ${
+                viewMode === 'grid' 
+                  ? 'bg-[var(--accent-tertiary)] text-white' 
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+              } transition-colors`}
+              title="Отображение плиткой"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                  d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+              </svg>
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-1.5 rounded-md ${
+                viewMode === 'list' 
+                  ? 'bg-[var(--accent-tertiary)] text-white' 
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+              } transition-colors`}
+              title="Отображение списком"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                  d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
+        </div>
 
+        {isOwner && isAuthenticated && (
           <motion.button
             onClick={enableEditMode}
             whileHover={{ scale: 1.03 }}
@@ -250,8 +285,8 @@ export function GameList({ games, onUpdate, editable, isOwner }) {
           >
             Добавить игру
           </motion.button>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Форма добавления игры */}
       {editable && isAuthenticated && isFormVisible && (
@@ -380,18 +415,72 @@ export function GameList({ games, onUpdate, editable, isOwner }) {
                 </h2>
               </div>
 
-              <div className='grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'>
-                {gamesInStatus.map(game => (
-                  <GameCard
-                    key={game.id}
-                    game={game}
-                    statusOptions={statusOptions}
-                    editable={editable}
-                    onDelete={deleteGame}
-                    onUpdate={updateGame}
-                  />
-                ))}
-              </div>
+              {viewMode === 'grid' ? (
+                <div className='grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'>
+                  {gamesInStatus.map(game => (
+                    <GameCard
+                      key={game.id}
+                      game={game}
+                      statusOptions={statusOptions}
+                      editable={editable}
+                      onDelete={deleteGame}
+                      onUpdate={updateGame}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className='flex flex-col gap-2'>
+                  {gamesInStatus.map(game => (
+                    <motion.div
+                      key={game.id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className='bg-[var(--card-bg)] p-4 border border-[var(--border-color)] rounded-lg flex justify-between items-center hover:border-[var(--border-color-hover)] transition-all'
+                    >
+                      <div className='flex-1'>
+                        <div className='font-medium text-[var(--text-primary)]'>{game.name}</div>
+                        <div className='flex items-center gap-2 mt-1'>
+                          {game.rating && (
+                            <div className='bg-amber-500/20 text-amber-500 px-2 py-0.5 rounded text-xs font-medium'>
+                              {game.rating}/10
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {editable && (
+                        <div className='flex space-x-2'>
+                          <button
+                            onClick={() => updateGame(game.id, { status: game.status === GAME_STATUSES.COMPLETED ? GAME_STATUSES.PLAYING : GAME_STATUSES.COMPLETED })}
+                            className='text-indigo-500 hover:text-indigo-400 p-1'
+                            title={game.status === GAME_STATUSES.COMPLETED ? 'Отметить как "Играю"' : 'Отметить как "Пройдено"'}
+                          >
+                            <svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' 
+                                d={game.status === GAME_STATUSES.COMPLETED 
+                                  ? 'M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z'
+                                  : 'M5 13l4 4L19 7'} 
+                              />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => deleteGame(game.id)}
+                            className='text-red-500 hover:text-red-400 p-1'
+                            title='Удалить игру'
+                          >
+                            <svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' 
+                                d='M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16' 
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      )}
+                    </motion.div>
+                  ))}
+                </div>
+              )}
             </motion.div>
           )
         })}
