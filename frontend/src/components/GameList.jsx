@@ -3,7 +3,7 @@ import { useAuth } from "../contexts/AuthContext"
 import api from "../services/api"
 import { motion, AnimatePresence } from "framer-motion"
 
-export default function GameList({ games, onUpdate, editable }) {
+export default function GameList({ games, onUpdate, editable, isOwner }) {
   const { user, isAuthenticated, authInitialized } = useAuth()
   const [newGame, setNewGame] = useState({
     name: "",
@@ -222,7 +222,7 @@ export default function GameList({ games, onUpdate, editable }) {
   return (
     <div className='space-y-8 text-[var(--text-primary)]'>
       {/* Форма добавления игры */}
-      {user && editable && isAuthenticated && (
+      {editable && isAuthenticated && (
         <motion.form
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -294,10 +294,24 @@ export default function GameList({ games, onUpdate, editable }) {
       {Array.isArray(games) && games.length === 0 && (
         <div className='bg-[var(--card-bg)] border border-[var(--border-color)] rounded-lg p-6 text-center'>
           <p className='text-[var(--text-secondary)]'>
-            {editable
+            {isOwner
               ? "У вас пока нет игр в списке. Добавьте первую игру!"
               : "У пользователя пока нет игр в списке."}
           </p>
+          {isOwner && !editable && isAuthenticated && (
+            <button
+              onClick={() =>
+                window.dispatchEvent(
+                  new CustomEvent("gamecheck:edit-mode", {
+                    detail: { enable: true },
+                  })
+                )
+              }
+              className='mt-4 px-4 py-2 bg-[var(--accent-primary)]/20 text-[var(--accent-secondary)] rounded-lg hover:bg-[var(--accent-primary)]/30 transition-all duration-200 text-sm font-medium'
+            >
+              Добавить первую игру
+            </button>
+          )}
         </div>
       )}
 
@@ -330,7 +344,7 @@ export default function GameList({ games, onUpdate, editable }) {
                           <h3 className='text-base font-semibold text-[var(--text-primary)] line-clamp-2 flex-grow'>
                             {game.name}
                           </h3>
-                          {user && user.id === game.userId && editable && (
+                          {editable && (
                             <button
                               onClick={() => handleDeleteGame(game.id)}
                               className='opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-400 transition-opacity focus:opacity-100 p-1'
@@ -352,7 +366,7 @@ export default function GameList({ games, onUpdate, editable }) {
                           )}
                         </div>
                         <div className='mt-3 space-y-3'>
-                          {user && user.id === game.userId && editable ? (
+                          {editable ? (
                             <div className='flex flex-col gap-2'>
                               <select
                                 value={game.status}

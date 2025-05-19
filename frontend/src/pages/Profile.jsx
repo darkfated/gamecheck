@@ -26,10 +26,23 @@ export default function Profile() {
   const [discordError, setDiscordError] = useState("")
   const [showCopied, setShowCopied] = useState(false)
   const [activeTab, setActiveTab] = useState("progress")
+  const [isEditMode, setIsEditMode] = useState(false)
 
   useEffect(() => {
     fetchProfile()
   }, [id])
+
+  useEffect(() => {
+    const handleEditModeEvent = event => {
+      setIsEditMode(event.detail.enable)
+    }
+
+    window.addEventListener("gamecheck:edit-mode", handleEditModeEvent)
+
+    return () => {
+      window.removeEventListener("gamecheck:edit-mode", handleEditModeEvent)
+    }
+  }, [])
 
   const fetchProfile = async () => {
     try {
@@ -360,10 +373,44 @@ export default function Profile() {
         {/* Вкладка Прогресс */}
         {activeTab === "progress" && (
           <div>
+            {isOwnProfile && (
+              <div className='flex justify-end mb-4'>
+                <button
+                  onClick={() => setIsEditMode(!isEditMode)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    isEditMode
+                      ? "bg-[var(--bg-tertiary)]/80 text-[var(--text-primary)]"
+                      : "bg-[var(--accent-primary)]/20 text-[var(--accent-secondary)]"
+                  }`}
+                >
+                  <svg
+                    className='w-4 h-4'
+                    fill='none'
+                    stroke='currentColor'
+                    viewBox='0 0 24 24'
+                  >
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth={2}
+                      d={
+                        isEditMode
+                          ? "M6 18L18 6M6 6l12 12"
+                          : "M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                      }
+                    />
+                  </svg>
+                  {isEditMode
+                    ? "Выйти из режима редактирования"
+                    : "Редактировать"}
+                </button>
+              </div>
+            )}
             <GameList
               games={games}
               onUpdate={fetchProfile}
-              editable={currentUser && currentUser.id === id}
+              editable={isOwnProfile && isEditMode}
+              isOwner={isOwnProfile}
             />
           </div>
         )}
