@@ -318,7 +318,7 @@ export function ProfileHeader({
             {/* Статистика профиля */}
             <motion.div
               variants={itemVariants}
-              className='mt-6 flex flex-wrap gap-6 sm:gap-8 md:gap-12'
+              className='mt-12 flex flex-wrap gap-6 sm:gap-8 md:gap-12'
             >
               <motion.button
                 onClick={() => showFollowersModal()}
