@@ -1,0 +1,29 @@
+{
+  "name": "vue-game-widget",
+  "version": "1.0.0",
+  "description": "Vue Game Widget as Web Component",
+  "main": "dist/vue-game-widget.umd.js",
+  "module": "dist/vue-game-widget.es.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [
+    "vue",
+    "web-component",
+    "microfrontend"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "vue": "^3.4.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.0",
+    "vite": "^5.0.0"
+  }
+}
