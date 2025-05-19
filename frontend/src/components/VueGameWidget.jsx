@@ -4,7 +4,6 @@ import React, { useEffect, useRef, useState } from "react"
 const VueGameWidget = () => {
   const iframeRef = useRef(null)
   const [isLoaded, setIsLoaded] = useState(false)
-  const [scores, setScores] = useState({ teamA: 0, teamB: 0 })
   const [error, setError] = useState(null)
 
   useEffect(() => {
@@ -18,11 +17,6 @@ const VueGameWidget = () => {
         if (data.type === 'VUE_WIDGET_LOADED') {
           console.log('Vue widget loaded successfully!')
           setIsLoaded(true)
-        }
-        
-        // Обработка обновления счета
-        if (data.type === 'SCORES_UPDATED' && data.scores) {
-          setScores(data.scores)
         }
       }
     }
@@ -42,7 +36,7 @@ const VueGameWidget = () => {
           }
         } catch (e) {
           console.error('Error accessing iframe:', e)
-          setError('Не удалось загрузить Vue компонент: ' + e.message)
+          setError('Не удалось загрузить компонент викторины: ' + e.message)
         }
       }
     }
@@ -62,34 +56,27 @@ const VueGameWidget = () => {
   }, [isLoaded])
 
   return (
-    <div className="vue-component-wrapper modern-card" style={{ margin: "20px 0" }}>
-      <h3 className="text-xl font-bold mb-4 text-[var(--text-primary)] flex justify-between items-center">
-        <span>Vue Micro-Frontend Component</span>
-        {isLoaded && (
-          <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-            {scores.teamA} : {scores.teamB}
-          </span>
-        )}
-      </h3>
-      
+    <>
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           <p className="text-sm">{error}</p>
         </div>
       )}
 
-      <div style={{ position: 'relative', minHeight: '250px' }}>
+      <div style={{ position: 'relative' }}>
         <iframe
           ref={iframeRef}
           src="/vue-widget.html"
-          title="Vue Game Widget"
+          title="Game Quiz Widget"
           style={{
             width: '100%',
-            height: '250px',
+            height: '480px',
             border: 'none',
             borderRadius: '8px',
             overflow: 'hidden',
-            backgroundColor: 'transparent'
+            backgroundColor: 'transparent',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+            display: 'block' // Prevents extra space below iframe
           }}
           loading="eager"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -102,7 +89,7 @@ const VueGameWidget = () => {
               top: 0,
               left: 0,
               width: '100%',
-              height: '100%',
+              height: 'auto',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -112,12 +99,12 @@ const VueGameWidget = () => {
           >
             <div className="text-center">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500 mb-2"></div>
-              <div className="text-sm text-[var(--text-secondary)]">Загрузка Vue компонента...</div>
+              <div className="text-sm text-[var(--text-secondary)]">Загрузка викторины...</div>
             </div>
           </div>
         )}
       </div>
-    </div>
+    </>
   )
 }
 

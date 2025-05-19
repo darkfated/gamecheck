@@ -191,10 +191,8 @@ export default function Feed() {
         <div className="space-y-6">
           <UserSearch />
           
-          {/* Интеграция Vue компонента */}
-          <div className="modern-card">
-            <VueGameWidget />
-          </div>
+          {/* Викторина по играм */}
+          <VueGameWidget />
         </div>
       </div>
     </div>

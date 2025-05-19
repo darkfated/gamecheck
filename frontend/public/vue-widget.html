@@ -1,26 +1,30 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" style="margin: 0; padding: 0; height: 100%;">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Game Score Widget</title>
+  <title>Game Quiz Widget</title>
   <style>
-    body {
+    html, body {
       margin: 0;
       padding: 0;
       font-family: Arial, sans-serif;
       background-color: transparent;
       overflow: hidden;
+      height: 100%;
     }
     
     .vue-game-widget {
       font-family: Arial, sans-serif;
       max-width: 100%;
-      padding: 20px;
+      padding: 15px;
       border-radius: 8px;
       background: linear-gradient(to right, #4a2f80, #3a4780);
       color: #fff;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      min-height: 450px;
+      display: flex;
+      flex-direction: column;
     }
     
     h2 {
@@ -29,41 +33,58 @@
       font-size: 1.5rem;
     }
     
-    .score-container {
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
+    .question-container {
+      margin-bottom: 30px;
     }
     
-    .team {
-      text-align: center;
-    }
-    
-    h3 {
-      margin-bottom: 10px;
+    .question {
       font-size: 1.2rem;
-    }
-    
-    .score {
-      font-size: 3rem;
-      font-weight: bold;
       margin-bottom: 15px;
-      background-color: rgba(255, 255, 255, 0.2);
-      border-radius: 8px;
-      padding: 10px 20px;
+      font-weight: bold;
     }
     
-    .divider {
-      width: 2px;
-      height: 120px;
-      background-color: rgba(255, 255, 255, 0.3);
+    .options-list {
+      list-style-type: none;
+      padding: 0;
+    }
+    
+    .option-item {
+      padding: 10px 15px;
+      background-color: rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .option-item:hover {
+      background-color: rgba(255, 255, 255, 0.25);
+      transform: translateY(-2px);
+    }
+    
+    .option-item.selected {
+      background-color: rgba(105, 56, 180, 0.8);
+      border: 2px solid rgba(255, 255, 255, 0.5);
+    }
+    
+    .option-item.correct {
+      background-color: rgba(46, 213, 115, 0.8);
+    }
+    
+    .option-item.incorrect {
+      background-color: rgba(255, 71, 87, 0.8);
+    }
+    
+    .controls {
+      text-align: center;
+      margin-top: 20px;
     }
     
     button {
       background-color: #6938b4;
       color: white;
       border: none;
-      padding: 8px 16px;
+      padding: 10px 20px;
       font-size: 1rem;
       border-radius: 4px;
       cursor: pointer;
@@ -74,17 +95,33 @@
       background-color: #7d4ccc;
     }
     
-    .controls {
+    button:disabled {
+      background-color: #9d9fb3;
+      cursor: not-allowed;
+    }
+    
+    .result {
       text-align: center;
+      padding: 15px;
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
       margin-top: 20px;
     }
     
-    .reset-btn {
-      background-color: #e64a4a;
+    .score {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 10px;
     }
     
-    .reset-btn:hover {
-      background-color: #ff5a5a;
+    .feedback {
+      font-size: 1.1rem;
+    }
+    
+    .navigation {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
     }
   </style>
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
@@ -93,76 +130,195 @@
   <div id="app"></div>
 
   <script>
-    // Vue приложение без использования кастомных элементов
-    const { createApp, ref } = Vue;
+    // Vue приложение - викторина по играм
+    const { createApp, ref, computed } = Vue;
     
-    const GameScoreWidget = {
+    const GameQuizWidget = {
       setup() {
-        const teamAScore = ref(0);
-        const teamBScore = ref(0);
+        const currentQuestionIndex = ref(0);
+        const selectedOptionIndex = ref(null);
+        const showResult = ref(false);
+        const userAnswers = ref([]);
+        const quizCompleted = ref(false);
         
-        const incrementTeamA = () => {
-          teamAScore.value++;
-          notifyParent();
+        // База вопросов для викторины
+        const questions = [
+          {
+            question: "В какой из игр основного персонажа сюжетной линии играл актёр Киану Ривз?",
+            options: [
+              "Death Stranding", 
+              "Cyberpunk 2077", 
+              "Grand Theft Auto V", 
+              "The Last of Us Part II"
+            ],
+            correctAnswer: 1 // Индекс правильного ответа (Cyberpunk 2077)
+          },
+          {
+            question: "Какая игра получила титул «Игра года» на The Game Awards 2020?",
+            options: [
+              "Ghost of Tsushima", 
+              "The Last of Us Part II", 
+              "DOOM Eternal", 
+              "Hades"
+            ],
+            correctAnswer: 1 // The Last of Us Part II
+          },
+          {
+            question: "В какой игровой вселенной присутствует организация под названием Черный Меза (Black Mesa)?",
+            options: [
+              "Half-Life", 
+              "Resident Evil", 
+              "Metal Gear Solid", 
+              "BioShock"
+            ],
+            correctAnswer: 0 // Half-Life
+          },
+          {
+            question: "Какая компания разработала игру Minecraft?",
+            options: [
+              "Electronic Arts", 
+              "Valve", 
+              "Mojang Studios", 
+              "Blizzard Entertainment"
+            ],
+            correctAnswer: 2 // Mojang Studios
+          },
+          {
+            question: "Какая игра из серии The Elder Scrolls вышла в 2011 году?",
+            options: [
+              "The Elder Scrolls III: Morrowind", 
+              "The Elder Scrolls IV: Oblivion", 
+              "The Elder Scrolls V: Skyrim", 
+              "The Elder Scrolls Online"
+            ],
+            correctAnswer: 2 // The Elder Scrolls V: Skyrim
+          }
+        ];
+        
+        const currentQuestion = computed(() => {
+          return questions[currentQuestionIndex.value];
+        });
+        
+        const score = computed(() => {
+          if (!quizCompleted.value) return 0;
+          
+          return userAnswers.value.reduce((total, answer, index) => {
+            return answer === questions[index].correctAnswer ? total + 1 : total;
+          }, 0);
+        });
+        
+        const feedback = computed(() => {
+          const maxScore = questions.length;
+          const userScore = score.value;
+          const percentage = (userScore / maxScore) * 100;
+          
+          if (percentage === 100) return "Отлично! Ты настоящий знаток видеоигр!";
+          if (percentage >= 80) return "Очень хорошо! Ты хорошо разбираешься в играх!";
+          if (percentage >= 60) return "Неплохо! Неплохие знания!";
+          if (percentage >= 40) return "Можно лучше. Стоит поиграть в больше игр!";
+          return "Попробуй еще раз! Игровая индустрия ждет тебя!";
+        });
+        
+        // Функция выбора ответа
+        const selectOption = (index) => {
+          selectedOptionIndex.value = index;
         };
         
-        const incrementTeamB = () => {
-          teamBScore.value++;
-          notifyParent();
+        // Функция перехода к следующему вопросу
+        const nextQuestion = () => {
+          // Сохраняем ответ пользователя
+          userAnswers.value.push(selectedOptionIndex.value);
+          
+          // Если это был последний вопрос, показываем результат
+          if (currentQuestionIndex.value === questions.length - 1) {
+            quizCompleted.value = true;
+            showResult.value = true;
+            
+            // Сообщаем родительскому окну о завершении викторины
+            notifyParent();
+          } else {
+            // Иначе переходим к следующему вопросу
+            currentQuestionIndex.value++;
+            selectedOptionIndex.value = null;
+          }
         };
         
-        const resetScores = () => {
-          teamAScore.value = 0;
-          teamBScore.value = 0;
-          notifyParent();
+        // Сброс викторины
+        const resetQuiz = () => {
+          currentQuestionIndex.value = 0;
+          selectedOptionIndex.value = null;
+          showResult.value = false;
+          userAnswers.value = [];
+          quizCompleted.value = false;
         };
         
-        // Сообщаем родительскому окну об изменениях
+        // Сообщаем родительскому окну о результате
         const notifyParent = () => {
           if (window.parent && window.parent !== window) {
             window.parent.postMessage({
-              type: 'SCORES_UPDATED',
-              scores: {
-                teamA: teamAScore.value,
-                teamB: teamBScore.value
+              type: 'QUIZ_COMPLETED',
+              result: {
+                score: score.value,
+                totalQuestions: questions.length,
+                percentage: (score.value / questions.length) * 100
               }
             }, '*');
           }
         };
         
         return {
-          teamAScore,
-          teamBScore,
-          incrementTeamA,
-          incrementTeamB,
-          resetScores
+          questions,
+          currentQuestion,
+          currentQuestionIndex,
+          selectedOptionIndex,
+          showResult,
+          userAnswers,
+          quizCompleted,
+          score,
+          feedback,
+          selectOption,
+          nextQuestion,
+          resetQuiz
         };
       },
       template: `
         <div class="vue-game-widget">
-          <h2>Game Score Tracker (Vue Widget)</h2>
-          <div class="score-container">
-            <div class="team">
-              <h3>Team A</h3>
-              <div class="score">{{ teamAScore }}</div>
-              <button @click="incrementTeamA">+1</button>
-            </div>
-            <div class="divider"></div>
-            <div class="team">
-              <h3>Team B</h3>
-              <div class="score">{{ teamBScore }}</div>
-              <button @click="incrementTeamB">+1</button>
+          <h2>Викторина по видеоиграм</h2>
+          
+          <div v-if="!showResult" class="question-container" style="flex-grow: 1;">
+            <div class="question">{{ currentQuestionIndex + 1 }}. {{ currentQuestion.question }}</div>
+            
+            <ul class="options-list">
+              <li 
+                v-for="(option, index) in currentQuestion.options" 
+                :key="index"
+                @click="selectOption(index)"
+                :class="['option-item', { selected: selectedOptionIndex === index }]"
+              >
+                {{ option }}
+              </li>
+            </ul>
+            
+            <div class="controls">
+              <button @click="nextQuestion" :disabled="selectedOptionIndex === null">
+                {{ currentQuestionIndex < questions.length - 1 ? 'Следующий вопрос' : 'Завершить викторину' }}
+              </button>
             </div>
           </div>
-          <div class="controls">
-            <button @click="resetScores" class="reset-btn">Reset Scores</button>
+          
+          <div v-else class="result" style="flex-grow: 1;">
+            <div class="score">Ваш результат: {{ score }} из {{ questions.length }}</div>
+            <div class="feedback">{{ feedback }}</div>
+            <div class="controls">
+              <button @click="resetQuiz">Пройти викторину снова</button>
+            </div>
           </div>
         </div>
       `
     };
     
     // Создаем приложение
-    const app = createApp(GameScoreWidget);
+    const app = createApp(GameQuizWidget);
     
     // Монтируем его
     app.mount('#app');

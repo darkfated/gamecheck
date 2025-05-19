@@ -45,6 +45,11 @@ export default {
 </script>
 
 <style scoped>
+body {
+  height: auto;
+  background-color: linear-gradient(to right, #4a2f80, #3a4780);;
+}
+
 .vue-game-widget {
   font-family: Arial, sans-serif;
   max-width: 500px;
@@ -52,6 +57,7 @@ export default {
   padding: 20px;
   border-radius: 8px;
   background: linear-gradient(to right, #4a2f80, #3a4780);
+  height: auto;
   color: #fff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
