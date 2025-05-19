@@ -7,6 +7,8 @@ import GameList from "../components/GameList"
 import { ActivityFeed } from "../components/ActivityFeed"
 import { Modal } from "../components/common/Modal"
 import { ThemeToggle } from "../components/common/ThemeToggle"
+import { TabNavigation } from "../components/common/TabNavigation"
+import { EditModeToggle } from "../components/common/EditModeToggle"
 import api from "../services/api"
 
 export default function Profile() {
@@ -27,6 +29,17 @@ export default function Profile() {
   const [showCopied, setShowCopied] = useState(false)
   const [activeTab, setActiveTab] = useState("progress")
   const [isEditMode, setIsEditMode] = useState(false)
+
+  const profileTabs = [
+    { id: "progress", label: `Прогресс (${games.length})` },
+    { id: "activity", label: "Активность" },
+    { id: "info", label: "Информация" },
+  ]
+
+  const isOwnProfile = currentUser && profile && currentUser.id === profile.id
+  const tabs = isOwnProfile
+    ? [...profileTabs, { id: "settings", label: "Настройки" }]
+    : profileTabs
 
   useEffect(() => {
     fetchProfile()
@@ -97,8 +110,6 @@ export default function Profile() {
 
         const followersResponse = await api.subscriptions.getFollowers(id)
         setFollowers(followersResponse.data)
-
-        console.log("Успешно отписался от пользователя")
       } else {
         await api.subscriptions.follow(id)
         setProfile(prev => ({
@@ -109,8 +120,6 @@ export default function Profile() {
 
         const followersResponse = await api.subscriptions.getFollowers(id)
         setFollowers(followersResponse.data)
-
-        console.log("Успешно подписался на пользователя")
       }
     } catch (error) {
       console.error("Error following/unfollowing:", error)
@@ -187,8 +196,12 @@ export default function Profile() {
     }
   }, [profile])
 
-  // Проверяем, является ли профиль текущего пользователя
-  const isOwnProfile = currentUser && profile && currentUser.id === profile.id
+  const getAverageRating = () => {
+    const ratedGames = games.filter(game => game.rating)
+    if (ratedGames.length === 0) return 0
+    const sum = ratedGames.reduce((acc, game) => acc + (game.rating || 0), 0)
+    return (sum / ratedGames.length).toFixed(1)
+  }
 
   if (loading) {
     return (
@@ -234,15 +247,9 @@ export default function Profile() {
     )
   }
 
-  const getAverageRating = () => {
-    const ratedGames = games.filter(game => game.rating)
-    if (ratedGames.length === 0) return 0
-    const sum = ratedGames.reduce((acc, game) => acc + (game.rating || 0), 0)
-    return (sum / ratedGames.length).toFixed(1)
-  }
-
   return (
     <div className='container mx-auto px-4 py-8'>
+      {/* Профиль пользователя */}
       <div className='bg-[var(--card-bg)] shadow rounded-lg p-4 sm:p-6 mb-8'>
         <div className='flex flex-col sm:flex-row items-start sm:items-center gap-4'>
           <img
@@ -321,52 +328,11 @@ export default function Profile() {
       </div>
 
       {/* Навигационные вкладки */}
-      <div className='mb-6 border-b border-[var(--border-color)]'>
-        <div className='flex flex-wrap -mb-px'>
-          <button
-            onClick={() => setActiveTab("progress")}
-            className={`inline-block py-3 px-4 font-medium text-sm sm:text-base border-b-2 transition-colors ${
-              activeTab === "progress"
-                ? "border-[var(--accent-primary)] text-[var(--accent-secondary)]"
-                : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--text-tertiary)]"
-            }`}
-          >
-            Прогресс ({games.length})
-          </button>
-          <button
-            onClick={() => setActiveTab("activity")}
-            className={`inline-block py-3 px-4 font-medium text-sm sm:text-base border-b-2 transition-colors ${
-              activeTab === "activity"
-                ? "border-[var(--accent-primary)] text-[var(--accent-secondary)]"
-                : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--text-tertiary)]"
-            }`}
-          >
-            Активность
-          </button>
-          <button
-            onClick={() => setActiveTab("info")}
-            className={`inline-block py-3 px-4 font-medium text-sm sm:text-base border-b-2 transition-colors ${
-              activeTab === "info"
-                ? "border-[var(--accent-primary)] text-[var(--accent-secondary)]"
-                : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--text-tertiary)]"
-            }`}
-          >
-            Информация
-          </button>
-          {isOwnProfile && (
-            <button
-              onClick={() => setActiveTab("settings")}
-              className={`inline-block py-3 px-4 font-medium text-sm sm:text-base border-b-2 transition-colors ${
-                activeTab === "settings"
-                  ? "border-[var(--accent-primary)] text-[var(--accent-secondary)]"
-                  : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--text-tertiary)]"
-              }`}
-            >
-              Настройки
-            </button>
-          )}
-        </div>
-      </div>
+      <TabNavigation
+        tabs={tabs}
+        activeTab={activeTab}
+        onTabChange={tabId => setActiveTab(tabId)}
+      />
 
       {/* Содержимое вкладок */}
       <div className='tab-content'>
@@ -375,35 +341,10 @@ export default function Profile() {
           <div>
             {isOwnProfile && (
               <div className='flex justify-end mb-4'>
-                <button
-                  onClick={() => setIsEditMode(!isEditMode)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    isEditMode
-                      ? "bg-[var(--bg-tertiary)]/80 text-[var(--text-primary)]"
-                      : "bg-[var(--accent-primary)]/20 text-[var(--accent-secondary)]"
-                  }`}
-                >
-                  <svg
-                    className='w-4 h-4'
-                    fill='none'
-                    stroke='currentColor'
-                    viewBox='0 0 24 24'
-                  >
-                    <path
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                      strokeWidth={2}
-                      d={
-                        isEditMode
-                          ? "M6 18L18 6M6 6l12 12"
-                          : "M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                      }
-                    />
-                  </svg>
-                  {isEditMode
-                    ? "Выйти из режима редактирования"
-                    : "Редактировать"}
-                </button>
+                <EditModeToggle
+                  isEditMode={isEditMode}
+                  onToggle={() => setIsEditMode(!isEditMode)}
+                />
               </div>
             )}
             <GameList
