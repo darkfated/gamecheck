@@ -22,9 +22,11 @@
       background: linear-gradient(to right, #4a2f80, #3a4780);
       color: #fff;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      min-height: 450px;
+      min-height: 460px;
+      height: 100%;
       display: flex;
       flex-direction: column;
+      box-sizing: border-box;
     }
     
     h2 {
@@ -34,7 +36,7 @@
     }
     
     .question-container {
-      margin-bottom: 30px;
+      margin-bottom: 20px;
     }
     
     .question {
@@ -77,7 +79,7 @@
     
     .controls {
       text-align: center;
-      margin-top: 20px;
+      margin-top: 15px;
     }
     
     button {
@@ -101,21 +103,27 @@
     }
     
     .result {
+      height: auto;
       text-align: center;
       padding: 15px;
       background-color: rgba(255, 255, 255, 0.2);
       border-radius: 8px;
       margin-top: 20px;
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
     
     .score {
       font-size: 1.5rem;
       font-weight: bold;
-      margin-bottom: 10px;
+      margin-bottom: 5px;
     }
     
     .feedback {
       font-size: 1.1rem;
+      margin-bottom: 10px;
     }
     
     .navigation {
@@ -127,10 +135,9 @@
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
 <body>
-  <div id="app"></div>
+  <div id="app" style="height: 100%;"></div>
 
   <script>
-    // Vue приложение - викторина по играм
     const { createApp, ref, computed } = Vue;
     
     const GameQuizWidget = {
@@ -141,7 +148,6 @@
         const userAnswers = ref([]);
         const quizCompleted = ref(false);
         
-        // База вопросов для викторины
         const questions = [
           {
             question: "В какой из игр основного персонажа сюжетной линии играл актёр Киану Ривз?",
@@ -151,7 +157,7 @@
               "Grand Theft Auto V", 
               "The Last of Us Part II"
             ],
-            correctAnswer: 1 // Индекс правильного ответа (Cyberpunk 2077)
+            correctAnswer: 1
           },
           {
             question: "Какая игра получила титул «Игра года» на The Game Awards 2020?",
@@ -161,7 +167,7 @@
               "DOOM Eternal", 
               "Hades"
             ],
-            correctAnswer: 1 // The Last of Us Part II
+            correctAnswer: 1
           },
           {
             question: "В какой игровой вселенной присутствует организация под названием Черный Меза (Black Mesa)?",
@@ -171,7 +177,7 @@
               "Metal Gear Solid", 
               "BioShock"
             ],
-            correctAnswer: 0 // Half-Life
+            correctAnswer: 0
           },
           {
             question: "Какая компания разработала игру Minecraft?",
@@ -181,7 +187,7 @@
               "Mojang Studios", 
               "Blizzard Entertainment"
             ],
-            correctAnswer: 2 // Mojang Studios
+            correctAnswer: 2
           },
           {
             question: "Какая игра из серии The Elder Scrolls вышла в 2011 году?",
@@ -191,7 +197,7 @@
               "The Elder Scrolls V: Skyrim", 
               "The Elder Scrolls Online"
             ],
-            correctAnswer: 2 // The Elder Scrolls V: Skyrim
+            correctAnswer: 2
           }
         ];
         
@@ -219,31 +225,24 @@
           return "Попробуй еще раз! Игровая индустрия ждет тебя!";
         });
         
-        // Функция выбора ответа
         const selectOption = (index) => {
           selectedOptionIndex.value = index;
         };
         
-        // Функция перехода к следующему вопросу
         const nextQuestion = () => {
-          // Сохраняем ответ пользователя
           userAnswers.value.push(selectedOptionIndex.value);
           
-          // Если это был последний вопрос, показываем результат
           if (currentQuestionIndex.value === questions.length - 1) {
             quizCompleted.value = true;
             showResult.value = true;
             
-            // Сообщаем родительскому окну о завершении викторины
             notifyParent();
           } else {
-            // Иначе переходим к следующему вопросу
             currentQuestionIndex.value++;
             selectedOptionIndex.value = null;
           }
         };
         
-        // Сброс викторины
         const resetQuiz = () => {
           currentQuestionIndex.value = 0;
           selectedOptionIndex.value = null;
@@ -252,7 +251,6 @@
           quizCompleted.value = false;
         };
         
-        // Сообщаем родительскому окну о результате
         const notifyParent = () => {
           if (window.parent && window.parent !== window) {
             window.parent.postMessage({
@@ -306,10 +304,10 @@
             </div>
           </div>
           
-          <div v-else class="result" style="flex-grow: 1;">
+          <div v-else class="result">
             <div class="score">Ваш результат: {{ score }} из {{ questions.length }}</div>
             <div class="feedback">{{ feedback }}</div>
-            <div class="controls">
+            <div class="controls" style="margin-top: 5px;">
               <button @click="resetQuiz">Пройти викторину снова</button>
             </div>
           </div>
@@ -317,13 +315,9 @@
       `
     };
     
-    // Создаем приложение
     const app = createApp(GameQuizWidget);
-    
-    // Монтируем его
     app.mount('#app');
     
-    // Сообщаем родительскому окну, что все готово
     window.addEventListener('load', () => {
       if (window.parent && window.parent !== window) {
         window.parent.postMessage({ type: 'VUE_WIDGET_LOADED' }, '*');

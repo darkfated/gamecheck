@@ -4,9 +4,9 @@ import { useAuth } from "../contexts/AuthContext"
 import { ActivityFeed } from "../components/feed/ActivityFeed"
 import { FeedTabs } from "../components/feed/FeedTabs"
 import { UserSearch } from "../components/feed/UserSearch"
+import GameQuizWidget from "../components/feed/GameQuizWidget"
 import api from "../services/api"
 import { motion, AnimatePresence } from "framer-motion"
-import VueGameWidget from "../components/VueGameWidget"
 
 export default function Feed() {
   const { user, login } = useAuth()
@@ -191,8 +191,7 @@ export default function Feed() {
         <div className="space-y-6">
           <UserSearch />
           
-          {/* Викторина по играм */}
-          <VueGameWidget />
+          <GameQuizWidget />
         </div>
       </div>
     </div>
