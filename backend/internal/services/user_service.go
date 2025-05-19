@@ -29,10 +29,14 @@ func NewUserService(
 }
 
 // UpdateProfile обновляет профиль пользователя
-func (s *UserService) UpdateProfile(ctx context.Context, userID string, bio, twitterID, twitchID *string) (*models.User, error) {
+func (s *UserService) UpdateProfile(ctx context.Context, userID string, bio, discordTag *string) (*models.User, error) {
 	user, err := s.userRepo.GetUserByID(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("ошибка при получении пользователя: %w", err)
+	}
+
+	if discordTag != nil {
+		user.DiscordTag = *discordTag
 	}
 
 	if err := s.userRepo.UpdateUser(ctx, user); err != nil {

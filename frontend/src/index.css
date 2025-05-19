@@ -4,42 +4,9 @@
 
 :root {
   color-scheme: dark;
-  --primary-dark: #1a1f2e;
-  --primary-darker: #151b27;
-  --primary-darkest: #0f1520;
-  --accent-blue: #2563eb;
-  --text-primary: #fff;
-  --text-secondary: #a0aec0;
-  --text-tertiary: #718096;
-
-  --bg-primary: #111827;
-  --bg-secondary: #1a1f2e;
-  --bg-tertiary: #151b27;
-
-  --bg-primary-rgb: 17, 24, 39;
-  --bg-secondary-rgb: 26, 31, 46;
-  --bg-tertiary-rgb: 21, 27, 39;
-
-  --accent-primary: #2563eb;
-  --accent-secondary: #3b82f6;
-  --accent-tertiary: #60a5fa;
-  --accent-primary-rgb: 37, 99, 235;
-  --accent-secondary-rgb: 59, 130, 246;
-
-  --border-color: rgba(37, 99, 235, 0.1);
-  --border-color-hover: rgba(37, 99, 235, 0.2);
-
-  --card-bg: #1a1f2e;
-  --card-border: rgba(37, 99, 235, 0.1);
-  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06);
-
-  --input-bg: #151b27;
-  --input-border: rgba(37, 99, 235, 0.2);
-  --input-focus: rgba(37, 99, 235, 0.3);
 }
 
-/* Тёмная тема (по умолчанию) */
+/* Тёмная тема */
 .dark-theme {
   --text-primary: #fff;
   --text-secondary: #a0aec0;
@@ -61,6 +28,7 @@
 
   --border-color: rgba(37, 99, 235, 0.1);
   --border-color-hover: rgba(37, 99, 235, 0.2);
+  --divider-color: rgba(120, 130, 150, 0.25);
 
   --card-bg: #1a1f2e;
   --card-border: rgba(37, 99, 235, 0.1);
@@ -94,6 +62,7 @@
 
   --border-color: rgba(37, 99, 235, 0.1);
   --border-color-hover: rgba(37, 99, 235, 0.2);
+  --divider-color: rgba(37, 99, 235, 0.1);
 
   --card-bg: #ffffff;
   --card-border: rgba(37, 99, 235, 0.1);
@@ -386,7 +355,7 @@ code {
   @apply text-green-400 bg-green-500/10 border border-green-500/20;
 }
 
-.status-planned {
+.status-plan_to_play {
   @apply text-gray-400 bg-gray-500/10 border border-gray-500/20;
 }
 

@@ -2,10 +2,8 @@ import { createContext, useContext, useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import api from "../services/api"
 
-// Создаем контекст аутентификации
 const AuthContext = createContext(null)
 
-// Хук для доступа к контексту
 export function useAuth() {
   return useContext(AuthContext)
 }
@@ -19,7 +17,6 @@ function extractTokenFromUrl() {
       "extractTokenFromUrl: получен токен из URL, длиной",
       token.length
     )
-    // Очищаем URL от токена для безопасности
     window.history.replaceState({}, document.title, window.location.pathname)
   }
   return token
@@ -87,7 +84,6 @@ export function AuthProvider({ children }) {
     try {
       console.log("AuthContext: обновление данных пользователя")
 
-      // Проверяем наличие токена
       if (!api.auth.hasToken()) {
         console.log(
           "AuthContext: нет токена для обновления данных пользователя"
@@ -109,7 +105,6 @@ export function AuthProvider({ children }) {
       )
 
       if (err.response && err.response.status === 401) {
-        // Если ошибка 401, то сбрасываем состояние
         console.log(
           "AuthContext: получен 401 при обновлении данных, сбрасываем состояние"
         )
@@ -121,7 +116,6 @@ export function AuthProvider({ children }) {
     }
   }
 
-  // Вход через Steam
   const login = () => {
     console.log("AuthContext: перенаправление на Steam авторизацию")
     api.auth.steamLogin()
@@ -146,7 +140,6 @@ export function AuthProvider({ children }) {
     }
   }
 
-  // Значения, предоставляемые контекстом
   const value = {
     user,
     isAuthenticated,
@@ -163,7 +156,6 @@ export function AuthProvider({ children }) {
     isAuthenticated ? "авторизован" : "не авторизован"
   )
 
-  // Отображаем индикатор загрузки, пока проверяем аутентификацию
   if (loading) {
     return (
       <div className='flex items-center justify-center min-h-screen'>

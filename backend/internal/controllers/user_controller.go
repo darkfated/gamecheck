@@ -74,9 +74,8 @@ func (c *UserController) UpdateProfile(ctx *gin.Context) {
 	}
 
 	var profileData struct {
-		Bio       *string `json:"bio"`
-		TwitterID *string `json:"twitterId"`
-		TwitchID  *string `json:"twitchId"`
+		Bio        *string `json:"bio"`
+		DiscordTag *string `json:"discordTag"`
 	}
 
 	if err := ctx.ShouldBindJSON(&profileData); err != nil {
@@ -88,8 +87,7 @@ func (c *UserController) UpdateProfile(ctx *gin.Context) {
 		ctx,
 		userID.(string),
 		profileData.Bio,
-		profileData.TwitterID,
-		profileData.TwitchID,
+		profileData.DiscordTag,
 	)
 
 	if err != nil {
