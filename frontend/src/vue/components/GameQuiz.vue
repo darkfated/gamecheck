@@ -1,23 +1,19 @@
 <template>
   <div class="game-quiz-container">
     <h2 class="quiz-title">Игровые тесты</h2>
-    
+
     <!-- Test Selection UI -->
     <div v-if="!categorySelected && !quizStarted" class="category-selection">
       <h3>Выберите категорию</h3>
       <div class="categories-grid">
-        <div 
-          v-for="(category, index) in categories" 
-          :key="index"
-          @click="selectCategory(category.id)"
-          class="category-card"
-        >
+        <div v-for="(category, index) in categories" :key="index" @click="selectCategory(category.id)"
+          class="category-card">
           <h4>{{ category.name }}</h4>
           <p>{{ category.description }}</p>
         </div>
       </div>
     </div>
-    
+
     <!-- Quiz Start UI -->
     <div v-else-if="categorySelected && !quizStarted" class="quiz-start">
       <h3>{{ selectedCategory.name }}</h3>
@@ -28,34 +24,26 @@
         <button @click="backToCategories" class="back-button">← Назад к категориям</button>
       </div>
     </div>
-    
+
     <!-- Quiz Question UI -->
     <div v-else-if="quizStarted && !quizFinished" class="quiz-question">
       <h3>Вопрос {{ currentQuestionIndex + 1 }} из {{ currentQuestions.length }}</h3>
       <div class="question-text">{{ currentQuestion.question }}</div>
-      
+
       <div class="answers-container">
-        <button 
-          v-for="(answer, index) in currentQuestion.answers" 
-          :key="index"
-          @click="selectAnswer(index)"
-          :class="['answer-button', { 'selected': selectedAnswer === index }]"
-        >
+        <button v-for="(answer, index) in currentQuestion.answers" :key="index" @click="selectAnswer(index)"
+          :class="['answer-button', { 'selected': selectedAnswer === index }]">
           {{ answer }}
         </button>
       </div>
-      
+
       <div class="navigation-buttons">
-        <button 
-          @click="nextQuestion" 
-          :disabled="selectedAnswer === null"
-          class="next-button"
-        >
+        <button @click="nextQuestion" :disabled="selectedAnswer === null" class="next-button">
           Далее
         </button>
       </div>
     </div>
-    
+
     <!-- Quiz Results UI -->
     <div v-else-if="quizFinished" class="quiz-results">
       <h3>Результаты теста "{{ selectedCategory.name }}"</h3>
@@ -282,7 +270,7 @@ export default {
       if (this.selectedAnswer === this.currentQuestion.correctAnswer) {
         this.correctAnswers++;
       }
-      
+
       if (this.currentQuestionIndex < this.currentQuestions.length - 1) {
         this.currentQuestionIndex++;
         this.selectedAnswer = null;
@@ -383,7 +371,8 @@ export default {
   line-height: 1.6;
 }
 
-.start-actions, .results-actions {
+.start-actions,
+.results-actions {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -443,7 +432,9 @@ export default {
 }
 
 
-.next-button, .start-button, .restart-button {
+.next-button,
+.start-button,
+.restart-button {
   background: linear-gradient(90deg, #6366f1, #a855f7, #d946ef);
   color: white;
   border: none;
@@ -466,7 +457,9 @@ export default {
   transition: all 0.3s;
 }
 
-.next-button:hover, .start-button:hover, .restart-button:hover {
+.next-button:hover,
+.start-button:hover,
+.restart-button:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 15px rgba(99, 102, 241, 0.3);
 }
@@ -508,9 +501,11 @@ export default {
 
 
 @media (min-width: 640px) {
-  .start-actions, .results-actions {
+
+  .start-actions,
+  .results-actions {
     flex-direction: row;
     justify-content: center;
   }
 }
-</style> 
+</style>
