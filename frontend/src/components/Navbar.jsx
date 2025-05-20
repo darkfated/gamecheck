@@ -155,6 +155,41 @@ export default function Navbar() {
                 whileHover={{ scale: 1.05 }}
                 transition={{ type: "spring", stiffness: 400, damping: 10 }}
               >
+                <Link
+                  to="/quizzes"
+                  className={`px-5 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
+                    isActive("/quizzes")
+                      ? "text-[var(--text-primary)]"
+                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                  }`}
+                  style={{
+                    background: isActive("/quizzes")
+                      ? "linear-gradient(to right, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2), rgba(217, 70, 239, 0.2))"
+                      : "none",
+                    boxShadow: isActive("/quizzes")
+                      ? "0 4px 10px -1px rgba(99, 102, 241, 0.2)"
+                      : "none",
+                  }}
+                >
+                  <svg
+                    className='w-4 h-4'
+                    fill='none'
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    strokeWidth='2'
+                    viewBox='0 0 24 24'
+                    stroke='currentColor'
+                  >
+                    <path d='M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01'></path>
+                  </svg>
+                  Тесты
+                </Link>
+              </motion.div>
+
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+              >
                 <a
                   href='#'
                   onClick={handleLibraryClick}
@@ -369,6 +404,40 @@ export default function Navbar() {
                     </Link>
                   </motion.div>
                 )}
+
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.25 }}
+                >
+                  <Link
+                    to='/quizzes'
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl ${
+                      isActive('/quizzes')
+                        ? "text-[var(--text-primary)]"
+                        : "text-[var(--text-secondary)]"
+                    }`}
+                    style={{
+                      background: isActive('/quizzes')
+                        ? "linear-gradient(to right, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2), rgba(217, 70, 239, 0.2))"
+                        : "none",
+                    }}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <svg
+                      className='w-5 h-5'
+                      fill='none'
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth='2'
+                      viewBox='0 0 24 24'
+                      stroke='currentColor'
+                    >
+                      <path d='M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01'></path>
+                    </svg>
+                    Тесты
+                  </Link>
+                </motion.div>
 
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
