@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./backend/.env.example
+    depends_on:
+      - db
+
+  backend-progress:
+    build:
+      context: ./backend-progress
+    ports:
+      - "5001:5001"
+    env_file:
+      - ./backend-progress/.env.example
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_BACKEND_URL=http://localhost:5000
+      - REACT_APP_PROGRESS_URL=http://localhost:5001
+    depends_on:
+      - backend
+      - backend-progress
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: gamecheck
+    ports:
+      - "5432:5432"

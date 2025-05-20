@@ -20,12 +20,7 @@ type Config struct {
 	DBName     string
 	DBSSLMode  string
 
-	JWTSecret         string
-	JWTExpiration     int
-	RefreshSecret     string
-	RefreshExpiration int
-
-	UserServiceURL string
+	JWTSecret string
 }
 
 // Load загружает конфигурацию из переменных окружения
@@ -34,21 +29,16 @@ func Load() (*Config, error) {
 
 	config := &Config{
 		Env:  getEnv("ENV", "development"),
-		Port: getEnv("PORT", "8081"),
+		Port: getEnv("PORT", "5001"),
 
 		DBHost:     getEnv("DB_HOST", "localhost"),
 		DBPort:     getEnv("DB_PORT", "5432"),
 		DBUser:     getEnv("DB_USER", "postgres"),
-		DBPassword: getEnv("DB_PASSWORD", "password"),
+		DBPassword: getEnv("DB_PASSWORD", "postgres"),
 		DBName:     getEnv("DB_NAME", "gamecheck_progress"),
 		DBSSLMode:  getEnv("DB_SSL_MODE", "disable"),
 
-		JWTSecret:         getEnv("JWT_SECRET", "your-secret-key"),
-		JWTExpiration:     getEnvAsInt("JWT_EXPIRATION", 15),
-		RefreshSecret:     getEnv("REFRESH_SECRET", "your-refresh-secret"),
-		RefreshExpiration: getEnvAsInt("REFRESH_EXPIRATION", 10080),
-
-		UserServiceURL: getEnv("USER_SERVICE_URL", "http://localhost:8080"),
+		JWTSecret: getEnv("JWT_SECRET", "your_jwt_secret_key"),
 	}
 
 	return config, nil

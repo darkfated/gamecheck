@@ -81,7 +81,7 @@ func setupRouter(cfg *config.Config, controllers *controllers.Controllers) *gin.
 
 	// Настройка CORS
 	corsConfig := cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000", "http://localhost:5001", "http://localhost:*"},
+		AllowOrigins:     []string{"http://localhost:3000", "http://localhost:5001"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization", "Cookie", "X-Auth-Check", "X-User-ID"},
 		ExposeHeaders:    []string{"Content-Length", "Set-Cookie"},
