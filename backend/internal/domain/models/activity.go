@@ -13,7 +13,10 @@ type ActivityType string
 const (
 	ActivityTypeAddGame      ActivityType = "add_game"
 	ActivityTypeUpdateStatus ActivityType = "update_status"
+	ActivityTypeUpdateGame   ActivityType = "update_game"
+	ActivityTypeRateGame     ActivityType = "rate_game"
 	ActivityTypeFollow       ActivityType = "follow"
+	ActivityTypeUnfollow     ActivityType = "unfollow"
 )
 
 // Activity представляет модель активности пользователя
@@ -22,12 +25,12 @@ type Activity struct {
 	UserID       string       `json:"userId" gorm:"type:uuid;index"`
 	User         User         `json:"user" gorm:"foreignKey:UserID"`
 	Type         ActivityType `json:"type"`
-	ProgressID   *string      `json:"progressId,omitempty" gorm:"type:uuid;index;default:null"`
-	Progress     *Progress    `json:"progress,omitempty" gorm:"foreignKey:ProgressID;references:ID;constraint:OnDelete:CASCADE"`
+	ProgressID   *string      `json:"progressId,omitempty" gorm:"type:uuid;index;default:null"` // ID прогресса из микросервиса
 	TargetUserID *string      `json:"targetUserId,omitempty" gorm:"type:uuid;default:null"`
 	TargetUser   *User        `json:"targetUser,omitempty" gorm:"foreignKey:TargetUserID"`
 	GameName     *string      `json:"gameName,omitempty" gorm:"default:null"`
 	Status       *GameStatus  `json:"status,omitempty" gorm:"default:null"`
+	Rating       *int         `json:"rating,omitempty" gorm:"default:null"`
 	CreatedAt    time.Time    `json:"createdAt"`
 }
 

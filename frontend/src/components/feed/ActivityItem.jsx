@@ -60,6 +60,19 @@ export const ActivityItem = ({ activity }) => {
             </Link>
           </span>
         )
+      case "unfollow":
+        if (!targetUser) return <span>отписался(ась) от пользователя</span>
+        return (
+          <span>
+            отписался(ась) от{" "}
+            <Link
+              to={`/profile/${targetUser.id}`}
+              className='font-medium text-[var(--accent-tertiary)] hover:text-[var(--accent-secondary)] transition-colors'
+            >
+              {targetUser.displayName}
+            </Link>
+          </span>
+        )
       default:
         return <span>{type}</span>
     }

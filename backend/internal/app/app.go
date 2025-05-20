@@ -41,20 +41,18 @@ func New(cfg *config.Config) (*Application, error) {
 
 	// Инициализация репозиториев
 	userRepo := dbRepo.NewUserRepository(database.GetDB())
-	progressRepo := dbRepo.NewProgressRepository(database.GetDB())
 	activityRepo := dbRepo.NewActivityRepository(database.GetDB())
 	subscriptionRepo := dbRepo.NewSubscriptionRepository(database.GetDB())
 	tokenRepo := dbRepo.NewTokenRepository(database.GetDB())
 
-	repos := dbRepo.NewRepository(userRepo, progressRepo, activityRepo, subscriptionRepo, tokenRepo)
+	repos := dbRepo.NewRepository(userRepo, activityRepo, subscriptionRepo, tokenRepo)
 
 	// Инициализация сервисов
 	authService := services.NewAuthService(cfg, userRepo, tokenRepo, activityRepo)
 	userService := services.NewUserService(userRepo, subscriptionRepo, activityRepo)
 	activityService := services.NewActivityService(activityRepo, userRepo)
-	progressService := services.NewProgressService(progressRepo, activityService)
 
-	svcs := services.NewServices(authService, userService, progressService, activityService)
+	svcs := services.NewServices(authService, userService, activityService)
 	ctrls := controllers.NewControllers(cfg, svcs)
 
 	router := setupRouter(cfg, ctrls)
@@ -83,15 +81,16 @@ func setupRouter(cfg *config.Config, controllers *controllers.Controllers) *gin.
 
 	// Настройка CORS
 	corsConfig := cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowOrigins:     []string{"http://localhost:3000", "http://localhost:5001", "http://localhost:*"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization", "Cookie"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization", "Cookie", "X-Auth-Check", "X-User-ID"},
 		ExposeHeaders:    []string{"Content-Length", "Set-Cookie"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}
 
 	log.Printf("Настроен CORS для следующих источников: %v", corsConfig.AllowOrigins)
+	log.Printf("Разрешенные заголовки: %v", corsConfig.AllowHeaders)
 	router.Use(cors.New(corsConfig))
 
 	controllers.RegisterRoutes(router)
@@ -115,7 +114,6 @@ func (a *Application) Run() error {
 	log.Printf("Сервер GameCheck запущен на http://localhost:%s", a.config.Port)
 	log.Printf("API доступен по адресу http://localhost:%s/api", a.config.Port)
 
-	// Ожидаем сигнала для корректного завершения работы
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit

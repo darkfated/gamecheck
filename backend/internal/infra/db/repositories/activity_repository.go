@@ -30,7 +30,6 @@ func (r *ActivityRepositoryImpl) GetFeed(ctx context.Context, limit, offset int)
 
 	err := r.db.WithContext(ctx).
 		Preload("User").
-		Preload("Progress").
 		Preload("TargetUser").
 		Order("created_at DESC").
 		Limit(limit).
@@ -50,7 +49,6 @@ func (r *ActivityRepositoryImpl) GetUserActivity(ctx context.Context, userID str
 
 	err := r.db.WithContext(ctx).
 		Preload("User").
-		Preload("Progress").
 		Preload("TargetUser").
 		Where("user_id = ?", userID).
 		Order("created_at DESC").
@@ -76,7 +74,6 @@ func (r *ActivityRepositoryImpl) GetFollowingActivity(ctx context.Context, userI
 
 	err := r.db.WithContext(ctx).
 		Preload("User").
-		Preload("Progress").
 		Preload("TargetUser").
 		Where("user_id IN (?)", subQuery).
 		Order("created_at DESC").

@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -42,7 +43,6 @@ func (c *AuthController) RegisterRoutes(router *gin.RouterGroup) {
 
 // SteamLogin инициирует процесс аутентификации через Steam
 func (c *AuthController) SteamLogin(ctx *gin.Context) {
-	// Формируем URL для аутентификации через Steam OpenID
 	steamLoginURL := fmt.Sprintf(
 		"https://steamcommunity.com/openid/login?"+
 			"openid.ns=http://specs.openid.net/auth/2.0&"+
@@ -60,7 +60,6 @@ func (c *AuthController) SteamLogin(ctx *gin.Context) {
 
 // SteamCallback обрабатывает ответ от Steam после аутентификации
 func (c *AuthController) SteamCallback(ctx *gin.Context) {
-	// Получаем steamID из claimed_id
 	claimedID := ctx.Query("openid.claimed_id")
 	if claimedID == "" {
 		c.handleAuthError(ctx, http.StatusBadRequest, "Не удалось получить SteamID")
@@ -74,6 +73,7 @@ func (c *AuthController) SteamCallback(ctx *gin.Context) {
 	}
 
 	steamID := parts[len(parts)-1]
+	fmt.Printf("[AUTH] Получен SteamID: %s\n", steamID)
 
 	steamAPIURL := fmt.Sprintf(
 		"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=%s&steamids=%s",
@@ -81,12 +81,33 @@ func (c *AuthController) SteamCallback(ctx *gin.Context) {
 		steamID,
 	)
 
+	// Добавляем больше логирования
+	fmt.Printf("[AUTH] Запрос к Steam API: %s\n", steamAPIURL)
+
 	resp, err := http.Get(steamAPIURL)
 	if err != nil {
+		fmt.Printf("[AUTH ERROR] Ошибка HTTP при обращении к Steam API: %v\n", err)
 		c.handleAuthError(ctx, http.StatusInternalServerError, "Ошибка при обращении к Steam API: "+err.Error())
 		return
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("[AUTH ERROR] Steam API вернул статус %d\n", resp.StatusCode)
+		c.handleAuthError(ctx, http.StatusInternalServerError, fmt.Sprintf("Steam API вернул статус %d", resp.StatusCode))
+		return
+	}
+
+	// Читаем ответ в буфер для логирования и дальнейшей обработки
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Printf("[AUTH ERROR] Ошибка чтения ответа Steam API: %v\n", err)
+		c.handleAuthError(ctx, http.StatusInternalServerError, "Ошибка чтения ответа Steam API: "+err.Error())
+		return
+	}
+
+	// Логируем ответ от Steam API для отладки
+	fmt.Printf("[AUTH] Ответ Steam API: %s\n", string(body))
 
 	var steamResponse struct {
 		Response struct {
@@ -101,12 +122,14 @@ func (c *AuthController) SteamCallback(ctx *gin.Context) {
 		} `json:"response"`
 	}
 
-	if err := json.NewDecoder(resp.Body).Decode(&steamResponse); err != nil {
+	if err := json.Unmarshal(body, &steamResponse); err != nil {
+		fmt.Printf("[AUTH ERROR] Ошибка при разборе ответа от Steam API: %v\nТело ответа: %s\n", err, string(body))
 		c.handleAuthError(ctx, http.StatusInternalServerError, "Ошибка при разборе ответа от Steam API: "+err.Error())
 		return
 	}
 
 	if len(steamResponse.Response.Players) == 0 {
+		fmt.Printf("[AUTH ERROR] Steam API не вернул данные о пользователе. Ответ: %s\n", string(body))
 		c.handleAuthError(ctx, http.StatusInternalServerError, "Steam API не вернул данные о пользователе")
 		return
 	}
@@ -117,16 +140,21 @@ func (c *AuthController) SteamCallback(ctx *gin.Context) {
 	avatarURL := player.AvatarFull
 	profileURL := player.ProfileURL
 
+	fmt.Printf("[AUTH] Данные пользователя: %s, %s\n", displayName, steamID)
+
 	// Аутентифицируем пользователя и получаем токен
 	token, err := c.authService.AuthenticateWithSteam(ctx, steamID, displayName, avatarURL, profileURL)
 	if err != nil {
+		fmt.Printf("[AUTH ERROR] Ошибка аутентификации: %v\n", err)
 		c.handleAuthError(ctx, http.StatusInternalServerError, "Ошибка аутентификации: "+err.Error())
 		return
 	}
 
+	fmt.Printf("[AUTH] Пользователь успешно аутентифицирован, токен: %s...\n", token[:10])
 	c.setAuthCookie(ctx, token)
 
 	frontendURL := fmt.Sprintf("http://localhost:3000/auth/callback?token=%s", token)
+	fmt.Printf("[AUTH] Редирект на: %s\n", frontendURL)
 	ctx.Redirect(http.StatusTemporaryRedirect, frontendURL)
 }
 

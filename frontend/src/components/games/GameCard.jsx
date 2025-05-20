@@ -13,7 +13,6 @@ export function GameCard({
   const [isEditing, setIsEditing] = useState(false)
   const [editedGame, setEditedGame] = useState({})
 
-  // Инициализируем editedGame при переключении в режим редактирования
   useEffect(() => {
     if (isEditing) {
       setEditedGame({
@@ -29,7 +28,14 @@ export function GameCard({
   }
 
   const handleSave = () => {
-    onUpdate(game.id, editedGame)
+    const updatedGame = {
+      ...editedGame,
+      rating: editedGame.rating === "" ? null : 
+              typeof editedGame.rating === 'string' ? 
+              parseInt(editedGame.rating) : editedGame.rating
+    }
+    
+    onUpdate(game.id, updatedGame)
     setIsEditing(false)
   }
 
@@ -137,7 +143,7 @@ export function GameCard({
                   onChange={e =>
                     handleChange(
                       "rating",
-                      e.target.value ? parseInt(e.target.value) : null
+                      e.target.value ? parseInt(e.target.value) : ""
                     )
                   }
                   className='p-2 w-full bg-[var(--input-bg)] backdrop-blur-sm border border-[var(--input-border)] rounded-lg text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--input-focus)] focus:border-[var(--input-focus)] transition-all duration-200 shadow-inner hover:bg-[var(--input-bg)] text-sm'

@@ -54,9 +54,10 @@ export const getStatusOptions = () => Object.values(GAME_STATUS_CONFIG)
 export const ACTIVITY_TYPES = {
   ADD_GAME: "add_game",
   UPDATE_STATUS: "update_status",
+  UPDATE_GAME: "update_game",
   RATE_GAME: "rate_game",
-  FOLLOW_USER: "follow_user",
-  UNFOLLOW_USER: "unfollow_user",
+  FOLLOW_USER: "follow",
+  UNFOLLOW_USER: "unfollow"
 }
 
 export const ROUTES = {

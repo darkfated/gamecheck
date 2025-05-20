@@ -9,7 +9,6 @@ import (
 // Repository определяет интерфейс для всех репозиториев приложения
 type Repository interface {
 	UserRepository
-	ProgressRepository
 	ActivityRepository
 	SubscriptionRepository
 	TokenRepository
@@ -27,16 +26,6 @@ type UserRepository interface {
 	IsFollowing(ctx context.Context, followerID, followingID string) (bool, error)
 	CountFollowers(ctx context.Context, userID string) (int, error)
 	CountFollowing(ctx context.Context, userID string) (int, error)
-}
-
-// ProgressRepository определяет методы для работы с прогрессом пользователей
-type ProgressRepository interface {
-	CreateProgress(ctx context.Context, progress *models.Progress) error
-	UpdateProgress(ctx context.Context, progress *models.Progress) error
-	DeleteProgress(ctx context.Context, id string, userID string) error
-
-	GetProgressByID(ctx context.Context, id string) (*models.Progress, error)
-	GetProgressByUserID(ctx context.Context, userID string) ([]*models.Progress, error)
 }
 
 // ActivityRepository определяет методы для работы с активностями

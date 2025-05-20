@@ -10,7 +10,6 @@ import (
 // RepositoryImpl реализация композитного репозитория
 type RepositoryImpl struct {
 	userRepo         repositories.UserRepository
-	progressRepo     repositories.ProgressRepository
 	activityRepo     repositories.ActivityRepository
 	subscriptionRepo repositories.SubscriptionRepository
 	tokenRepo        repositories.TokenRepository
@@ -19,14 +18,12 @@ type RepositoryImpl struct {
 // NewRepository создает новый экземпляр композитного репозитория
 func NewRepository(
 	userRepo repositories.UserRepository,
-	progressRepo repositories.ProgressRepository,
 	activityRepo repositories.ActivityRepository,
 	subscriptionRepo repositories.SubscriptionRepository,
 	tokenRepo repositories.TokenRepository,
 ) repositories.Repository {
 	return &RepositoryImpl{
 		userRepo:         userRepo,
-		progressRepo:     progressRepo,
 		activityRepo:     activityRepo,
 		subscriptionRepo: subscriptionRepo,
 		tokenRepo:        tokenRepo,
@@ -64,27 +61,6 @@ func (r *RepositoryImpl) CountFollowers(ctx context.Context, userID string) (int
 
 func (r *RepositoryImpl) CountFollowing(ctx context.Context, userID string) (int, error) {
 	return r.userRepo.CountFollowing(ctx, userID)
-}
-
-// Методы ProgressRepository
-func (r *RepositoryImpl) CreateProgress(ctx context.Context, progress *models.Progress) error {
-	return r.progressRepo.CreateProgress(ctx, progress)
-}
-
-func (r *RepositoryImpl) UpdateProgress(ctx context.Context, progress *models.Progress) error {
-	return r.progressRepo.UpdateProgress(ctx, progress)
-}
-
-func (r *RepositoryImpl) DeleteProgress(ctx context.Context, id string, userID string) error {
-	return r.progressRepo.DeleteProgress(ctx, id, userID)
-}
-
-func (r *RepositoryImpl) GetProgressByID(ctx context.Context, id string) (*models.Progress, error) {
-	return r.progressRepo.GetProgressByID(ctx, id)
-}
-
-func (r *RepositoryImpl) GetProgressByUserID(ctx context.Context, userID string) ([]*models.Progress, error) {
-	return r.progressRepo.GetProgressByUserID(ctx, userID)
 }
 
 // Методы ActivityRepository
