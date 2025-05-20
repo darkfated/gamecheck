@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { useParams, useNavigate, Link } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
 import { ActivityFeed } from "../components/feed/ActivityFeed"
-import { Modal } from "../components/common/Modal"
+import Modal from "../components/common/Modal"
 import { ProfileHeader } from "../components/profile/ProfileHeader"
 import { ProfileSidebar } from "../components/profile/ProfileSidebar"
 import { ProfileInfo } from "../components/profile/ProfileInfo"
@@ -325,28 +325,40 @@ export default function Profile() {
         onClose={() => setShowFollowersModal(false)}
         title='Подписчики'
       >
-        <div className='space-y-4'>
+        <div className='space-y-3'>
           {followers.length === 0 ? (
-            <p className='text-[var(--text-secondary)] text-center'>
-              Нет подписчиков
-            </p>
+            <div className='flex flex-col items-center justify-center py-12 text-center'>
+              <div className='w-20 h-20 mb-6 rounded-2xl bg-gradient-to-br from-[var(--accent-primary)]/20 to-[var(--accent-secondary)]/20 backdrop-blur-sm flex items-center justify-center'>
+                <svg className="w-10 h-10 text-[var(--accent-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <p className='text-[var(--text-primary)] text-xl font-medium bg-gradient-to-r from-[var(--text-primary)] to-[var(--text-secondary)] bg-clip-text text-transparent'>Нет подписчиков</p>
+              <p className='text-[var(--text-secondary)]/70 mt-2 max-w-sm'>Когда у вас появятся подписчики, они будут отображаться здесь</p>
+            </div>
           ) : (
             followers.map(follower => (
               <div
                 key={follower.id}
-                className='flex items-center gap-4 p-2 hover:bg-[var(--bg-secondary)]/60 rounded-lg'
+                className='group relative flex items-center gap-4 p-4 rounded-xl hover:bg-gradient-to-r from-[var(--accent-primary)]/5 to-[var(--accent-secondary)]/5 transition-all duration-300'
               >
-                <img
-                  src={follower.avatarUrl}
-                  alt={follower.displayName}
-                  className='w-10 h-10 rounded-full flex-shrink-0 ring-1 ring-[var(--border-color)]'
-                />
+                <div className='relative'>
+                  <div className='absolute inset-0 rounded-full bg-gradient-to-br from-[var(--accent-primary)]/20 to-[var(--accent-secondary)]/20 blur-sm'></div>
+                  <img
+                    src={follower.avatarUrl}
+                    alt={follower.displayName}
+                    className='relative w-12 h-12 rounded-full ring-2 ring-[var(--border-color)] group-hover:ring-[var(--accent-primary)]/30 transition-all duration-300'
+                  />
+                  <div className='absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full border-2 border-[var(--card-bg)]'></div>
+                </div>
                 <Link
                   to={`/profile/${follower.id}`}
                   onClick={() => setShowFollowersModal(false)}
-                  className='font-medium text-[var(--accent-secondary)] hover:text-[var(--accent-tertiary)]'
+                  className='flex-1 min-w-0 group-hover:translate-x-1 transition-transform duration-300'
                 >
-                  {follower.displayName}
+                  <p className='font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-primary)] transition-colors truncate'>
+                    {follower.displayName}
+                  </p>
                 </Link>
               </div>
             ))
@@ -359,28 +371,40 @@ export default function Profile() {
         onClose={() => setShowFollowingModal(false)}
         title='Подписки'
       >
-        <div className='space-y-4'>
+        <div className='space-y-3'>
           {following.length === 0 ? (
-            <p className='text-[var(--text-secondary)] text-center'>
-              Нет подписок
-            </p>
+            <div className='flex flex-col items-center justify-center py-12 text-center'>
+              <div className='w-20 h-20 mb-6 rounded-2xl bg-gradient-to-br from-[var(--accent-primary)]/20 to-[var(--accent-secondary)]/20 backdrop-blur-sm flex items-center justify-center'>
+                <svg className="w-10 h-10 text-[var(--accent-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+              </div>
+              <p className='text-[var(--text-primary)] text-xl font-medium bg-gradient-to-r from-[var(--text-primary)] to-[var(--text-secondary)] bg-clip-text text-transparent'>Нет подписок</p>
+              <p className='text-[var(--text-secondary)]/70 mt-2 max-w-sm'>Начните следить за другими пользователями, чтобы видеть их активность</p>
+            </div>
           ) : (
             following.map(followedUser => (
               <div
                 key={followedUser.id}
-                className='flex items-center gap-4 p-2 hover:bg-[var(--bg-secondary)]/60 rounded-lg'
+                className='group relative flex items-center gap-4 p-4 rounded-xl hover:bg-gradient-to-r from-[var(--accent-primary)]/5 to-[var(--accent-secondary)]/5 transition-all duration-300'
               >
-                <img
-                  src={followedUser.avatarUrl}
-                  alt={followedUser.displayName}
-                  className='w-10 h-10 rounded-full flex-shrink-0 ring-1 ring-[var(--border-color)]'
-                />
+                <div className='relative'>
+                  <div className='absolute inset-0 rounded-full bg-gradient-to-br from-[var(--accent-primary)]/20 to-[var(--accent-secondary)]/20 blur-sm'></div>
+                  <img
+                    src={followedUser.avatarUrl}
+                    alt={followedUser.displayName}
+                    className='relative w-12 h-12 rounded-full ring-2 ring-[var(--border-color)] group-hover:ring-[var(--accent-primary)]/30 transition-all duration-300'
+                  />
+                  <div className='absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full border-2 border-[var(--card-bg)]'></div>
+                </div>
                 <Link
                   to={`/profile/${followedUser.id}`}
                   onClick={() => setShowFollowingModal(false)}
-                  className='font-medium text-[var(--accent-secondary)] hover:text-[var(--accent-tertiary)]'
+                  className='flex-1 min-w-0 group-hover:translate-x-1 transition-transform duration-300'
                 >
-                  {followedUser.displayName}
+                  <p className='font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-primary)] transition-colors truncate'>
+                    {followedUser.displayName}
+                  </p>
                 </Link>
               </div>
             ))

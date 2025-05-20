@@ -1,76 +1,84 @@
-import React from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import React, { useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { createPortal } from 'react-dom';
 
-export const Modal = ({ isOpen, onClose, title, children }) => {
-  return (
+const Modal = ({ isOpen, onClose, title, children, size = 'md' }) => {
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen, onClose]);
+
+  const sizeClasses = {
+    sm: 'max-w-md',
+    md: 'max-w-lg',
+    lg: 'max-w-2xl',
+    xl: 'max-w-4xl',
+    full: 'max-w-full mx-4'
+  };
+
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
-        <div className='fixed inset-0 z-50 overflow-y-auto'>
-          <div className='flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0'>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className='fixed inset-0 transition-opacity'
-              onClick={onClose}
-            >
-              <div className='absolute inset-0 bg-black/70' />
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{
-                opacity: 0,
-                scale: 0.95,
-                y: 20,
-                transition: { duration: 0.2 },
-              }}
-              transition={{
-                type: "spring",
-                duration: 0.5,
-                bounce: 0.3,
-              }}
-              className='relative inline-block w-full max-w-lg p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-[var(--card-bg)] border border-[var(--border-color)] rounded-xl shadow-2xl'
-            >
-              <div className='flex justify-between items-center mb-6'>
-                <h3 className='text-xl font-semibold leading-6 text-[var(--text-primary)]'>
-                  {title}
-                </h3>
-                <motion.button
-                  whileHover={{ scale: 1.1, rotate: 90 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={onClose}
-                  className='text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors'
-                >
-                  <svg
-                    className='w-6 h-6'
-                    fill='none'
-                    viewBox='0 0 24 24'
-                    stroke='currentColor'
-                  >
-                    <path
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                      strokeWidth={2}
-                      d='M6 18L18 6M6 6l12 12'
-                    />
-                  </svg>
-                </motion.button>
-              </div>
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className='space-y-4'
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            transition={{ type: "spring", duration: 0.5 }}
+            className={`relative w-full ${sizeClasses[size]} bg-[var(--card-bg)] border border-[var(--border-color)] rounded-xl shadow-xl overflow-hidden`}
+          >
+            <div className="flex items-center justify-between p-4 border-b border-[var(--border-color)]">
+              <h2 className="text-lg font-semibold text-[var(--text-primary)]">
+                {title}
+              </h2>
+              <button
+                onClick={onClose}
+                className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-colors"
               >
-                {children}
-              </motion.div>
-            </motion.div>
-          </div>
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+            <div className="p-4 max-h-[calc(100vh-8rem)] overflow-y-auto">
+              {children}
+            </div>
+          </motion.div>
         </div>
       )}
-    </AnimatePresence>
-  )
-}
+    </AnimatePresence>,
+    document.body
+  );
+};
+
+export default Modal;
