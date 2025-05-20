@@ -6,7 +6,7 @@ import { useGameManagement } from "../../hooks/useGameManagement"
 import { GameCard } from "./GameCard"
 import { GAME_STATUSES, getStatusOptions } from "../../constants"
 
-export function GameList({ games, onUpdate, editable, isOwner }) {
+export function GameList({ games, onUpdate, editable, isOwner, viewMode = 'cards' }) {
   const { isAuthenticated, authInitialized } = useAuth()
   const { isSubmitting, authError, addGame, updateGame, deleteGame } =
     useGameManagement(onUpdate)
@@ -253,10 +253,9 @@ export function GameList({ games, onUpdate, editable, isOwner }) {
         </div>
       )}
 
-      {/* Форма добавления игры */}
-      {editable && isAuthenticated && isFormVisible && (
+      {isOwner && isAuthenticated && isFormVisible && (
         <motion.div
-          initial={{ opacity: 0, y: -10 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           className='bg-[var(--card-bg)] p-4 rounded-xl border border-[var(--border-color)]'
         >
@@ -268,7 +267,9 @@ export function GameList({ games, onUpdate, editable, isOwner }) {
               <input
                 type='text'
                 value={newGame.name}
-                onChange={e => setNewGame({ ...newGame, name: e.target.value })}
+                onChange={e =>
+                  setNewGame({ ...newGame, name: e.target.value })
+                }
                 required
                 placeholder='Название игры'
                 className='w-full p-2 mt-1 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg'
@@ -357,45 +358,48 @@ export function GameList({ games, onUpdate, editable, isOwner }) {
         </motion.div>
       )}
 
-      {/* Отображение списка игр по категориям статусов */}
-      <AnimatePresence>
-        {statusOptions.map(status => {
-          const gamesInStatus = groupedGames[status.value] || []
-          if (gamesInStatus.length === 0) return null
+      {statusOptions.map(status => {
+        const gamesInStatus = groupedGames[status.value] || []
+        if (gamesInStatus.length === 0) return null
 
-          return (
-            <motion.div
-              key={status.value}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className='space-y-4'
-            >
-              <div className='flex items-center gap-2 border-b border-[var(--divider-color)] pb-2'>
-                <div
-                  className={`w-3 h-3 rounded-full bg-${status.color}-500`}
-                />
-                <h2 className='text-lg font-bold text-[var(--text-primary)]'>
-                  {status.label} ({gamesInStatus.length})
-                </h2>
-              </div>
-
-              <div className='grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'>
+        return (
+          <div key={status.value} className='space-y-4'>
+            <h3 className='text-lg font-semibold text-[var(--text-primary)]'>
+              {status.label}
+            </h3>
+            {viewMode === 'cards' ? (
+              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
                 {gamesInStatus.map(game => (
                   <GameCard
                     key={game.id}
                     game={game}
-                    statusOptions={statusOptions}
-                    editable={editable}
-                    onDelete={deleteGame}
                     onUpdate={updateGame}
+                    onDelete={deleteGame}
+                    editable={editable}
+                    isOwner={isOwner}
+                    statusOptions={statusOptions}
                   />
                 ))}
               </div>
-            </motion.div>
-          )
-        })}
-      </AnimatePresence>
+            ) : (
+              <div className='space-y-3'>
+                {gamesInStatus.map(game => (
+                  <GameCard
+                    key={game.id}
+                    game={game}
+                    onUpdate={updateGame}
+                    onDelete={deleteGame}
+                    editable={editable}
+                    isOwner={isOwner}
+                    statusOptions={statusOptions}
+                    listMode={true}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }
