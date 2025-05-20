@@ -2,6 +2,7 @@ import { Routes, Route, useNavigate, Navigate, useLocation } from "react-router-
 import Navbar from "./components/Navbar"
 import Feed from "./pages/Feed"
 import Profile from "./pages/Profile"
+import QuizPage from "./pages/QuizPage"
 import { useTheme } from "./contexts/ThemeContext"
 import { useEffect } from "react"
 import api from "./services/api"
@@ -44,6 +45,7 @@ function App() {
         <Routes>
           <Route path='/' element={<Feed />} />
           <Route path='/profile/:id' element={<Profile />} />
+          <Route path='/quizzes' element={<QuizPage />} />
           <Route path='/auth/callback' element={<AuthCallback />} />
         </Routes>
       </main>
