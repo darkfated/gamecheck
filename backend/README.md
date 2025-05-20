@@ -38,7 +38,7 @@ copy .env.example .env
 4. **Запуск приложения**
 
 ```bash
-go run main.go
+go run cmd/server/main.go
 ```
 
 Сервер запустится по адресу: http://localhost:5000
@@ -71,17 +71,6 @@ go run main.go
 | GET    | /api/subscriptions/:id/following | Получить подписки           |
 | POST   | /api/subscriptions/follow/:id    | Подписаться на пользователя |
 | DELETE | /api/subscriptions/unfollow/:id  | Отписаться от пользователя  |
-
-### Прогресс в играх
-
-| Метод  | URL                    | Описание                                |
-| ------ | ---------------------- | --------------------------------------- |
-| GET    | /api/progress          | Получить прогресс текущего пользователя |
-| GET    | /api/progress/user/:id | Получить прогресс пользователя по ID    |
-| GET    | /api/progress/:id      | Получить запись прогресса по ID         |
-| POST   | /api/progress          | Добавить игру                           |
-| PATCH  | /api/progress/:id      | Обновить прогресс                       |
-| DELETE | /api/progress/:id      | Удалить запись прогресса                |
 
 ### Активность
 
