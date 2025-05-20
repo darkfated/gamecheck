@@ -1,328 +1,300 @@
 <!DOCTYPE html>
-<html lang="ru" style="margin: 0; padding: 0; height: 100%;">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Game Quiz Widget</title>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-      background-color: transparent;
-      overflow: hidden;
-      height: 100%;
-    }
-    
-    .vue-game-widget {
-      font-family: Arial, sans-serif;
-      max-width: 100%;
-      padding: 15px;
-      border-radius: 8px;
-      background: linear-gradient(to right, #4a2f80, #3a4780);
-      color: #fff;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      min-height: 460px;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      box-sizing: border-box;
-    }
-    
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-      font-size: 1.5rem;
-    }
-    
-    .question-container {
-      margin-bottom: 20px;
-    }
-    
-    .question {
-      font-size: 1.2rem;
-      margin-bottom: 15px;
-      font-weight: bold;
-    }
-    
-    .options-list {
-      list-style-type: none;
-      padding: 0;
-    }
-    
-    .option-item {
-      padding: 10px 15px;
-      background-color: rgba(255, 255, 255, 0.15);
-      border-radius: 8px;
-      margin-bottom: 10px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    
-    .option-item:hover {
-      background-color: rgba(255, 255, 255, 0.25);
-      transform: translateY(-2px);
-    }
-    
-    .option-item.selected {
-      background-color: rgba(105, 56, 180, 0.8);
-      border: 2px solid rgba(255, 255, 255, 0.5);
-    }
-    
-    .option-item.correct {
-      background-color: rgba(46, 213, 115, 0.8);
-    }
-    
-    .option-item.incorrect {
-      background-color: rgba(255, 71, 87, 0.8);
-    }
-    
-    .controls {
-      text-align: center;
-      margin-top: 15px;
-    }
-    
-    button {
-      background-color: #6938b4;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      font-size: 1rem;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-    
-    button:hover {
-      background-color: #7d4ccc;
-    }
-    
-    button:disabled {
-      background-color: #9d9fb3;
-      cursor: not-allowed;
-    }
-    
-    .result {
-      height: auto;
-      text-align: center;
-      padding: 15px;
-      background-color: rgba(255, 255, 255, 0.2);
-      border-radius: 8px;
-      margin-top: 20px;
-      margin-bottom: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    
-    .score {
-      font-size: 1.5rem;
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
-    
-    .feedback {
-      font-size: 1.1rem;
-      margin-bottom: 10px;
-    }
-    
-    .navigation {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 20px;
-    }
-  </style>
-  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-</head>
-<body>
-  <div id="app" style="height: 100%;"></div>
-
-  <script>
-    const { createApp, ref, computed } = Vue;
-    
-    const GameQuizWidget = {
-      setup() {
-        const currentQuestionIndex = ref(0);
-        const selectedOptionIndex = ref(null);
-        const showResult = ref(false);
-        const userAnswers = ref([]);
-        const quizCompleted = ref(false);
-        
-        const questions = [
-          {
-            question: "В какой из игр основного персонажа сюжетной линии играл актёр Киану Ривз?",
-            options: [
-              "Death Stranding", 
-              "Cyberpunk 2077", 
-              "Grand Theft Auto V", 
-              "The Last of Us Part II"
-            ],
-            correctAnswer: 1
-          },
-          {
-            question: "Какая игра получила титул «Игра года» на The Game Awards 2020?",
-            options: [
-              "Ghost of Tsushima", 
-              "The Last of Us Part II", 
-              "DOOM Eternal", 
-              "Hades"
-            ],
-            correctAnswer: 1
-          },
-          {
-            question: "В какой игровой вселенной присутствует организация под названием Черный Меза (Black Mesa)?",
-            options: [
-              "Half-Life", 
-              "Resident Evil", 
-              "Metal Gear Solid", 
-              "BioShock"
-            ],
-            correctAnswer: 0
-          },
-          {
-            question: "Какая компания разработала игру Minecraft?",
-            options: [
-              "Electronic Arts", 
-              "Valve", 
-              "Mojang Studios", 
-              "Blizzard Entertainment"
-            ],
-            correctAnswer: 2
-          },
-          {
-            question: "Какая игра из серии The Elder Scrolls вышла в 2011 году?",
-            options: [
-              "The Elder Scrolls III: Morrowind", 
-              "The Elder Scrolls IV: Oblivion", 
-              "The Elder Scrolls V: Skyrim", 
-              "The Elder Scrolls Online"
-            ],
-            correctAnswer: 2
-          }
-        ];
-        
-        const currentQuestion = computed(() => {
-          return questions[currentQuestionIndex.value];
-        });
-        
-        const score = computed(() => {
-          if (!quizCompleted.value) return 0;
-          
-          return userAnswers.value.reduce((total, answer, index) => {
-            return answer === questions[index].correctAnswer ? total + 1 : total;
-          }, 0);
-        });
-        
-        const feedback = computed(() => {
-          const maxScore = questions.length;
-          const userScore = score.value;
-          const percentage = (userScore / maxScore) * 100;
-          
-          if (percentage === 100) return "Отлично! Ты настоящий знаток видеоигр!";
-          if (percentage >= 80) return "Очень хорошо! Ты хорошо разбираешься в играх!";
-          if (percentage >= 60) return "Неплохо! Неплохие знания!";
-          if (percentage >= 40) return "Можно лучше. Стоит поиграть в больше игр!";
-          return "Попробуй еще раз! Игровая индустрия ждет тебя!";
-        });
-        
-        const selectOption = (index) => {
-          selectedOptionIndex.value = index;
-        };
-        
-        const nextQuestion = () => {
-          userAnswers.value.push(selectedOptionIndex.value);
-          
-          if (currentQuestionIndex.value === questions.length - 1) {
-            quizCompleted.value = true;
-            showResult.value = true;
-            
-            notifyParent();
-          } else {
-            currentQuestionIndex.value++;
-            selectedOptionIndex.value = null;
-          }
-        };
-        
-        const resetQuiz = () => {
-          currentQuestionIndex.value = 0;
-          selectedOptionIndex.value = null;
-          showResult.value = false;
-          userAnswers.value = [];
-          quizCompleted.value = false;
-        };
-        
-        const notifyParent = () => {
-          if (window.parent && window.parent !== window) {
-            window.parent.postMessage({
-              type: 'QUIZ_COMPLETED',
-              result: {
-                score: score.value,
-                totalQuestions: questions.length,
-                percentage: (score.value / questions.length) * 100
-              }
-            }, '*');
-          }
-        };
-        
-        return {
-          questions,
-          currentQuestion,
-          currentQuestionIndex,
-          selectedOptionIndex,
-          showResult,
-          userAnswers,
-          quizCompleted,
-          score,
-          feedback,
-          selectOption,
-          nextQuestion,
-          resetQuiz
-        };
-      },
-      template: `
-        <div class="vue-game-widget">
-          <h2>Викторина по видеоиграм</h2>
-          
-          <div v-if="!showResult" class="question-container" style="flex-grow: 1;">
-            <div class="question">{{ currentQuestionIndex + 1 }}. {{ currentQuestion.question }}</div>
-            
-            <ul class="options-list">
-              <li 
-                v-for="(option, index) in currentQuestion.options" 
-                :key="index"
-                @click="selectOption(index)"
-                :class="['option-item', { selected: selectedOptionIndex === index }]"
-              >
-                {{ option }}
-              </li>
-            </ul>
-            
-            <div class="controls">
-              <button @click="nextQuestion" :disabled="selectedOptionIndex === null">
-                {{ currentQuestionIndex < questions.length - 1 ? 'Следующий вопрос' : 'Завершить викторину' }}
-              </button>
-            </div>
-          </div>
-          
-          <div v-else class="result">
-            <div class="score">Ваш результат: {{ score }} из {{ questions.length }}</div>
-            <div class="feedback">{{ feedback }}</div>
-            <div class="controls" style="margin-top: 5px;">
-              <button @click="resetQuiz">Пройти викторину снова</button>
-            </div>
-          </div>
-        </div>
-      `
-    };
-    
-    const app = createApp(GameQuizWidget);
-    app.mount('#app');
-    
-    window.addEventListener('load', () => {
-      if (window.parent && window.parent !== window) {
-        window.parent.postMessage({ type: 'VUE_WIDGET_LOADED' }, '*');
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Game Quiz Widget</title>
+    <style>
+      :root {
+        --bg-primary: #0f0f10;
+        --text-primary: #fff;
+        --text-secondary: #a1a1aa;
+        --border-color: #27272a;
+        --accent-primary: #6366f1;
+        --accent-secondary: #818cf8;
       }
-    });
-  </script>
-</body>
-</html> 
+      html,
+      body,
+      #app {
+        margin: 0;
+        padding: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        height: 100%;
+        min-height: 0;
+        width: 100%;
+        overflow: hidden;
+      }
+      #app {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        width: 100%;
+      }
+      .quiz-box {
+        background: var(--bg-primary);
+        border-radius: 24px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        border: 1px solid var(--border-color);
+        padding: 32px 24px;
+        width: 100%;
+        max-width: 420px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 28px;
+        justify-content: center;
+      }
+      .question {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5em;
+      }
+      .options-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      .option-item {
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        border: 1.5px solid var(--border-color);
+        border-radius: 10px;
+        padding: 14px 18px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: border 0.15s, background 0.15s, color 0.15s;
+        outline: none;
+        user-select: none;
+      }
+      .option-item.selected {
+        background: linear-gradient(
+          90deg,
+          var(--accent-primary),
+          var(--accent-secondary)
+        );
+        color: #fff;
+        border-color: var(--accent-secondary);
+      }
+      .option-item:active {
+        filter: brightness(0.95);
+      }
+      .submit-btn {
+        margin-top: 8px;
+        background: linear-gradient(
+          90deg,
+          var(--accent-primary),
+          var(--accent-secondary)
+        );
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        padding: 14px 0;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.15s, box-shadow 0.15s;
+        box-shadow: 0 2px 8px rgba(99, 102, 241, 0.08);
+        width: 100%;
+      }
+      .submit-btn:disabled {
+        background: var(--border-color);
+        color: var(--text-secondary);
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+      .result {
+        text-align: center;
+        color: var(--text-primary);
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-top: 12px;
+      }
+    </style>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      const { createApp, ref, computed } = Vue
+      const GameQuizWidget = {
+        setup() {
+          const currentQuestionIndex = ref(0)
+          const selectedOptionIndex = ref(null)
+          const showResult = ref(false)
+          const userAnswers = ref([])
+          const questions = [
+            {
+              question:
+                "В какой из игр основного персонажа сюжетной линии играл актёр Киану Ривз?",
+              options: [
+                "Death Stranding",
+                "Cyberpunk 2077",
+                "Grand Theft Auto V",
+                "The Last of Us Part II",
+              ],
+              correctAnswer: 1,
+            },
+            {
+              question:
+                "Какая игра получила титул «Игра года» на The Game Awards 2020?",
+              options: [
+                "Ghost of Tsushima",
+                "The Last of Us Part II",
+                "DOOM Eternal",
+                "Hades",
+              ],
+              correctAnswer: 1,
+            },
+            {
+              question:
+                "В какой игровой вселенной присутствует организация Black Mesa?",
+              options: [
+                "Half-Life",
+                "Resident Evil",
+                "Metal Gear Solid",
+                "BioShock",
+              ],
+              correctAnswer: 0,
+            },
+            {
+              question: "Какая компания разработала игру Minecraft?",
+              options: [
+                "Electronic Arts",
+                "Valve",
+                "Mojang Studios",
+                "Blizzard Entertainment",
+              ],
+              correctAnswer: 2,
+            },
+            {
+              question:
+                "Какая игра из серии The Elder Scrolls вышла в 2011 году?",
+              options: [
+                "The Elder Scrolls III: Morrowind",
+                "The Elder Scrolls IV: Oblivion",
+                "The Elder Scrolls V: Skyrim",
+                "The Elder Scrolls Online",
+              ],
+              correctAnswer: 2,
+            },
+            {
+              question:
+                "Как зовут главного героя серии игр The Legend of Zelda?",
+              options: ["Зельда", "Линк", "Ганон", "Марио"],
+              correctAnswer: 1,
+            },
+            {
+              question: "В какой игре впервые появился персонаж Соник?",
+              options: [
+                "Sonic the Hedgehog",
+                "Sonic Adventure",
+                "Sonic Heroes",
+                "Sonic Mania",
+              ],
+              correctAnswer: 0,
+            },
+            {
+              question: "Какой жанр у игры Dark Souls?",
+              options: ["RPG", "Шутер", "Головоломка", "Гонки"],
+              correctAnswer: 0,
+            },
+            {
+              question:
+                "В какой игре можно встретить персонажа Геральта из Ривии?",
+              options: [
+                "Dragon Age",
+                "The Witcher",
+                "Skyrim",
+                "Divinity: Original Sin",
+              ],
+              correctAnswer: 1,
+            },
+            {
+              question: "Какой предмет нужен для победы в игре Portal?",
+              options: [
+                "Куб-компаньон",
+                "Портальная пушка",
+                "Ключ-карта",
+                "Золотая монета",
+              ],
+              correctAnswer: 1,
+            },
+          ]
+          const currentQuestion = computed(
+            () => questions[currentQuestionIndex.value]
+          )
+          const isLast = computed(
+            () => currentQuestionIndex.value === questions.length - 1
+          )
+          const score = computed(
+            () =>
+              userAnswers.value.filter(
+                (a, i) => a === questions[i].correctAnswer
+              ).length
+          )
+          function selectOption(idx) {
+            selectedOptionIndex.value = idx
+          }
+          function submit() {
+            userAnswers.value.push(selectedOptionIndex.value)
+            if (isLast.value) {
+              showResult.value = true
+            } else {
+              currentQuestionIndex.value++
+              selectedOptionIndex.value = null
+            }
+          }
+          function reset() {
+            currentQuestionIndex.value = 0
+            selectedOptionIndex.value = null
+            showResult.value = false
+            userAnswers.value = []
+          }
+          return {
+            currentQuestion,
+            selectedOptionIndex,
+            selectOption,
+            submit,
+            showResult,
+            score,
+            questions,
+            reset,
+            isLast,
+          }
+        },
+        template: `
+          <div class='quiz-box'>
+            <template v-if='!showResult'>
+              <div class='question'>{{ currentQuestion.question }}</div>
+              <ul class='options-list'>
+                <li v-for='(option, idx) in currentQuestion.options' :key='idx'
+                    :class='["option-item", {selected: selectedOptionIndex === idx}]'
+                    @click='selectOption(idx)'>
+                  {{ option }}
+                </li>
+              </ul>
+              <button class='submit-btn' :disabled='selectedOptionIndex === null' @click='submit'>
+                Ответить
+              </button>
+            </template>
+            <template v-else>
+              <div class='result'>
+                Ваш результат: {{ score }} из {{ questions.length }}<br>
+                <button class='submit-btn' @click='reset'>Пройти снова</button>
+              </div>
+            </template>
+          </div>
+        `,
+      }
+      createApp(GameQuizWidget).mount("#app")
+    </script>
+  </body>
+</html>
