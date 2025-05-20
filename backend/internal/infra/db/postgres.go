@@ -64,7 +64,6 @@ func (d *Database) migrateSchema() error {
 	// Миграция схемы базы данных
 	if err := d.DB.AutoMigrate(
 		&models.User{},
-		&models.Progress{},
 		&models.Activity{},
 		&models.Subscription{},
 		&models.Token{},

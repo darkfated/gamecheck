@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react"
 import { useParams, useNavigate, Link } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
-import { GameList } from "../components/games/GameList"
 import { ActivityFeed } from "../components/feed/ActivityFeed"
 import { Modal } from "../components/common/Modal"
 import { ProfileHeader } from "../components/profile/ProfileHeader"
@@ -9,6 +8,7 @@ import { ProfileSidebar } from "../components/profile/ProfileSidebar"
 import { ProfileInfo } from "../components/profile/ProfileInfo"
 import { ProfileSettings } from "../components/profile/ProfileSettings"
 import { GameStats } from "../components/profile/GameStats"
+import GameProgressSection from "../components/games/GameProgressSection"
 import { motion } from "framer-motion"
 import api from "../services/api"
 import { GAME_STATUSES, getStatusOptions } from "../constants"
@@ -64,8 +64,13 @@ export default function Profile() {
       const currentProfile = profileResponse.data
       setProfile(currentProfile)
 
-      const gamesResponse = await api.games.getUserGames(id)
-      setGames(gamesResponse.data)
+      try {
+        const gamesResponse = await api.games.getUserGames(id)
+        setGames(gamesResponse.data)
+      } catch (gameError) {
+        console.error("Ошибка загрузки игр:", gameError)
+        setGames([])
+      }
 
       const followersResponse = await api.subscriptions.getFollowers(id)
       setFollowers(followersResponse.data)
@@ -280,10 +285,8 @@ export default function Profile() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <GameList
-                    games={games}
-                    onUpdate={fetchProfile}
-                    editable={isOwnProfile}
+                  <GameProgressSection
+                    userId={id}
                     isOwner={isOwnProfile}
                   />
                 </motion.div>

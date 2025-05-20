@@ -1,10 +1,15 @@
 package controllers
 
 import (
+	"bytes"
 	"fmt"
+	"io"
+	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
+	"gamecheck/internal/domain/models"
 	"gamecheck/internal/services"
 
 	"github.com/gin-gonic/gin"
@@ -24,6 +29,16 @@ func NewActivityController(activityService *services.ActivityService, authContro
 	}
 }
 
+// ActivityCreateRequest представляет запрос на создание активности
+type ActivityCreateRequest struct {
+	UserID     string              `json:"userId" binding:"required"`
+	Type       models.ActivityType `json:"type" binding:"required"`
+	ProgressID string              `json:"progressId,omitempty"`
+	GameName   string              `json:"gameName,omitempty"`
+	Status     string              `json:"status,omitempty"`
+	Rating     *int                `json:"rating,omitempty"`
+}
+
 // RegisterRoutes регистрирует маршруты для активностей
 func (c *ActivityController) RegisterRoutes(router *gin.RouterGroup) {
 	activity := router.Group("/activity")
@@ -31,7 +46,93 @@ func (c *ActivityController) RegisterRoutes(router *gin.RouterGroup) {
 		activity.GET("", c.GetFeed)
 		activity.GET("/user/:id", c.GetUserActivity)
 		activity.GET("/following", c.AuthRequired(), c.GetFollowingActivity)
+		// Специальный эндпоинт для создания активности из микросервиса, не использует AuthRequired
+		activity.POST("/create", c.CreateActivity)
 	}
+}
+
+// CreateActivity создает новую запись активности
+func (c *ActivityController) CreateActivity(ctx *gin.Context) {
+	var req ActivityCreateRequest
+
+	// Логируем входящие запросы для отладки
+	body, _ := ctx.GetRawData()
+	log.Printf("[ACTIVITY] Получен запрос на создание активности: %s", string(body))
+
+	// Восстанавливаем тело запроса, так как оно было прочитано ранее
+	ctx.Request.Body = io.NopCloser(bytes.NewBuffer(body))
+
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		log.Printf("[ACTIVITY ERROR] Ошибка формата запроса: %v", err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Неверный формат запроса: %v", err)})
+		return
+	}
+
+	log.Printf("[ACTIVITY] Расшифрованные данные: %+v", req)
+
+	// Проверка авторизации через токен (опционально)
+	userID, exists := ctx.Get("userID")
+
+	// Для межсервисного взаимодействия пропускаем проверку пользователя
+	// Доверяем поступающим данным при создании активности
+	if exists {
+		log.Printf("[ACTIVITY] Запрос от аутентифицированного пользователя: %v", userID)
+	} else {
+		log.Printf("[ACTIVITY] Запрос без аутентификации, создание межсервисной активности")
+	}
+
+	// Создаем активность с данными из запроса
+	activity := &models.Activity{
+		UserID: req.UserID,
+		Type:   req.Type,
+	}
+
+	// Заполняем опциональные поля
+	if req.ProgressID != "" {
+		activity.ProgressID = &req.ProgressID
+		log.Printf("[ACTIVITY] Установлен ID прогресса: %s (из микросервиса)", req.ProgressID)
+	}
+
+	if req.GameName != "" {
+		activity.GameName = &req.GameName
+		log.Printf("[ACTIVITY] Установлено название игры: %s", req.GameName)
+	}
+
+	if req.Status != "" {
+		status := models.GameStatus(req.Status)
+		activity.Status = &status
+		log.Printf("[ACTIVITY] Установлен статус: %s", req.Status)
+	}
+
+	if req.Rating != nil {
+		activity.Rating = req.Rating
+		log.Printf("[ACTIVITY] Установлен рейтинг: %d", *req.Rating)
+	}
+
+	log.Printf("[ACTIVITY] Создаваемая активность: %+v", activity)
+
+	// Создаем активность
+	if err := c.activityService.CreateActivity(ctx, activity); err != nil {
+		log.Printf("[ACTIVITY ERROR] Ошибка при создании активности: %v", err)
+
+		// Если ошибка связана с внешним ключом, это нормально - таблица Progress теперь в микросервисе
+		if strings.Contains(err.Error(), "fk_activities_progress") {
+			log.Printf("[ACTIVITY] Игнорируем ошибку внешнего ключа, так как таблица Progress теперь в микросервисе")
+			// Создаем активность заново без ссылки на Progress
+			activity.ProgressID = nil
+			if err := c.activityService.CreateActivity(ctx, activity); err != nil {
+				log.Printf("[ACTIVITY ERROR] Повторная ошибка при создании активности: %v", err)
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Ошибка при создании активности: %v", err)})
+				return
+			}
+		} else {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Ошибка при создании активности: %v", err)})
+			return
+		}
+	}
+
+	log.Printf("[ACTIVITY] Активность успешно создана с ID: %s", activity.ID)
+	ctx.JSON(http.StatusCreated, gin.H{"message": "Активность успешно создана", "activityId": activity.ID})
 }
 
 // GetFeed возвращает общую ленту активности

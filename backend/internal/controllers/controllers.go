@@ -13,7 +13,6 @@ type Controllers struct {
 	services *services.Services
 	Auth     *AuthController
 	User     *UserController
-	Progress *ProgressController
 	Activity *ActivityController
 }
 
@@ -22,7 +21,6 @@ func NewControllers(cfg *config.Config, services *services.Services) *Controller
 	authController := NewAuthController(cfg, services.Auth)
 
 	userController := NewUserController(services.User, authController)
-	progressController := NewProgressController(services.Progress, authController)
 	activityController := NewActivityController(services.Activity, authController)
 
 	return &Controllers{
@@ -30,7 +28,6 @@ func NewControllers(cfg *config.Config, services *services.Services) *Controller
 		services: services,
 		Auth:     authController,
 		User:     userController,
-		Progress: progressController,
 		Activity: activityController,
 	}
 }
@@ -41,6 +38,5 @@ func (c *Controllers) RegisterRoutes(router *gin.Engine) {
 
 	c.Auth.RegisterRoutes(api)
 	c.User.RegisterRoutes(api)
-	c.Progress.RegisterRoutes(api)
 	c.Activity.RegisterRoutes(api)
 }
