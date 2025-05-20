@@ -4,13 +4,11 @@ const QuizPage = () => {
   const quizContainerRef = useRef(null);
 
   useEffect(() => {
-    // Загружаем Vue bundle скрипт
     const script = document.createElement('script');
     script.src = 'http://localhost:8080/vue-bundle.js';
     script.async = true;
     script.onload = () => {
       if (window.mountVueQuiz && quizContainerRef.current) {
-        // Монтируем Vue компонент на странице React
         window.mountVueQuiz('vue-quiz-container');
       }
     };
@@ -18,9 +16,7 @@ const QuizPage = () => {
     document.body.appendChild(script);
 
     return () => {
-      // Удаляем скрипт при размонтировании компонента
       document.body.removeChild(script);
-      // Можно также добавить очистку Vue приложения здесь, если это необходимо
     };
   }, []);
 

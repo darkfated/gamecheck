@@ -322,7 +322,7 @@ export default {
   color: transparent;
 }
 
-/* Category Selection Styles */
+
 .category-selection h3 {
   color: var(--text-primary);
   text-align: center;
@@ -364,7 +364,7 @@ export default {
   line-height: 1.4;
 }
 
-/* Quiz Start Styles */
+
 .quiz-start {
   text-align: center;
   padding: 1rem;
@@ -391,7 +391,7 @@ export default {
   margin-top: 1.5rem;
 }
 
-/* Question Styles */
+
 .quiz-question h3 {
   color: var(--text-secondary);
   font-size: 1rem;
@@ -442,7 +442,7 @@ export default {
   justify-content: flex-end;
 }
 
-/* Button Styles */
+
 .next-button, .start-button, .restart-button {
   background: linear-gradient(90deg, #6366f1, #a855f7, #d946ef);
   color: white;
@@ -484,7 +484,7 @@ export default {
   box-shadow: none;
 }
 
-/* Results Styles */
+
 .quiz-results {
   text-align: center;
   padding: 1rem;
@@ -506,7 +506,7 @@ export default {
   color: transparent;
 }
 
-/* Responsive Adjustments */
+
 @media (min-width: 640px) {
   .start-actions, .results-actions {
     flex-direction: row;

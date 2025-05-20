@@ -11,10 +11,10 @@ const mountVueApp = (elementId) => {
   return null;
 };
 
-// Монтирование в отдельной среде Vue
+
 if (document.getElementById('vue-app')) {
   mountVueApp('vue-app');
 }
 
-// Экспортируем функцию для монтирования в React приложении
+
 window.mountVueQuiz = mountVueApp; 
