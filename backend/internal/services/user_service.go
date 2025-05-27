@@ -61,7 +61,6 @@ func (s *UserService) GetUserProfile(ctx context.Context, id string, currentUser
 		user.IsFollowing = isFollowing
 	}
 
-	// Получаем количество подписчиков и подписок
 	followersCount, err := s.userRepo.CountFollowers(ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("ошибка при подсчете подписчиков: %w", err)
@@ -88,7 +87,6 @@ func (s *UserService) SearchUsers(ctx context.Context, query string) ([]*models.
 
 // FollowUser подписывает пользователя на другого пользователя
 func (s *UserService) FollowUser(ctx context.Context, followerID, followingID string) error {
-	// Подписываем пользователя
 	if err := s.subscriptionRepo.Follow(ctx, followerID, followingID); err != nil {
 		return fmt.Errorf("ошибка при подписке: %w", err)
 	}

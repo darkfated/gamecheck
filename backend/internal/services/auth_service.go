@@ -45,7 +45,6 @@ func (s *AuthService) AuthenticateWithSteam(ctx context.Context, steamID, displa
 		return "", fmt.Errorf("ошибка при поиске пользователя: %w", err)
 	}
 
-	// Если пользователь не существует или возникла ошибка "запись не найдена", создаем нового
 	if user == nil || errors.Is(err, gorm.ErrRecordNotFound) {
 		user = &models.User{
 			ID:          uuid.New().String(),
@@ -58,7 +57,6 @@ func (s *AuthService) AuthenticateWithSteam(ctx context.Context, steamID, displa
 			return "", fmt.Errorf("ошибка при создании пользователя: %w", err)
 		}
 	} else {
-		// Обновляем информацию о пользователе
 		user.DisplayName = displayName
 		user.AvatarURL = avatarURL
 		user.ProfileURL = profileURL
@@ -109,13 +107,11 @@ func (s *AuthService) ValidateToken(ctx context.Context, tokenString string) (*m
 		return nil, errors.New("токен не найден")
 	}
 
-	// Проверяем срок действия токена
 	if time.Now().After(dbToken.ExpiresAt) {
 		_ = s.tokenRepo.DeleteToken(ctx, tokenString)
 		return nil, errors.New("токен истек")
 	}
 
-	// Проверяем JWT токен
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("неожиданный метод подписи: %v", token.Header["alg"])

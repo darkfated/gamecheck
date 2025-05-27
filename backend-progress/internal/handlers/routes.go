@@ -41,5 +41,6 @@ func (r *Router) SetupRoutes(router *gin.Engine) {
 		progress.DELETE("/:id", r.progressHandlers.DeleteProgress)
 		progress.GET("/list", r.progressHandlers.ListProgress)
 		progress.GET("/user/:id", r.progressHandlers.GetUserProgress)
+		progress.POST("/:id/update-steam", r.progressHandlers.UpdateSteamData)
 	}
 }

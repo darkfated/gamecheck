@@ -156,7 +156,7 @@ export default function Navbar() {
                 transition={{ type: "spring", stiffness: 400, damping: 10 }}
               >
                 <Link
-                  to="/quizzes"
+                  to='/quizzes'
                   className={`px-5 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
                     isActive("/quizzes")
                       ? "text-[var(--text-primary)]"
@@ -413,12 +413,12 @@ export default function Navbar() {
                   <Link
                     to='/quizzes'
                     className={`flex items-center gap-2 px-4 py-2 rounded-xl ${
-                      isActive('/quizzes')
+                      isActive("/quizzes")
                         ? "text-[var(--text-primary)]"
                         : "text-[var(--text-secondary)]"
                     }`}
                     style={{
-                      background: isActive('/quizzes')
+                      background: isActive("/quizzes")
                         ? "linear-gradient(to right, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2), rgba(217, 70, 239, 0.2))"
                         : "none",
                     }}

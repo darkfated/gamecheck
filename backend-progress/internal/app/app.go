@@ -33,8 +33,16 @@ func New(cfg *config.Config) (*Application, error) {
 		return nil, err
 	}
 
+	mainServiceURL := os.Getenv("USER_SERVICE_URL")
+	if mainServiceURL == "" {
+		mainServiceURL = "http://localhost:5000"
+		log.Printf("[PROGRESS] Используется URL основного сервиса по умолчанию: %s", mainServiceURL)
+	}
+
 	progressRepo := repositories.NewProgressRepository(database.GetDB())
-	progressService := service.NewProgressService(progressRepo)
+	steamIntegrationService := service.NewSteamIntegrationService(mainServiceURL)
+	userService := service.NewUserService(mainServiceURL)
+	progressService := service.NewProgressService(progressRepo, steamIntegrationService, userService)
 	progressHandlers := handlers.NewProgressHandlers(progressService)
 
 	router := setupRouter(cfg, progressHandlers)

@@ -3,6 +3,8 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
+	"log"
 
 	"github.com/gamecheck/progress-service/internal/domain/models"
 	"github.com/gamecheck/progress-service/internal/domain/repositories"
@@ -18,22 +20,53 @@ var (
 
 // ProgressService представляет сервис для работы с прогрессом
 type ProgressService struct {
-	repo repositories.ProgressRepository
+	repo             repositories.ProgressRepository
+	steamIntegration *SteamIntegrationService
+	userService      *UserService
 }
 
 // NewProgressService создает новый сервис прогресса
-func NewProgressService(repo repositories.ProgressRepository) *ProgressService {
-	return &ProgressService{repo: repo}
+func NewProgressService(repo repositories.ProgressRepository, steamIntegration *SteamIntegrationService, userService *UserService) *ProgressService {
+	return &ProgressService{
+		repo:             repo,
+		steamIntegration: steamIntegration,
+		userService:      userService,
+	}
 }
 
-// CreateProgress создает новую запись о прогрессе
-func (s *ProgressService) CreateProgress(ctx context.Context, progress *models.Progress) error {
+// CreateProgress создает новую запись о прогрессе с интеграцией Steam
+func (s *ProgressService) CreateProgress(ctx context.Context, progress *models.Progress, authToken string) error {
 	if progress.UserID == "" {
 		return ErrInvalidUserID
 	}
 
 	if progress.Name == "" || progress.Status == "" {
 		return ErrInvalidData
+	}
+
+	// Пытаемся получить данные из Steam
+	if s.steamIntegration != nil && s.userService != nil {
+		user, err := s.userService.GetUserByID(progress.UserID, authToken)
+		if err != nil {
+			log.Printf("[PROGRESS] Не удалось получить данные пользователя: %v", err)
+		} else if user.SteamID != "" {
+			steamGameInfo, err := s.steamIntegration.GetGameInfoFromSteam(user.SteamID, progress.Name)
+			if err != nil {
+				log.Printf("[PROGRESS] Ошибка при получении данных Steam: %v", err)
+			} else if steamGameInfo != nil {
+				progress.SteamAppID = &steamGameInfo.AppID
+				progress.SteamIconURL = steamGameInfo.IconURL
+				progress.SteamPlaytimeForever = &steamGameInfo.PlaytimeForever
+				progress.SteamStoreURL = steamGameInfo.StoreURL
+
+				log.Printf("[PROGRESS] Найдена игра в Steam: %s (AppID: %d, Время игры: %d мин)",
+					progress.Name, steamGameInfo.AppID, steamGameInfo.PlaytimeForever)
+			} else {
+				log.Printf("[PROGRESS] Игра '%s' не найдена в Steam библиотеке пользователя", progress.Name)
+			}
+		} else {
+			log.Printf("[PROGRESS] У пользователя нет привязанного Steam аккаунта")
+		}
 	}
 
 	// Создание прогресса
@@ -140,4 +173,54 @@ func (s *ProgressService) ListProgress(ctx context.Context, page, pageSize int, 
 	}
 
 	return s.repo.ListAll(ctx, page, pageSize, filters)
+}
+
+// UpdateSteamData обновляет Steam данные для существующей записи прогресса
+func (s *ProgressService) UpdateSteamData(ctx context.Context, progressID string, authToken string) error {
+	// Получаем существующий прогресс
+	progress, err := s.repo.GetByID(ctx, progressID)
+	if err != nil {
+		return err
+	}
+	if progress == nil {
+		return ErrProgressNotFound
+	}
+
+	// Пытаемся получить обновленные данные из Steam
+	if s.steamIntegration != nil && s.userService != nil {
+		user, err := s.userService.GetUserByID(progress.UserID, authToken)
+		if err != nil {
+			log.Printf("[PROGRESS] Не удалось получить данные пользователя для обновления Steam данных: %v", err)
+			return err
+		}
+
+		if user.SteamID != "" {
+			// Получаем свежие данные из Steam
+			steamGameInfo, err := s.steamIntegration.GetGameInfoFromSteam(user.SteamID, progress.Name)
+			if err != nil {
+				log.Printf("[PROGRESS] Ошибка при получении обновленных данных Steam: %v", err)
+				return err
+			}
+
+			if steamGameInfo != nil {
+				// Обновляем Steam данные
+				oldPlaytime := 0
+				if progress.SteamPlaytimeForever != nil {
+					oldPlaytime = *progress.SteamPlaytimeForever
+				}
+
+				progress.SteamAppID = &steamGameInfo.AppID
+				progress.SteamIconURL = steamGameInfo.IconURL
+				progress.SteamPlaytimeForever = &steamGameInfo.PlaytimeForever
+				progress.SteamStoreURL = steamGameInfo.StoreURL
+
+				log.Printf("[PROGRESS] Обновлены Steam данные для игры: %s (время игры: %d -> %d мин)",
+					progress.Name, oldPlaytime, steamGameInfo.PlaytimeForever)
+
+				return s.repo.Update(ctx, progress)
+			}
+		}
+	}
+
+	return fmt.Errorf("не удалось обновить Steam данные")
 }

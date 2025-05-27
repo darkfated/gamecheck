@@ -80,14 +80,6 @@ progressAxiosInstance.interceptors.request.use(
     const token = tokenService.getToken()
     if (token) {
       config.headers["Authorization"] = `Bearer ${token}`
-      
-      console.log("[Auth Debug] Отправка запроса к микросервису прогресса:", {
-        url: config.url,
-        hasToken: !!token,
-        tokenPrefix: token ? token.substring(0, 10) + "..." : "нет"
-      });
-    } else {
-      console.warn("[Auth Debug] Отправка запроса к микросервису прогресса без токена!");
     }
     return config
   },
@@ -96,11 +88,7 @@ progressAxiosInstance.interceptors.request.use(
 
 progressAxiosInstance.interceptors.response.use(
   response => {
-    console.log("[Auth Debug] Успешный ответ от микросервиса прогресса:", {
-      url: response.config.url,
-      status: response.status,
-    });
-    return response;
+    return response
   },
   async error => {
     console.error(
@@ -110,13 +98,12 @@ progressAxiosInstance.interceptors.response.use(
             status: error.response.status,
             message: error.response.data,
             url: error.config.url,
-            error: error.response.data.error || "Неизвестная ошибка"
+            error: error.response.data.error || "Неизвестная ошибка",
           }
         : error.message
     )
 
     if (error.response && error.response.status === 401) {
-      console.log("[Auth Debug] Получена ошибка авторизации 401 от микросервиса прогресса");
       tokenService.removeToken()
       if (!window.location.pathname.includes("/auth")) {
         window.location.href = "/"
@@ -172,7 +159,9 @@ const authApi = {
 
 const progressApi = {
   getUserGames: userId =>
-    progressAxiosInstance.get(userId ? `/progress/user/${userId}` : "/progress"),
+    progressAxiosInstance.get(
+      userId ? `/progress/user/${userId}` : "/progress"
+    ),
 
   addGame: data => {
     if (!tokenService.getToken()) {
@@ -196,6 +185,13 @@ const progressApi = {
   },
 
   getGameById: id => progressAxiosInstance.get(`/progress/${id}`),
+
+  updateSteamData: id => {
+    if (!tokenService.getToken()) {
+      return Promise.reject(new Error("Отсутствует токен авторизации"))
+    }
+    return progressAxiosInstance.post(`/progress/${id}/update-steam`)
+  },
 }
 
 const gamesApi = progressApi
@@ -208,43 +204,15 @@ const usersApi = {
 
 const activitiesApi = {
   getFeed: () => {
-    console.log("[Activities API] Запрос общей ленты активностей");
     return axiosInstance.get("/activity")
-      .then(response => {
-        console.log("[Activities API] Получен ответ от getFeed:", {
-          status: response.status,
-          dataType: Array.isArray(response.data) ? 'array' : typeof response.data,
-          itemCount: Array.isArray(response.data) ? response.data.length : 'n/a'
-        });
-        return response;
-      });
   },
-  
+
   getUserActivity: userId => {
-    console.log(`[Activities API] Запрос активностей пользователя ${userId}`);
     return axiosInstance.get(`/activity/user/${userId}`)
-      .then(response => {
-        console.log("[Activities API] Получен ответ от getUserActivity:", {
-          userId,
-          status: response.status,
-          dataType: Array.isArray(response.data) ? 'array' : typeof response.data,
-          itemCount: Array.isArray(response.data) ? response.data.length : 'n/a'
-        });
-        return response;
-      });
   },
-  
+
   getFollowingActivity: () => {
-    console.log("[Activities API] Запрос активностей подписок");
     return axiosInstance.get("/activity/following")
-      .then(response => {
-        console.log("[Activities API] Получен ответ от getFollowingActivity:", {
-          status: response.status,
-          dataType: Array.isArray(response.data) ? 'array' : typeof response.data,
-          itemCount: Array.isArray(response.data) ? response.data.length : 'n/a'
-        });
-        return response;
-      });
   },
 }
 

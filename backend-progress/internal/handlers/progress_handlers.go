@@ -17,7 +17,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// ActivityType представляет тип активности пользователя
 type ActivityType string
 
 const (
@@ -162,16 +161,16 @@ func (h *ProgressHandlers) CreateProgress(c *gin.Context) {
 
 	log.Printf("[PROGRESS] Создание прогресса для пользователя %s: %+v", userIDStr, progress)
 
-	if err := h.service.CreateProgress(c.Request.Context(), &progress); err != nil {
-		log.Printf("[PROGRESS ERROR] Ошибка создания прогресса: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
 	authHeader := c.GetHeader("Authorization")
 	token := ""
 	if len(authHeader) > 7 && authHeader[:7] == "Bearer " {
 		token = authHeader[7:]
+	}
+
+	if err := h.service.CreateProgress(c.Request.Context(), &progress, token); err != nil {
+		log.Printf("[PROGRESS ERROR] Ошибка создания прогресса: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
 	notification := ActivityNotification{
@@ -383,4 +382,49 @@ func (h *ProgressHandlers) ListProgress(c *gin.Context) {
 			"pages":    (total + int64(pageSize) - 1) / int64(pageSize),
 		},
 	})
+}
+
+// UpdateSteamData обрабатывает запрос на обновление Steam данных для игры
+func (h *ProgressHandlers) UpdateSteamData(c *gin.Context) {
+	progressID := c.Param("id")
+	if progressID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID прогресса не указан"})
+		return
+	}
+
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "пользователь не аутентифицирован"})
+		return
+	}
+
+	authHeader := c.GetHeader("Authorization")
+	token := ""
+	if len(authHeader) > 7 && authHeader[:7] == "Bearer " {
+		token = authHeader[7:]
+	}
+
+	progress, err := h.service.GetProgressByID(c.Request.Context(), progressID)
+	if err != nil {
+		if err == service.ErrProgressNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "прогресс не найден"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+		return
+	}
+
+	if progress.UserID != userID.(string) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "у вас нет прав на обновление этого прогресса"})
+		return
+	}
+
+	if err := h.service.UpdateSteamData(c.Request.Context(), progressID, token); err != nil {
+		log.Printf("[PROGRESS ERROR] Ошибка при обновлении Steam данных: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "не удалось обновить Steam данные"})
+		return
+	}
+
+	log.Printf("[PROGRESS] Steam данные успешно обновлены для прогресса: %s", progressID)
+	c.JSON(http.StatusOK, gin.H{"message": "Steam данные успешно обновлены"})
 }

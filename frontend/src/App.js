@@ -29,11 +29,9 @@ function AuthCallback() {
     }
 
     if (token) {
-      console.log("Получен токен аутентификации")
       api.auth.handleAuthToken(token)
       navigate("/", { replace: true })
     } else {
-      console.warn("Токен не найден в URL")
       navigate("/", { replace: true })
     }
   }, [location, navigate])

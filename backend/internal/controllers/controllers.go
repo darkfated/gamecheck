@@ -14,6 +14,7 @@ type Controllers struct {
 	Auth     *AuthController
 	User     *UserController
 	Activity *ActivityController
+	Steam    *SteamController
 }
 
 // NewControllers создает новый экземпляр композитного контроллера
@@ -22,6 +23,7 @@ func NewControllers(cfg *config.Config, services *services.Services) *Controller
 
 	userController := NewUserController(services.User, authController)
 	activityController := NewActivityController(services.Activity, authController)
+	steamController := NewSteamController(services.Steam, authController)
 
 	return &Controllers{
 		config:   cfg,
@@ -29,6 +31,7 @@ func NewControllers(cfg *config.Config, services *services.Services) *Controller
 		Auth:     authController,
 		User:     userController,
 		Activity: activityController,
+		Steam:    steamController,
 	}
 }
 
@@ -39,4 +42,5 @@ func (c *Controllers) RegisterRoutes(router *gin.Engine) {
 	c.Auth.RegisterRoutes(api)
 	c.User.RegisterRoutes(api)
 	c.Activity.RegisterRoutes(api)
+	c.Steam.RegisterRoutes(api)
 }

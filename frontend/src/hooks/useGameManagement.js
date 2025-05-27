@@ -9,24 +9,20 @@ export const useGameManagement = onUpdateCallback => {
 
   const checkAuth = () => {
     if (!authInitialized) {
-      console.log("Контекст аутентификации не инициализирован")
       return false
     }
 
     if (!isAuthenticated) {
-      console.log("Пользователь не аутентифицирован")
       setAuthError(true)
       return false
     }
 
     if (!api.auth.hasToken()) {
-      console.log("Нет токена авторизации")
       setAuthError(true)
       return false
     }
 
     if (!user) {
-      console.log("Нет данных пользователя")
       setAuthError(true)
       return false
     }
@@ -121,11 +117,38 @@ export const useGameManagement = onUpdateCallback => {
     }
   }
 
+  const updateSteamData = async gameId => {
+    if (!checkAuth()) {
+      alert("Для обновления Steam данных необходимо авторизоваться")
+      return false
+    }
+
+    try {
+      await api.games.updateSteamData(gameId)
+      onUpdateCallback()
+      return true
+    } catch (error) {
+      console.error("Ошибка при обновлении Steam данных:", error)
+      if (error.response && error.response.status === 401) {
+        setAuthError(true)
+        alert("Для обновления Steam данных необходимо авторизоваться")
+      } else {
+        alert(
+          `Ошибка при обновлении Steam данных: ${
+            error.response?.data?.error || error.message || "Неизвестная ошибка"
+          }`
+        )
+      }
+      return false
+    }
+  }
+
   return {
     isSubmitting,
     authError,
     addGame,
     updateGame,
     deleteGame,
+    updateSteamData,
   }
 }

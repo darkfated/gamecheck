@@ -6,10 +6,30 @@ import { useGameManagement } from "../../hooks/useGameManagement"
 import { GameCard } from "./GameCard"
 import { GAME_STATUSES, getStatusOptions } from "../../constants"
 
-export function GameList({ games, onUpdate, editable, isOwner, viewMode = 'cards' }) {
+export function GameList({
+  games,
+  onUpdate,
+  editable,
+  isOwner,
+  viewMode = "cards",
+}) {
   const { isAuthenticated, authInitialized } = useAuth()
-  const { isSubmitting, authError, addGame, updateGame, deleteGame } =
-    useGameManagement(onUpdate)
+  const {
+    isSubmitting,
+    authError,
+    addGame,
+    updateGame,
+    deleteGame,
+    updateSteamData,
+  } = useGameManagement(onUpdate)
+
+  // Функция для обновления Steam данных
+  const handleUpdateSteam = gameId => {
+    if (updateSteamData) {
+      updateSteamData(gameId)
+    }
+  }
+
   const [isFormVisible, setIsFormVisible] = useState(false)
   const [newGame, setNewGame] = useState({
     name: "",
@@ -38,7 +58,6 @@ export function GameList({ games, onUpdate, editable, isOwner, viewMode = 'cards
       gameToAdd.review = ""
     }
 
-    console.log("Добавляю игру:", gameToAdd)
     try {
       await addGame(gameToAdd)
       const lastStatus = newGame.status
@@ -267,9 +286,7 @@ export function GameList({ games, onUpdate, editable, isOwner, viewMode = 'cards
               <input
                 type='text'
                 value={newGame.name}
-                onChange={e =>
-                  setNewGame({ ...newGame, name: e.target.value })
-                }
+                onChange={e => setNewGame({ ...newGame, name: e.target.value })}
                 required
                 placeholder='Название игры'
                 className='w-full p-2 mt-1 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg'
@@ -367,7 +384,7 @@ export function GameList({ games, onUpdate, editable, isOwner, viewMode = 'cards
             <h3 className='text-lg font-semibold text-[var(--text-primary)]'>
               {status.label}
             </h3>
-            {viewMode === 'cards' ? (
+            {viewMode === "cards" ? (
               <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
                 {gamesInStatus.map(game => (
                   <GameCard
@@ -375,6 +392,7 @@ export function GameList({ games, onUpdate, editable, isOwner, viewMode = 'cards
                     game={game}
                     onUpdate={updateGame}
                     onDelete={deleteGame}
+                    onUpdateSteam={handleUpdateSteam}
                     editable={editable}
                     isOwner={isOwner}
                     statusOptions={statusOptions}
@@ -389,6 +407,7 @@ export function GameList({ games, onUpdate, editable, isOwner, viewMode = 'cards
                     game={game}
                     onUpdate={updateGame}
                     onDelete={deleteGame}
+                    onUpdateSteam={handleUpdateSteam}
                     editable={editable}
                     isOwner={isOwner}
                     statusOptions={statusOptions}

@@ -51,8 +51,9 @@ func New(cfg *config.Config) (*Application, error) {
 	authService := services.NewAuthService(cfg, userRepo, tokenRepo, activityRepo)
 	userService := services.NewUserService(userRepo, subscriptionRepo, activityRepo)
 	activityService := services.NewActivityService(activityRepo, userRepo)
+	steamService := services.NewSteamService(cfg)
 
-	svcs := services.NewServices(authService, userService, activityService)
+	svcs := services.NewServices(authService, userService, activityService, steamService)
 	ctrls := controllers.NewControllers(cfg, svcs)
 
 	router := setupRouter(cfg, ctrls)

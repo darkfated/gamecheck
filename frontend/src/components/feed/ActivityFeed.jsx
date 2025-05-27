@@ -19,42 +19,29 @@ export const ActivityFeed = ({ userId = null, showFollowingOnly = false }) => {
         setLoading(true)
         setError(null)
 
-        console.log("ActivityFeed: начинаем загрузку активностей", { 
-          userId, 
-          showFollowingOnly, 
-          isAuthenticated: !!user 
-        });
-
-        let response;
+        let response
 
         if (userId) {
-          console.log(`ActivityFeed: загрузка активностей для пользователя ${userId}`);
-          response = await api.activities.getUserActivity(userId);
+          response = await api.activities.getUserActivity(userId)
         } else if (showFollowingOnly || !userId) {
-          console.log("ActivityFeed: загрузка активностей подписок");
-          response = await api.activities.getFollowingActivity();
+          response = await api.activities.getFollowingActivity()
         } else {
-          console.log("ActivityFeed: загрузка общей ленты активностей");
-          response = await api.activities.getFeed();
+          response = await api.activities.getFeed()
         }
 
-        console.log("Полученные активности:", response.data);
-        
         if (!Array.isArray(response.data)) {
-          console.error("ОШИБКА: Активности не являются массивом!", response.data);
-          setError("Получены некорректные данные активностей");
-          setActivities([]);
+          setError("Получены некорректные данные активностей")
+          setActivities([])
         } else {
-          setActivities(response.data);
+          setActivities(response.data)
         }
       } catch (err) {
-        console.error("Ошибка при загрузке активности:", {
-          message: err.message,
-          response: err.response,
-          status: err.response?.status,
-          data: err.response?.data,
-        });
-        setError(err.response?.data?.error || err.response?.data?.message || err.message || "Ошибка загрузки активностей");
+        setError(
+          err.response?.data?.error ||
+            err.response?.data?.message ||
+            err.message ||
+            "Ошибка загрузки активностей"
+        )
       } finally {
         setLoading(false)
       }
@@ -63,7 +50,6 @@ export const ActivityFeed = ({ userId = null, showFollowingOnly = false }) => {
     if (user || userId) {
       fetchActivities()
     } else {
-      console.log("ActivityFeed: пользователь не авторизован и userId не предоставлен");
       setLoading(false)
     }
   }, [userId, user, showFollowingOnly])
@@ -112,9 +98,9 @@ export const ActivityFeed = ({ userId = null, showFollowingOnly = false }) => {
           <h3 className='text-lg font-medium'>Ошибка загрузки</h3>
         </div>
         <p className='text-red-400/80 text-center'>{error}</p>
-        <div className="flex justify-center mt-4">
+        <div className='flex justify-center mt-4'>
           <button
-            className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-500 rounded-lg transition-colors"
+            className='px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-500 rounded-lg transition-colors'
             onClick={() => window.location.reload()}
           >
             Попробовать снова
