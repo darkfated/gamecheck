@@ -41,9 +41,10 @@ GameCheck - это веб-приложение для отслеживания �
 
 ![Информация игрока](https://github.com/user-attachments/assets/aa566d50-c039-4eac-ab21-de96d24c5931)
 
-### Светлая тема
+### Квизы
 
-![Светлая тема](https://github.com/user-attachments/assets/e55ed3d2-a5bf-46db-b198-d0d112ad23e6)
+![Светлая тема](https://github.com/user-attachments/assets/d80928f9-292a-432f-b552-43672fe5e751)
+![Прохождение квиза](https://github.com/user-attachments/assets/03a2405c-d685-45be-aa3e-e7db6089e35c)
 
 ## Документация
 
