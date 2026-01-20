@@ -1465,10 +1465,6 @@ export const getQuizById = (id: string): Quiz | undefined => {
   return quizzes.find(q => q.id === id)
 }
 
-export const getQuizzesByCategory = (category: string): Quiz[] => {
-  return quizzes.filter(q => q.category === category)
-}
-
 export const getCategories = (): string[] => {
   return [...new Set(quizzes.map(q => q.category))]
 }

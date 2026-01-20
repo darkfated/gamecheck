@@ -21,7 +21,7 @@ const GameProgressSection: FC<GameProgressSectionProps> = ({
 }) => {
   const [games, setGames] = useState<Game[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<Error | null>(null)
+  const [, setError] = useState<Error | null>(null)
   const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards')
 
   const fetchGames = async () => {

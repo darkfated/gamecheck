@@ -187,8 +187,6 @@ const authApi = {
     return tokenService.saveToken(token)
   },
 
-  getToken: () => tokenService.getToken(),
-
   hasToken: () => !!tokenService.getToken(),
 
   logout: async (): Promise<void> => {
@@ -234,9 +232,6 @@ const progressApi = {
     }
     return progressAxiosInstance.delete(`/progress/${id}`)
   },
-
-  getGameById: (id: string) =>
-    progressAxiosInstance.get<Game>(`/progress/${id}`),
 
   updateSteamData: (id: string) => {
     if (!tokenService.getToken()) {

@@ -227,13 +227,13 @@ code {
 
 @keyframes glow {
   0% {
-    box-shadow: 0 0 5px 0px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 0 5px 0 rgba(99, 102, 241, 0.4);
   }
   50% {
     box-shadow: 0 0 20px 5px rgba(99, 102, 241, 0.6);
   }
   100% {
-    box-shadow: 0 0 5px 0px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 0 5px 0 rgba(99, 102, 241, 0.4);
   }
 }
 
@@ -243,13 +243,13 @@ code {
 
 @keyframes gradient {
   0% {
-    background-position: 0% 50%;
+    background-position: 0 50%;
   }
   50% {
     background-position: 100% 50%;
   }
   100% {
-    background-position: 0% 50%;
+    background-position: 0 50%;
   }
 }
 

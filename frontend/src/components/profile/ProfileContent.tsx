@@ -44,7 +44,6 @@ export const ProfileContent: FC<ProfileContentProps> = ({
   profile,
   profileId,
   updateProfile,
-  onAddGame,
   statusOptions = [],
 }) => {
   return (

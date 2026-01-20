@@ -41,7 +41,7 @@ export const ActivityItem: FC<ActivityItemProps> = ({ activity }) => {
   }
 
   const renderActivityContent = () => {
-    const { type, user, progress, targetUser } = activity
+    const { type, progress, targetUser } = activity
 
     switch (type) {
       case 'add_game':

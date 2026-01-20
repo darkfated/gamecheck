@@ -1,5 +1,3 @@
-export const API_URL = 'http://localhost:5000/api'
-
 export const GAME_STATUSES = {
   PLAN_TO_PLAY: 'plan_to_play',
   PLAYING: 'playing',
@@ -60,19 +58,3 @@ export const GAME_STATUS_CONFIG: Record<string, StatusConfig> = {
 
 export const getStatusOptions = (): StatusConfig[] =>
   Object.values(GAME_STATUS_CONFIG)
-
-export const ACTIVITY_TYPES = {
-  ADD_GAME: 'add_game',
-  UPDATE_STATUS: 'update_status',
-  UPDATE_GAME: 'update_game',
-  RATE_GAME: 'rate_game',
-  FOLLOW_USER: 'follow',
-  UNFOLLOW_USER: 'unfollow',
-} as const
-
-export const ROUTES = {
-  HOME: '/',
-  PROFILE: '/profile/:id',
-  FEED: '/feed',
-  LOGIN: '/login',
-} as const

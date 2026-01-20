@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { FC, useMemo, useState } from 'react'
+import React, { FC, useMemo, useState } from 'react'
 import { GAME_STATUSES, getStatusOptions } from '../../constants'
 import { useAuth } from '../../contexts/AuthContext'
 import { useGameManagement } from '../../hooks/useGameManagement'

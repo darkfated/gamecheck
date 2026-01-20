@@ -16,7 +16,7 @@ export const QuizPlayer: FC<QuizPlayerProps> = ({
   const quiz = getQuizById(quizId)
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [answers, setAnswers] = useState<Record<string, string>>({})
-  const [showExplanation, setShowExplanation] = useState(false)
+  const [, setShowExplanation] = useState(false)
 
   if (!quiz) {
     return <div>Квиз не найден</div>

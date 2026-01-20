@@ -1,12 +1,3 @@
-export const formatDate = (date: string | Date): string => {
-  return new Date(date).toLocaleString('ru', {
-    day: 'numeric',
-    month: 'long',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
-
 export const timeAgo = (date: string | Date): string => {
   const seconds = Math.floor(
     (new Date().getTime() - new Date(date).getTime()) / 1000,
@@ -14,28 +5,28 @@ export const timeAgo = (date: string | Date): string => {
 
   let interval = seconds / 31536000
   if (interval > 1) {
-    return Math.floor(interval) + ' years ago'
+    return Math.floor(interval) + ' лет назад'
   }
 
   interval = seconds / 2592000
   if (interval > 1) {
-    return Math.floor(interval) + ' months ago'
+    return Math.floor(interval) + ' мес. назад'
   }
 
   interval = seconds / 86400
   if (interval > 1) {
-    return Math.floor(interval) + ' days ago'
+    return Math.floor(interval) + ' дн. назад'
   }
 
   interval = seconds / 3600
   if (interval > 1) {
-    return Math.floor(interval) + ' hours ago'
+    return Math.floor(interval) + ' ч. назад'
   }
 
   interval = seconds / 60
   if (interval > 1) {
-    return Math.floor(interval) + ' minutes ago'
+    return Math.floor(interval) + ' мин. назад'
   }
 
-  return Math.floor(seconds) + ' seconds ago'
+  return Math.floor(seconds) + ' сек. назад'
 }
