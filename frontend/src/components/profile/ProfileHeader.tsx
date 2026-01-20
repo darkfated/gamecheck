@@ -347,7 +347,7 @@ export const ProfileHeader: FC<ProfileHeaderProps> = ({
                 whileHover={{ y: -2 }}
                 className='group flex items-center gap-3'
               >
-                <div className='h-10 w-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-blue-600/20 to-indigo-600/20 group-hover:from-blue-600/30 group-hover:to-indigo-600/30 transition-all duration-300'>
+                <div className='h-10 w-10 flex items-center backdrop-blur-sm justify-center rounded-xl bg-gradient-to-br from-blue-600/20 to-indigo-600/20 group-hover:from-blue-600/30 group-hover:to-indigo-600/30 transition-all duration-300'>
                   <svg
                     className='w-5 h-5 text-blue-400'
                     fill='none'
@@ -377,7 +377,7 @@ export const ProfileHeader: FC<ProfileHeaderProps> = ({
                 whileHover={{ y: -2 }}
                 className='group flex items-center gap-3'
               >
-                <div className='h-10 w-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600/20 to-purple-600/20 group-hover:from-indigo-600/30 group-hover:to-purple-600/30 transition-all duration-300'>
+                <div className='h-10 w-10 flex items-center backdrop-blur-sm justify-center rounded-xl bg-gradient-to-br from-indigo-600/20 to-purple-600/20 group-hover:from-indigo-600/30 group-hover:to-purple-600/30 transition-all duration-300'>
                   <svg
                     className='w-5 h-5 text-purple-400'
                     fill='none'
@@ -403,7 +403,7 @@ export const ProfileHeader: FC<ProfileHeaderProps> = ({
               </motion.button>
 
               <div className='group flex items-center gap-3'>
-                <div className='h-10 w-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-pink-600/20 to-red-600/20 group-hover:from-pink-600/30 group-hover:to-red-600/30 transition-all duration-300'>
+                <div className='h-10 w-10 flex items-center backdrop-blur-sm justify-center rounded-xl bg-gradient-to-br from-pink-600/20 to-red-600/20 group-hover:from-pink-600/30 group-hover:to-red-600/30 transition-all duration-300'>
                   <svg
                     className='w-5 h-5 text-pink-500'
                     fill='none'
