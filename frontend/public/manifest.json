@@ -1,6 +1,6 @@
 {
   "short_name": "GameCheck",
-  "name": "GameCheck - Отслеживание игр",
+  "name": "GameCheck - платформа для отслеживания игровой активности",
   "icons": [
     {
       "src": "favicon.ico",

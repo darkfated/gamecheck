@@ -2,26 +2,26 @@
 
 REM
 if exist backend\go.mod (
-    echo Installing dependencies for backend...
+    echo Установка зависимостей для Backend...
     cd backend && go mod tidy && cd ..
 ) else (
-    echo [Error] go.mod not found in backend folder
+    echo [Error] go.mod не найден в папке backend
 )
 
 REM
 if exist backend-progress\go.mod (
-    echo Installing dependencies for backend-progress...
+    echo Установка зависимостей для Backend Progress...
     cd backend-progress && go mod tidy && cd ..
 ) else (
-    echo [Error] go.mod not found in backend-progress folder
+    echo [Error] go.mod не найден в папке backend-progress
 )
 
 REM
 if exist frontend\package.json (
-    echo Installing dependencies for Frontend...
+    echo Установка зависимостей для React Frontend...
     cd frontend && npm install && cd ..
 ) else (
-    echo [Error] package.json not found in frontend folder
+    echo [Error] package.json не найден в папке frontend
 )
 
 REM

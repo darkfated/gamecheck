@@ -2,34 +2,26 @@
 
 REM
 if exist backend\go.mod (
-    echo Starting backend...
+    echo Запуск Backend...
     start cmd /k "cd backend && go run ./cmd/server/main.go"
 ) else (
-    echo [Error] go.mod not found in backend folder
+    echo [Error] go.mod не найден в папке backend
 )
 
 REM
 if exist backend-progress\go.mod (
-    echo Starting backend-progress...
+    echo Запуск Backend Progress...
     start cmd /k "cd backend-progress && go run ./cmd/server/main.go"
 ) else (
-    echo [Error] go.mod not found in backend-progress folder
+    echo [Error] go.mod не найден в папке backend-progress
 )
 
 REM
 if exist frontend\package.json (
-    echo Starting React frontend...
+    echo Запуск React Frontend...
     start cmd /k "cd frontend && npm start"
 ) else (
-    echo [Error] package.json not found in frontend folder
-)
-
-REM
-if exist frontend\package.json (
-    echo Starting Vue frontend...
-    start cmd /k "cd frontend && npm run start:vue"
-) else (
-    echo [Error] package.json not found in frontend\vue folder
+    echo [Error] package.json не найден в папке frontend
 )
 
 REM

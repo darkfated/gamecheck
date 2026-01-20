@@ -14,6 +14,7 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.20.0",
     "react-scripts": "5.0.1",
+    "typescript": "^5.3.3",
     "vue": "^3.3.4",
     "web-vitals": "^2.1.4"
   },
@@ -46,6 +47,10 @@
   "devDependencies": {
     "@babel/core": "^7.23.3",
     "@babel/preset-env": "^7.23.3",
+    "@types/node": "^20.10.6",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
+    "@types/react-router-dom": "^5.3.3",
     "@vue/compiler-sfc": "^3.3.4",
     "autoprefixer": "^10.4.16",
     "babel-loader": "^9.1.3",
