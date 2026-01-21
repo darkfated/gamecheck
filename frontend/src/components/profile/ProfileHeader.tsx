@@ -127,19 +127,48 @@ export const ProfileHeader: FC<ProfileHeaderProps> = ({
         className='h-48 sm:h-64 md:h-80 rounded-xl shadow-xl relative overflow-hidden'
         variants={itemVariants}
       >
-        <div className='absolute inset-0 bg-gradient-to-r from-indigo-800 via-purple-700 to-pink-600 opacity-85'></div>
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1550745165-9bc0b252726f')] bg-cover bg-center opacity-30 mix-blend-overlay"></div>
+        <motion.div
+          className='absolute inset-0 bg-gradient-to-r from-indigo-800 via-purple-700 to-pink-600'
+          animate={{ opacity: [0.7, 0.85, 0.7] }}
+          transition={{
+            duration: 6,
+            repeat: Infinity,
+            repeatType: 'mirror',
+          }}
+        ></motion.div>
 
-        <div className='absolute inset-0 overflow-hidden'>
-          <div className='absolute top-1/3 left-20 w-72 h-72 bg-pink-600 opacity-20 rounded-full filter blur-3xl'></div>
-          <div className='absolute top-10 right-20 w-48 h-48 bg-indigo-700 opacity-20 rounded-full filter blur-3xl'></div>
-          <div className='absolute bottom-10 right-1/3 w-64 h-64 bg-purple-600 opacity-20 rounded-full filter blur-3xl'></div>
-        </div>
+        <motion.div
+          className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1550745165-9bc0b252726f')] bg-cover bg-center"
+          animate={{ opacity: [0.25, 0.35, 0.25] }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            repeatType: 'mirror',
+          }}
+        ></motion.div>
+
+        <motion.div className='absolute inset-0 overflow-hidden'>
+          <motion.div
+            className='absolute top-1/3 left-20 w-72 h-72 bg-pink-600 opacity-15 rounded-full filter blur-3xl'
+            animate={{ scale: [1, 1.05, 1], opacity: [0.15, 0.25, 0.15] }}
+            transition={{ duration: 5, repeat: Infinity, repeatType: 'mirror' }}
+          ></motion.div>
+          <motion.div
+            className='absolute top-10 right-20 w-48 h-48 bg-indigo-700 opacity-15 rounded-full filter blur-3xl'
+            animate={{ scale: [1, 1.08, 1], opacity: [0.15, 0.28, 0.15] }}
+            transition={{ duration: 6, repeat: Infinity, repeatType: 'mirror' }}
+          ></motion.div>
+          <motion.div
+            className='absolute bottom-10 right-1/3 w-64 h-64 bg-purple-600 opacity-15 rounded-full filter blur-3xl'
+            animate={{ scale: [1, 1.07, 1], opacity: [0.15, 0.26, 0.15] }}
+            transition={{ duration: 7, repeat: Infinity, repeatType: 'mirror' }}
+          ></motion.div>
+        </motion.div>
 
         <motion.div
           className='absolute inset-0 bg-gradient-to-t from-[var(--bg-primary)] via-transparent to-transparent'
-          animate={{ opacity: 0.8 }}
-          transition={{ duration: 0.5 }}
+          animate={{ opacity: [0.7, 0.85, 0.7] }}
+          transition={{ duration: 6, repeat: Infinity, repeatType: 'mirror' }}
         ></motion.div>
       </motion.div>
 
@@ -313,7 +342,7 @@ export const ProfileHeader: FC<ProfileHeaderProps> = ({
                     </span>
                   )}
                   {isOwnProfile && (
-                    <span className='py-1 px-2 text-xs bg-[var(--accent-primary)]/20 rounded-full text-[var(--accent-tertiary)]'>
+                    <span className='py-1 px-2 text-xs bg-[var(--accent-primary)]/20 rounded-full text-[var(--accent-tertiary)] select-none'>
                       Это ваш профиль
                     </span>
                   )}
@@ -418,7 +447,7 @@ export const ProfileHeader: FC<ProfileHeaderProps> = ({
                     />
                   </svg>
                 </div>
-                <div className='flex flex-col'>
+                <div className='flex flex-col select-none'>
                   <span className='text-xl font-bold text-[var(--text-primary)]'>
                     {gamesCount}
                   </span>

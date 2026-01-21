@@ -1,7 +1,7 @@
-import {AnimatePresence, motion} from 'framer-motion'
-import {FC, useEffect, useMemo, useRef, useState} from 'react'
-import {Link} from 'react-router-dom'
-import {useAuth} from '../contexts/AuthContext'
+import { AnimatePresence, LayoutGroup, motion } from 'framer-motion'
+import { FC, useEffect, useMemo, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 import api from '../services/api'
 
 interface User {
@@ -75,8 +75,8 @@ const Users: FC = () => {
       if (requestRef.current !== req) return
       setError(
         err?.response?.data?.message ||
-        err?.message ||
-        'Ошибка при загрузке пользователей',
+          err?.message ||
+          'Ошибка при загрузке пользователей',
       )
       setUsers([])
       setTotal(0)
@@ -180,12 +180,6 @@ const Users: FC = () => {
     visible: { opacity: 1, y: 0 },
   }
 
-  const activeTabStyle: React.CSSProperties = {
-    background:
-      'linear-gradient(to right, rgba(99, 102, 241, 0.18), rgba(168, 85, 247, 0.18), rgba(217, 70, 239, 0.18))',
-    boxShadow: '0 6px 18px -4px rgba(99, 102, 241, 0.12)',
-  }
-
   return (
     <motion.div
       className='bg-[var(--bg-primary)]'
@@ -194,9 +188,6 @@ const Users: FC = () => {
       animate='visible'
     >
       <div className='container mx-auto px-4 py-8 relative'>
-        <div className='absolute top-0 right-0 w-44 h-44 bg-gradient-to-r from-indigo-600/5 to-purple-600/5 rounded-full -translate-y-1/2 translate-x-1/4 blur-xl pointer-events-none' />
-        <div className='absolute bottom-0 left-0 w-36 h-36 bg-gradient-to-r from-purple-600/5 to-pink-600/5 rounded-full translate-y-1/2 -translate-x-1/3 blur-xl pointer-events-none' />
-
         <motion.div className='mb-6' variants={itemVariants}>
           <h1 className='text-3xl sm:text-4xl font-bold text-[var(--text-primary)]'>
             Игроки
@@ -217,57 +208,118 @@ const Users: FC = () => {
           className='flex flex-col md:flex-row md:items-center gap-4 md:gap-6 justify-between mb-6'
           variants={itemVariants}
         >
-          <div className='flex gap-3 items-center'>
-            <button
-              onClick={() => setActiveTab('following')}
-              className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${activeTab === 'following' ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
-              style={activeTab === 'following' ? activeTabStyle : undefined}
-            >
-              <svg
-                className='w-5 h-5'
-                viewBox='0 0 24 24'
-                fill='none'
-                stroke='currentColor'
-              >
-                <path
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  strokeWidth={2}
-                  d='M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'
-                />
-              </svg>
-              Подписки
-            </button>
+          <div style={{ overflowX: 'visible' }}>
+            <LayoutGroup>
+              <div className='flex gap-3 items-center relative'>
+                <div className='relative'>
+                  {activeTab === 'following' && (
+                    <motion.div
+                      layoutId='users-active-tab'
+                      className='absolute rounded-xl pointer-events-none'
+                      style={{
+                        top: 4,
+                        bottom: 4,
+                        left: 4,
+                        right: 4,
+                        borderRadius: 14,
+                        background:
+                          'linear-gradient(to right, rgba(99, 102, 241, 0.18), rgba(168, 85, 247, 0.18), rgba(217, 70, 239, 0.18))',
+                        boxShadow: '0 8px 20px -10px rgba(99, 102, 241, 0.12)',
+                      }}
+                      transition={{
+                        type: 'spring',
+                        stiffness: 420,
+                        damping: 28,
+                      }}
+                    />
+                  )}
 
-            <button
-              onClick={() => setActiveTab('all')}
-              className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${activeTab === 'all' ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
-              style={activeTab === 'all' ? activeTabStyle : undefined}
-            >
-              <svg
-                className='w-5 h-5'
-                viewBox='0 0 24 24'
-                fill='none'
-                stroke='currentColor'
-              >
-                <path
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  strokeWidth={2}
-                  d='M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'
-                />
-              </svg>
-              Все игроки
-            </button>
+                  <button
+                    onClick={() => setActiveTab('following')}
+                    className={`relative z-10 px-6 py-3 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
+                      activeTab === 'following'
+                        ? 'text-[var(--text-primary)]'
+                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                    }`}
+                  >
+                    <svg
+                      className='w-5 h-5'
+                      viewBox='0 0 24 24'
+                      fill='none'
+                      stroke='currentColor'
+                    >
+                      <path
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        strokeWidth={2}
+                        d='M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'
+                      />
+                    </svg>
+                    Подписки
+                  </button>
+                </div>
+
+                <div className='relative'>
+                  {activeTab === 'all' && (
+                    <motion.div
+                      layoutId='users-active-tab'
+                      className='absolute rounded-xl pointer-events-none'
+                      style={{
+                        top: 4,
+                        bottom: 4,
+                        left: 4,
+                        right: 4,
+                        borderRadius: 14,
+                        background:
+                          'linear-gradient(to right, rgba(99, 102, 241, 0.18), rgba(168, 85, 247, 0.18), rgba(217, 70, 239, 0.18))',
+                        boxShadow: '0 8px 20px -10px rgba(99, 102, 241, 0.12)',
+                      }}
+                      transition={{
+                        type: 'spring',
+                        stiffness: 420,
+                        damping: 28,
+                      }}
+                    />
+                  )}
+
+                  <button
+                    onClick={() => setActiveTab('all')}
+                    className={`relative z-10 px-6 py-3 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
+                      activeTab === 'all'
+                        ? 'text-[var(--text-primary)]'
+                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                    }`}
+                  >
+                    <svg
+                      className='w-5 h-5'
+                      viewBox='0 0 24 24'
+                      fill='none'
+                      stroke='currentColor'
+                    >
+                      <path
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        strokeWidth={2}
+                        d='M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'
+                      />
+                    </svg>
+                    Все игроки
+                  </button>
+                </div>
+              </div>
+            </LayoutGroup>
           </div>
 
-          <motion.div className='w-full md:w-auto flex flex-col sm:flex-row items-stretch gap-3' variants={itemVariants}>
+          <motion.div
+            className='w-full md:w-auto flex flex-col sm:flex-row items-stretch gap-3'
+            variants={itemVariants}
+          >
             <div className='flex-1'>
               <input
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder='Поиск по имени или тегу'
-                className='w-full md:w-[260px] lg:w-[290] h-12 px-4 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] placeholder-[var(--text-secondary)] shadow-inner transition'
+                className='w-full md:w-[260px] lg:w-[290px] h-12 px-4 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] placeholder-[var(--text-secondary)] shadow-inner transition'
               />
             </div>
 
@@ -311,7 +363,9 @@ const Users: FC = () => {
 
         <AnimatePresence mode='wait'>
           <motion.div
-            key={activeTab + '-' + page + '-' + limit + '-' + sortBy + '-' + order}
+            key={
+              activeTab + '-' + page + '-' + limit + '-' + sortBy + '-' + order
+            }
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
@@ -388,7 +442,8 @@ const Users: FC = () => {
                             {u.displayName}
                           </Link>
                           <div className='text-xs text-[var(--text-secondary)] mt-1 truncate'>
-                            {u.discordTag ?? `${u.followersCount ?? 0} подписчиков`}
+                            {u.discordTag ??
+                              `${u.followersCount ?? 0} подписчиков`}
                           </div>
                         </div>
 

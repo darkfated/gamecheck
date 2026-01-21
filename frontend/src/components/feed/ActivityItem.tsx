@@ -142,7 +142,7 @@ export const ActivityItem: FC<ActivityItemProps> = ({ activity }) => {
       </motion.div>
 
       <div className='ml-4 flex-grow z-10'>
-        <div>
+        <div className='select-none'>
           <Link
             to={`/profile/${activity.user.id}`}
             className='font-medium text-[var(--accent-primary)] hover:text-[var(--accent-secondary)] transition-colors'

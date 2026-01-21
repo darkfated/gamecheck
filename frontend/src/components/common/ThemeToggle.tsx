@@ -12,7 +12,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = '' }) => {
   return (
     <div className={`relative inline-flex items-center ${className}`}>
       <span className='mr-3 text-sm font-medium text-[var(--text-secondary)]'>
-        {theme === 'dark' ? 'Dark' : 'Light'}
+        {theme === 'dark' ? 'Тёмная' : 'Светлая'}
       </span>
       <motion.label
         className='relative inline-flex items-center cursor-pointer'

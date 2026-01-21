@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { FC, useEffect, useState } from 'react'
+import { FC, useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import Modal from '../components/common/Modal'
 import { ActivityFeed } from '../components/feed/ActivityFeed'
@@ -48,10 +48,26 @@ interface UserProfile {
   avatarUrl: string
 }
 
+const safeFetch = async <T,>(fn: () => Promise<{ data: T }>, fallback: T) => {
+  try {
+    const res = await fn()
+    return res.data
+  } catch (err) {
+    console.error(err)
+    return fallback
+  }
+}
+
+const sectionVariants = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+}
+
 const Profile: FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { user: currentUser } = useAuth()
+
   const [profile, setProfile] = useState<ProfileData | null>(null)
   const [games, setGames] = useState<Game[]>([])
   const [loading, setLoading] = useState(true)
@@ -61,82 +77,72 @@ const Profile: FC = () => {
   const [showFollowersModal, setShowFollowersModal] = useState(false)
   const [showFollowingModal, setShowFollowingModal] = useState(false)
   const [activeTab, setActiveTab] = useState('progress')
+  const [followLoading, setFollowLoading] = useState(false)
+  const [listsLoaded, setListsLoaded] = useState(false)
 
-  const statusOptions = getStatusOptions()
+  const statusOptions = useMemo(() => getStatusOptions(), [])
 
-  const isOwnProfile: boolean =
-    currentUser && profile ? currentUser.id === profile.id : false
+  const isOwnProfile: boolean = Boolean(
+    currentUser && profile && currentUser.id === profile.id,
+  )
 
-  const profileTabs: Tab[] = [
-    { id: 'progress', label: `Прогресс (${games.length})` },
-    { id: 'activity', label: 'Активность' },
-    { id: 'info', label: 'Информация' },
-  ]
+  const profileTabs: Tab[] = useMemo(
+    () => [
+      { id: 'progress', label: `Прогресс (${games.length})` },
+      { id: 'activity', label: 'Активность' },
+      { id: 'info', label: 'Информация' },
+    ],
+    [games.length],
+  )
 
-  const tabs: Tab[] = isOwnProfile
-    ? [...profileTabs, { id: 'settings', label: 'Настройки' }]
-    : profileTabs
+  const tabs: Tab[] = useMemo(
+    () =>
+      isOwnProfile
+        ? [...profileTabs, { id: 'settings', label: 'Настройки' }]
+        : profileTabs,
+    [profileTabs, isOwnProfile],
+  )
 
-  useEffect(() => {
-    if (id) {
-      fetchProfile()
-    }
-  }, [id])
-
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     if (!id) return
 
-    try {
-      setLoading(true)
-      setError(null)
+    setLoading(true)
+    setError(null)
+    setListsLoaded(false)
 
+    try {
       const profileResponse = await api.users.getProfile(id)
       const currentProfile = profileResponse.data
       setProfile(currentProfile)
 
-      try {
-        const gamesResponse = await api.games.getUserGames(id)
-        setGames(gamesResponse.data)
-      } catch (gameError) {
-        console.error('Ошибка загрузки игр:', gameError)
-        setGames([])
-      }
+      const [gamesData, followersData, followingData] = await Promise.all([
+        safeFetch(() => api.games.getUserGames(id), [] as Game[]),
+        safeFetch(
+          () => api.subscriptions.getFollowers(id),
+          [] as UserProfile[],
+        ),
+        safeFetch(
+          () => api.subscriptions.getFollowing(id),
+          [] as UserProfile[],
+        ),
+      ])
 
-      try {
-        const followersResponse = await api.subscriptions.getFollowers(id)
-        setFollowers(followersResponse.data)
-      } catch (err) {
-        console.error('Ошибка загрузки подписчиков:', err)
-        setFollowers([])
-      }
-
-      try {
-        const followingResponse = await api.subscriptions.getFollowing(id)
-        setFollowing(followingResponse.data)
-      } catch (err) {
-        console.error('Ошибка загрузки подписок:', err)
-        setFollowing([])
-      }
+      setGames(gamesData)
+      setFollowers(followersData)
+      setFollowing(followingData)
+      setListsLoaded(true)
 
       if (currentUser && currentUser.id !== id) {
-        try {
-          const myFollowingResponse = await api.subscriptions.getFollowing(
-            currentUser.id,
-          )
-          const isFollowing = myFollowingResponse.data.some(
-            (followedUser: UserProfile) => followedUser.id === id,
-          )
-
-          setProfile(
-            prev =>
-              ({
-                ...prev,
-                isFollowing: isFollowing,
-              }) as ProfileData,
-          )
-        } catch (err) {
-          console.error('Ошибка проверки подписки:', err)
-        }
+        const myFollowingResponse = await safeFetch(
+          () => api.subscriptions.getFollowing(currentUser.id),
+          [] as UserProfile[],
+        )
+        const isFollowing = myFollowingResponse.some(
+          (u: UserProfile) => u.id === id,
+        )
+        setProfile(prev =>
+          prev ? ({ ...prev, isFollowing } as ProfileData) : prev,
+        )
       }
     } catch (err: any) {
       console.error('Error fetching profile:', err)
@@ -144,80 +150,68 @@ const Profile: FC = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [id, currentUser])
+
+  useEffect(() => {
+    if (id) fetchProfile()
+  }, [id, fetchProfile])
+
+  const refreshFollowers = useCallback(async () => {
+    if (!id) return
+    const followersData = await safeFetch(
+      () => api.subscriptions.getFollowers(id),
+      [] as UserProfile[],
+    )
+    setFollowers(followersData)
+  }, [id])
+
+  const refreshFollowing = useCallback(async () => {
+    if (!id) return
+    const followingData = await safeFetch(
+      () => api.subscriptions.getFollowing(id),
+      [] as UserProfile[],
+    )
+    setFollowing(followingData)
+  }, [id])
 
   const handleFollow = async () => {
     if (!profile || !id) return
+    setFollowLoading(true)
+    const isCurrentlyFollowing = Boolean(profile.isFollowing)
+
+    setProfile(prev =>
+      prev
+        ? {
+            ...prev,
+            isFollowing: !isCurrentlyFollowing,
+            followersCount: isCurrentlyFollowing
+              ? Math.max(0, (prev.followersCount || 0) - 1)
+              : (prev.followersCount || 0) + 1,
+          }
+        : prev,
+    )
 
     try {
-      const isCurrentlyFollowing = profile.isFollowing
-
       if (isCurrentlyFollowing) {
         await api.subscriptions.unfollow(id)
-        setProfile(prev =>
-          prev
-            ? {
-                ...prev,
-                isFollowing: false,
-                followersCount: Math.max(0, (prev.followersCount || 0) - 1),
-              }
-            : null,
-        )
-
-        const followersResponse = await api.subscriptions.getFollowers(id)
-        setFollowers(followersResponse.data)
       } else {
         await api.subscriptions.follow(id)
-        setProfile(prev =>
-          prev
-            ? {
-                ...prev,
-                isFollowing: true,
-                followersCount: (prev.followersCount || 0) + 1,
-              }
-            : null,
-        )
-
-        const followersResponse = await api.subscriptions.getFollowers(id)
-        setFollowers(followersResponse.data)
       }
-    } catch (error) {
-      console.error('Error following/unfollowing:', error)
-      try {
-        if (!id) return
-        const profileResponse = await api.users.getProfile(id)
-        const profileData = profileResponse.data
-
-        if (currentUser && currentUser.id !== id) {
-          const myFollowingResponse = await api.subscriptions.getFollowing(
-            currentUser.id,
-          )
-          const isFollowing = myFollowingResponse.data.some(
-            (followedUser: UserProfile) => followedUser.id === id,
-          )
-
-          setProfile({
-            ...profileData,
-            isFollowing: isFollowing,
-          })
-        } else {
-          setProfile(profileData)
-        }
-      } catch (refreshError) {
-        console.error(
-          'Error refreshing profile after follow/unfollow error:',
-          refreshError,
-        )
-      }
+      await refreshFollowers()
+    } catch (err) {
+      console.error('Error following/unfollowing:', err)
+      await fetchProfile()
+    } finally {
+      setFollowLoading(false)
     }
   }
 
   const updateProfile = async (updates: any) => {
     try {
       await api.users.updateProfile(updates)
-      setProfile(prev => (prev ? { ...prev, ...updates } : null))
-    } catch (error) {
-      console.error('Ошибка при обновлении профиля:', error)
+      setProfile(prev => (prev ? { ...prev, ...updates } : prev))
+    } catch (err) {
+      console.error('Ошибка при обновлении профиля:', err)
       alert('Не удалось обновить профиль')
     }
   }
@@ -301,9 +295,9 @@ const Profile: FC = () => {
 
           <motion.div
             className='flex-1'
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            initial='hidden'
+            animate='show'
+            variants={sectionVariants}
             key={activeTab}
           >
             {activeTab === 'progress' && profile && (
@@ -347,7 +341,11 @@ const Profile: FC = () => {
         title='Подписчики'
       >
         <div className='space-y-3'>
-          {followers.length === 0 ? (
+          {!listsLoaded ? (
+            <div className='flex items-center justify-center py-8'>
+              <div className='animate-spin rounded-full h-10 w-10 border-4 border-t-transparent border-b-transparent border-indigo-500' />
+            </div>
+          ) : followers.length === 0 ? (
             <div className='flex flex-col items-center justify-center py-12 text-center'>
               <div className='w-20 h-20 mb-6 rounded-2xl bg-gradient-to-br from-[var(--accent-primary)]/20 to-[var(--accent-secondary)]/20 backdrop-blur-sm flex items-center justify-center'>
                 <svg
@@ -407,7 +405,11 @@ const Profile: FC = () => {
         title='Подписки'
       >
         <div className='space-y-3'>
-          {following.length === 0 ? (
+          {!listsLoaded ? (
+            <div className='flex items-center justify-center py-8'>
+              <div className='animate-spin rounded-full h-10 w-10 border-4 border-t-transparent border-b-transparent border-indigo-500' />
+            </div>
+          ) : following.length === 0 ? (
             <div className='flex flex-col items-center justify-center py-12 text-center'>
               <div className='w-20 h-20 mb-6 rounded-2xl bg-gradient-to-br from-[var(--accent-primary)]/20 to-[var(--accent-secondary)]/20 backdrop-blur-sm flex items-center justify-center'>
                 <svg

@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, LayoutGroup, motion } from 'framer-motion'
 import React, { FC, useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
@@ -35,8 +35,7 @@ const Navbar: FC = () => {
 
   return (
     <motion.nav
-      className={`sticky top-0 z-40 backdrop-blur-xl transition-all duration-300
-        border-b border-[var(--border-color)]`}
+      className={`sticky top-0 z-40 backdrop-blur-xl transition-all duration-300 border-b border-[var(--border-color)]`}
       style={{
         backgroundColor: scrolled
           ? 'rgba(var(--bg-secondary-rgb), 0.9)'
@@ -76,176 +75,225 @@ const Navbar: FC = () => {
               </div>
             </Link>
 
-            <div className='hidden md:flex space-x-2'>
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 10 }}
-              >
-                <Link
-                  to='/'
-                  className={`px-5 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
-                    isActive('/')
-                      ? 'text-[var(--text-primary)]'
-                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                  }`}
-                  style={{
-                    background: isActive('/')
-                      ? 'linear-gradient(to right, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2), rgba(217, 70, 239, 0.2))'
-                      : 'none',
-                    boxShadow: isActive('/')
-                      ? '0 4px 10px -1px rgba(99, 102, 241, 0.2)'
-                      : 'none',
-                  }}
-                >
-                  <svg
-                    className='w-4 h-4'
-                    fill='none'
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    strokeWidth='2'
-                    viewBox='0 0 24 24'
-                    stroke='currentColor'
-                  >
-                    <path d='M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'></path>
-                  </svg>
-                  Лента
-                </Link>
-              </motion.div>
-
-              {user && (
+            <LayoutGroup>
+              <div className='hidden md:flex space-x-2'>
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 10 }}
                 >
-                  <Link
-                    to={`/profile/${user.id}`}
-                    className={`px-5 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
-                      isActive(`/profile/${user.id}`)
-                        ? 'text-[var(--text-primary)]'
-                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                    }`}
-                    style={{
-                      background: isActive(`/profile/${user.id}`)
-                        ? 'linear-gradient(to right, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2), rgba(217, 70, 239, 0.2))'
-                        : 'none',
-                      boxShadow: isActive(`/profile/${user.id}`)
-                        ? '0 4px 10px -1px rgba(99, 102, 241, 0.2)'
-                        : 'none',
-                    }}
-                  >
-                    <svg
-                      className='w-4 h-4'
-                      fill='none'
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                      strokeWidth='2'
-                      viewBox='0 0 24 24'
-                      stroke='currentColor'
+                  <div className='relative'>
+                    {isActive('/') && (
+                      <motion.div
+                        layoutId='nav-active'
+                        className='absolute inset-0 rounded-xl'
+                        style={{
+                          background:
+                            'linear-gradient(to right, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2), rgba(217, 70, 239, 0.2))',
+                          boxShadow: '0 4px 10px -1px rgba(99, 102, 241, 0.2)',
+                        }}
+                        transition={{
+                          type: 'spring',
+                          stiffness: 400,
+                          damping: 30,
+                        }}
+                      />
+                    )}
+
+                    <Link
+                      to='/'
+                      className={`relative z-10 px-5 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
+                        isActive('/')
+                          ? 'text-[var(--text-primary)]'
+                          : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                      }`}
                     >
-                      <path d='M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'></path>
-                    </svg>
-                    Профиль
-                  </Link>
+                      <svg
+                        className='w-4 h-4'
+                        fill='none'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        strokeWidth='2'
+                        viewBox='0 0 24 24'
+                        stroke='currentColor'
+                      >
+                        <path d='M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'></path>
+                      </svg>
+                      Лента
+                    </Link>
+                  </div>
                 </motion.div>
-              )}
 
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 10 }}
-              >
-                <Link
-                  to='/users'
-                  className={`px-5 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
-                    isActive('/users')
-                      ? 'text-[var(--text-primary)]'
-                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                  }`}
-                  style={{
-                    background: isActive('/users')
-                      ? 'linear-gradient(to right, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2), rgba(217, 70, 239, 0.2))'
-                      : 'none',
-                    boxShadow: isActive('/users')
-                      ? '0 4px 10px -1px rgba(99, 102, 241, 0.2)'
-                      : 'none',
-                  }}
-                >
-                  <svg
-                    className='w-4 h-4'
-                    fill='none'
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    strokeWidth='2'
-                    viewBox='0 0 24 24'
-                    stroke='currentColor'
+                {user && (
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 10 }}
                   >
-                    <path d='M12 4.354a4 4 0 110 5.292M15 21H3v-2a6 6 0 0112 0v2zm0 0h6v-2a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'></path>
-                  </svg>
-                  Пользователи
-                </Link>
-              </motion.div>
+                    <div className='relative'>
+                      {isActive(`/profile/${user.id}`) && (
+                        <motion.div
+                          layoutId='nav-active'
+                          className='absolute inset-0 rounded-xl'
+                          style={{
+                            background:
+                              'linear-gradient(to right, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2), rgba(217, 70, 239, 0.2))',
+                            boxShadow:
+                              '0 4px 10px -1px rgba(99, 102, 241, 0.2)',
+                          }}
+                          transition={{
+                            type: 'spring',
+                            stiffness: 400,
+                            damping: 30,
+                          }}
+                        />
+                      )}
 
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 10 }}
-              >
-                <Link
-                  to='/quizzes'
-                  className={`px-5 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
-                    isActive('/quizzes')
-                      ? 'text-[var(--text-primary)]'
-                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                  }`}
-                  style={{
-                    background: isActive('/quizzes')
-                      ? 'linear-gradient(to right, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2), rgba(217, 70, 239, 0.2))'
-                      : 'none',
-                    boxShadow: isActive('/quizzes')
-                      ? '0 4px 10px -1px rgba(99, 102, 241, 0.2)'
-                      : 'none',
-                  }}
-                >
-                  <svg
-                    className='w-4 h-4'
-                    fill='none'
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    strokeWidth='2'
-                    viewBox='0 0 24 24'
-                    stroke='currentColor'
-                  >
-                    <path d='M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01'></path>
-                  </svg>
-                  Тесты
-                </Link>
-              </motion.div>
+                      <Link
+                        to={`/profile/${user.id}`}
+                        className={`relative z-10 px-5 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
+                          isActive(`/profile/${user.id}`)
+                            ? 'text-[var(--text-primary)]'
+                            : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                        }`}
+                      >
+                        <svg
+                          className='w-4 h-4'
+                          fill='none'
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                          strokeWidth='2'
+                          viewBox='0 0 24 24'
+                          stroke='currentColor'
+                        >
+                          <path d='M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'></path>
+                        </svg>
+                        Профиль
+                      </Link>
+                    </div>
+                  </motion.div>
+                )}
 
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 10 }}
-              >
-                <a
-                  href='#'
-                  onClick={handleLibraryClick}
-                  className={`px-5 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] opacity-70`}
-                  style={{
-                    cursor: 'not-allowed',
-                  }}
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 10 }}
                 >
-                  <svg
-                    className='w-4 h-4'
-                    fill='none'
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    strokeWidth='2'
-                    viewBox='0 0 24 24'
-                    stroke='currentColor'
-                  >
-                    <path d='M12 6.253v13m0-13C6.228 6.253 2.092 7.371 2.092 8.5c0 1.128 4.136 2.247 9.908 2.247m0-13c5.771 0 9.908 1.119 9.908 2.247c0 1.128-4.136 2.247-9.908 2.247m0 13c-5.771 0-9.908-1.119-9.908-2.247c0-1.128 4.136-2.247 9.908-2.247m0 0c5.771 0 9.908 1.119 9.908 2.247c0 1.128-4.136 2.247-9.908 2.247'></path>
-                  </svg>
-                  Библиотека (недоступно)
-                </a>
-              </motion.div>
-            </div>
+                  <div className='relative'>
+                    {isActive('/users') && (
+                      <motion.div
+                        layoutId='nav-active'
+                        className='absolute inset-0 rounded-xl'
+                        style={{
+                          background:
+                            'linear-gradient(to right, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2), rgba(217, 70, 239, 0.2))',
+                          boxShadow: '0 4px 10px -1px rgba(99, 102, 241, 0.2)',
+                        }}
+                        transition={{
+                          type: 'spring',
+                          stiffness: 400,
+                          damping: 30,
+                        }}
+                      />
+                    )}
+
+                    <Link
+                      to='/users'
+                      className={`relative z-10 px-5 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
+                        isActive('/users')
+                          ? 'text-[var(--text-primary)]'
+                          : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                      }`}
+                    >
+                      <svg
+                        className='w-4 h-4'
+                        fill='none'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        strokeWidth='2'
+                        viewBox='0 0 24 24'
+                        stroke='currentColor'
+                      >
+                        <path d='M12 4.354a4 4 0 110 5.292M15 21H3v-2a6 6 0 0112 0v2zm0 0h6v-2a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'></path>
+                      </svg>
+                      Пользователи
+                    </Link>
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+                >
+                  <div className='relative'>
+                    {isActive('/quizzes') && (
+                      <motion.div
+                        layoutId='nav-active'
+                        className='absolute inset-0 rounded-xl'
+                        style={{
+                          background:
+                            'linear-gradient(to right, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2), rgba(217, 70, 239, 0.2))',
+                          boxShadow: '0 4px 10px -1px rgba(99, 102, 241, 0.2)',
+                        }}
+                        transition={{
+                          type: 'spring',
+                          stiffness: 400,
+                          damping: 30,
+                        }}
+                      />
+                    )}
+
+                    <Link
+                      to='/quizzes'
+                      className={`relative z-10 px-5 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
+                        isActive('/quizzes')
+                          ? 'text-[var(--text-primary)]'
+                          : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                      }`}
+                    >
+                      <svg
+                        className='w-4 h-4'
+                        fill='none'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        strokeWidth='2'
+                        viewBox='0 0 24 24'
+                        stroke='currentColor'
+                      >
+                        <path d='M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01'></path>
+                      </svg>
+                      Тесты
+                    </Link>
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+                >
+                  <div className='relative'>
+                    <a
+                      href='#'
+                      onClick={handleLibraryClick}
+                      className={`relative z-10 px-5 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] opacity-70`}
+                      style={{
+                        cursor: 'not-allowed',
+                      }}
+                    >
+                      <svg
+                        className='w-4 h-4'
+                        fill='none'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        strokeWidth='2'
+                        viewBox='0 0 24 24'
+                        stroke='currentColor'
+                      >
+                        <path d='M12 6.253v13m0-13C6.228 6.253 2.092 7.371 2.092 8.5c0 1.128 4.136 2.247 9.908 2.247m0-13c5.771 0 9.908 1.119 9.908 2.247c0 1.128-4.136 2.247-9.908 2.247m0 13c-5.771 0-9.908-1.119-9.908-2.247c0-1.128 4.136-2.247 9.908-2.247m0 0c5.771 0 9.908 1.119 9.908 2.247c0 1.128-4.136 2.247-9.908 2.247'></path>
+                      </svg>
+                      Библиотека (недоступно)
+                    </a>
+                  </div>
+                </motion.div>
+              </div>
+            </LayoutGroup>
           </div>
 
           <div className='flex items-center space-x-4'>
