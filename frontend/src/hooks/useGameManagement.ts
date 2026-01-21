@@ -56,6 +56,27 @@ export const useGameManagement = (
       return false
     }
 
+    if (gameData.name.length < 2) {
+      alert('Название игры должно быть больше 2 символов')
+      return false
+    }
+    if (gameData.name.length > 40) {
+      alert('Название игры не должно превышать 40 символов')
+      return false
+    }
+
+    if (gameData.rating !== undefined && gameData.rating !== null) {
+      if (gameData.rating < 1 || gameData.rating > 10) {
+        alert('Рейтинг может быть от 1 до 10')
+        return false
+      }
+    }
+
+    if (gameData.review && gameData.review.length > 200) {
+      alert('Отзыв не должен превышать 200 символов')
+      return false
+    }
+
     try {
       setIsSubmitting(true)
       await api.games.addGame(gameData)
@@ -89,6 +110,27 @@ export const useGameManagement = (
       return false
     }
 
+    if (updates.name && updates.name.length < 2) {
+      alert('Название игры должно быть больше 2 символов')
+      return false
+    }
+    if (updates.name && updates.name.length > 40) {
+      alert('Название игры не должно превышать 40 символов')
+      return false
+    }
+
+    if (updates.rating !== undefined && updates.rating !== null) {
+      if (updates.rating < 1 || updates.rating > 10) {
+        alert('Рейтинг может быть от 1 до 10')
+        return false
+      }
+    }
+
+    if (updates.review && updates.review.length > 200) {
+      alert('Отзыв не должен превышать 200 символов')
+      return false
+    }
+
     try {
       await api.games.updateGame(gameId, updates)
       onUpdateCallback()
@@ -110,7 +152,7 @@ export const useGameManagement = (
   }
 
   const deleteGame = async (gameId: string): Promise<boolean> => {
-    if (!window.confirm('Are you sure you want to delete this game?')) {
+    if (!window.confirm('Ты действительно хочешь удалить эту игру?')) {
       return false
     }
 

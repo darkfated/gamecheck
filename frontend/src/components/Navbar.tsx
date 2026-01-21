@@ -154,6 +154,41 @@ const Navbar: FC = () => {
                 transition={{ type: 'spring', stiffness: 400, damping: 10 }}
               >
                 <Link
+                  to='/users'
+                  className={`px-5 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
+                    isActive('/users')
+                      ? 'text-[var(--text-primary)]'
+                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                  }`}
+                  style={{
+                    background: isActive('/users')
+                      ? 'linear-gradient(to right, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2), rgba(217, 70, 239, 0.2))'
+                      : 'none',
+                    boxShadow: isActive('/users')
+                      ? '0 4px 10px -1px rgba(99, 102, 241, 0.2)'
+                      : 'none',
+                  }}
+                >
+                  <svg
+                    className='w-4 h-4'
+                    fill='none'
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    strokeWidth='2'
+                    viewBox='0 0 24 24'
+                    stroke='currentColor'
+                  >
+                    <path d='M12 4.354a4 4 0 110 5.292M15 21H3v-2a6 6 0 0112 0v2zm0 0h6v-2a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'></path>
+                  </svg>
+                  Пользователи
+                </Link>
+              </motion.div>
+
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+              >
+                <Link
                   to='/quizzes'
                   className={`px-5 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
                     isActive('/quizzes')
@@ -334,6 +369,31 @@ const Navbar: FC = () => {
                     <span className='font-medium'>Профиль</span>
                   </Link>
                 )}
+
+                <Link
+                  to='/users'
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                    isActive('/users')
+                      ? 'bg-gradient-to-r from-indigo-500/20 to-purple-500/20 text-[var(--text-primary)]'
+                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                  }`}
+                >
+                  <svg
+                    className='w-5 h-5'
+                    fill='none'
+                    stroke='currentColor'
+                    viewBox='0 0 24 24'
+                  >
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth={2}
+                      d='M12 4.354a4 4 0 110 5.292M15 21H3v-2a6 6 0 0112 0v2zm0 0h6v-2a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'
+                    />
+                  </svg>
+                  <span className='font-medium'>Пользователи</span>
+                </Link>
 
                 <Link
                   to='/quizzes'

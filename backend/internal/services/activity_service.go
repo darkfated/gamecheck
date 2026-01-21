@@ -1,68 +1,54 @@
 package services
 
 import (
-	"context"
-	"fmt"
-
 	"gamecheck/internal/domain/models"
-	"gamecheck/internal/domain/repositories"
+	"gamecheck/internal/infra/db/repositories"
+
+	"github.com/google/uuid"
 )
 
-// ActivityService предоставляет методы для работы с активностями
 type ActivityService struct {
-	activityRepo repositories.ActivityRepository
-	userRepo     repositories.UserRepository
+	activityRepository *repositories.ActivityRepository
+	userRepository     *repositories.UserRepository
 }
 
-// NewActivityService создает новый экземпляр сервиса активностей
 func NewActivityService(
-	activityRepo repositories.ActivityRepository,
-	userRepo repositories.UserRepository,
+	activityRepo *repositories.ActivityRepository,
+	userRepo *repositories.UserRepository,
 ) *ActivityService {
 	return &ActivityService{
-		activityRepo: activityRepo,
-		userRepo:     userRepo,
+		activityRepository: activityRepo,
+		userRepository:     userRepo,
 	}
 }
 
-// CreateActivity создает новую запись активности
-func (s *ActivityService) CreateActivity(ctx context.Context, activity *models.Activity) error {
-	return s.activityRepo.CreateActivity(ctx, activity)
+func (s *ActivityService) GetFeed(userID string, limit int) ([]*models.Activity, error) {
+	return s.activityRepository.GetFeed(userID, limit)
 }
 
-// GetFeed получает общую ленту активности
-func (s *ActivityService) GetFeed(ctx context.Context, limit, offset int) ([]*models.Activity, error) {
-	activities, err := s.activityRepo.GetFeed(ctx, limit, offset)
-	if err != nil {
-		return nil, fmt.Errorf("ошибка при получении ленты активности: %w", err)
-	}
-	return activities, nil
+func (s *ActivityService) GetAllActivities(limit int) ([]*models.Activity, error) {
+	return s.activityRepository.GetAllActivities(limit)
 }
 
-// GetUserActivity получает активность конкретного пользователя
-func (s *ActivityService) GetUserActivity(ctx context.Context, userID string, limit, offset int) ([]*models.Activity, error) {
-	_, err := s.userRepo.GetUserByID(ctx, userID)
-	if err != nil {
-		return nil, fmt.Errorf("пользователь не найден: %w", err)
-	}
-
-	activities, err := s.activityRepo.GetUserActivity(ctx, userID, limit, offset)
-	if err != nil {
-		return nil, fmt.Errorf("ошибка при получении активности пользователя: %w", err)
-	}
-	return activities, nil
+func (s *ActivityService) GetUserActivity(userID string, limit int) ([]*models.Activity, error) {
+	return s.activityRepository.GetByUserID(userID, limit)
 }
 
-// GetFollowingActivity получает активность пользователей, на которых подписан указанный пользователь
-func (s *ActivityService) GetFollowingActivity(ctx context.Context, userID string, limit, offset int) ([]*models.Activity, error) {
-	_, err := s.userRepo.GetUserByID(ctx, userID)
-	if err != nil {
-		return nil, fmt.Errorf("пользователь не найден: %w", err)
+func (s *ActivityService) Follow(followerID, followingID string) (*models.Activity, error) {
+	activity := &models.Activity{
+		ID:           uuid.New().String(),
+		UserID:       followerID,
+		Type:         models.ActivityTypeFollow,
+		TargetUserID: &followingID,
 	}
 
-	activities, err := s.activityRepo.GetFollowingActivity(ctx, userID, limit, offset)
-	if err != nil {
-		return nil, fmt.Errorf("ошибка при получении активности подписок: %w", err)
+	if err := s.activityRepository.Create(activity); err != nil {
+		return nil, err
 	}
-	return activities, nil
+
+	return activity, nil
+}
+
+func (s *ActivityService) Unfollow(followerID, followingID string) error {
+	return nil
 }

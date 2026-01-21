@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -9,80 +10,91 @@ import (
 	"syscall"
 	"time"
 
-	"gamecheck/config"
-	"gamecheck/internal/controllers"
-	"gamecheck/internal/domain/repositories"
+	"gamecheck/internal/config"
+	"gamecheck/internal/handlers"
 	"gamecheck/internal/infra/db"
-	dbRepo "gamecheck/internal/infra/db/repositories"
+	"gamecheck/internal/middleware"
 	"gamecheck/internal/services"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
-// Application представляет основное приложение
-type Application struct {
-	config        *config.Config
-	router        *gin.Engine
-	database      *db.Database
-	repositories  repositories.Repository
-	services      *services.Services
-	controllers   *controllers.Controllers
-	shutdownFuncs []func() error
+type App struct {
+	config   *config.Config
+	router   *gin.Engine
+	database *db.Database
+	handlers *handlers.Handlers
+	services *services.Services
+	server   *http.Server
 }
 
-// New создает новый экземпляр приложения
-func New(cfg *config.Config) (*Application, error) {
-	// Инициализация базы данных
-	database, err := db.NewDatabase(cfg)
+func New(cfg *config.Config) (*App, error) {
+	database, err := db.New(cfg)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to initialize database: %w", err)
 	}
 
-	// Инициализация репозиториев
-	userRepo := dbRepo.NewUserRepository(database.GetDB())
-	activityRepo := dbRepo.NewActivityRepository(database.GetDB())
-	subscriptionRepo := dbRepo.NewSubscriptionRepository(database.GetDB())
-	tokenRepo := dbRepo.NewTokenRepository(database.GetDB())
+	repos := db.NewRepositories(database)
 
-	repos := dbRepo.NewRepository(userRepo, activityRepo, subscriptionRepo, tokenRepo)
+	authService := services.NewAuthService(
+		cfg,
+		repos.User,
+		repos.Token,
+		repos.Activity,
+	)
 
-	// Инициализация сервисов
-	authService := services.NewAuthService(cfg, userRepo, tokenRepo, activityRepo)
-	userService := services.NewUserService(userRepo, subscriptionRepo, activityRepo)
-	activityService := services.NewActivityService(activityRepo, userRepo)
+	userService := services.NewUserService(
+		repos.User,
+		repos.Subscription,
+		repos.Activity,
+	)
+
 	steamService := services.NewSteamService(cfg)
 
-	svcs := services.NewServices(authService, userService, activityService, steamService)
-	ctrls := controllers.NewControllers(cfg, svcs)
+	progressService := services.NewProgressService(
+		repos.Progress,
+		repos.Activity,
+		steamService,
+	)
 
-	router := setupRouter(cfg, ctrls)
+	activityService := services.NewActivityService(
+		repos.Activity,
+		repos.User,
+	)
 
-	app := &Application{
-		config:       cfg,
-		router:       router,
-		database:     database,
-		repositories: repos,
-		services:     svcs,
-		controllers:  ctrls,
-		shutdownFuncs: []func() error{
-			database.Close,
-		},
+	svcs := services.New(
+		authService,
+		userService,
+		progressService,
+		activityService,
+		steamService,
+	)
+
+	hdlrs := handlers.New(cfg, svcs, repos.Repository)
+
+	router := setupRouter(cfg, hdlrs)
+
+	app := &App{
+		config:   cfg,
+		router:   router,
+		database: database,
+		handlers: hdlrs,
+		services: svcs,
 	}
 
 	return app, nil
 }
 
-func setupRouter(cfg *config.Config, controllers *controllers.Controllers) *gin.Engine {
+func setupRouter(cfg *config.Config, hdlrs *handlers.Handlers) *gin.Engine {
 	if cfg.Env == "production" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
 	router := gin.Default()
 
-	// Настройка CORS
 	corsConfig := cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000", "http://localhost:5001"},
+		AllowOrigins:     cfg.CORS.Origins,
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization", "Cookie", "X-Auth-Check", "X-User-ID"},
 		ExposeHeaders:    []string{"Content-Length", "Set-Cookie"},
@@ -90,49 +102,43 @@ func setupRouter(cfg *config.Config, controllers *controllers.Controllers) *gin.
 		MaxAge:           12 * time.Hour,
 	}
 
-	log.Printf("Настроен CORS для следующих источников: %v", corsConfig.AllowOrigins)
-	log.Printf("Разрешенные заголовки: %v", corsConfig.AllowHeaders)
 	router.Use(cors.New(corsConfig))
+	router.Use(middleware.ErrorHandler())
 
-	controllers.RegisterRoutes(router)
+	api := router.Group("/api")
+	hdlrs.RegisterRoutes(api)
 
 	return router
 }
 
-// Run запускает HTTP-сервер
-func (a *Application) Run() error {
-	server := &http.Server{
+func (a *App) Run() error {
+	a.server = &http.Server{
 		Addr:    ":" + a.config.Port,
 		Handler: a.router,
 	}
 
 	go func() {
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("Ошибка запуска сервера: %v", err)
+		log.Printf("Starting server on port %s", a.config.Port)
+		if err := a.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("Failed to start server: %v", err)
 		}
 	}()
-
-	log.Printf("Сервер GameCheck запущен на http://localhost:%s", a.config.Port)
-	log.Printf("API доступен по адресу http://localhost:%s/api", a.config.Port)
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
-	log.Println("Завершение работы сервера...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if err := server.Shutdown(ctx); err != nil {
-		log.Fatalf("Ошибка при завершении работы сервера: %v", err)
+	if err := a.server.Shutdown(ctx); err != nil {
+		log.Printf("Server forced to shutdown: %v", err)
 	}
 
-	for _, fn := range a.shutdownFuncs {
-		if err := fn(); err != nil {
-			log.Printf("Ошибка при завершении работы: %v", err)
-		}
+	if err := a.database.Close(); err != nil {
+		log.Printf("Failed to close database: %v", err)
 	}
 
-	log.Println("Сервер успешно остановлен")
+	log.Println("Server stopped")
 	return nil
 }

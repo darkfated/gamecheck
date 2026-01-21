@@ -35,21 +35,11 @@ psql -v ON_ERROR_STOP=1 -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activi
 psql -v ON_ERROR_STOP=1 -c "DROP DATABASE IF EXISTS gamecheck;"
 if errorlevel 1 goto error
 
-echo Завершаем активные подключения к gamecheck_progress...
-psql -v ON_ERROR_STOP=1 -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname='gamecheck_progress';"
-psql -v ON_ERROR_STOP=1 -c "DROP DATABASE IF EXISTS gamecheck_progress;"
-if errorlevel 1 goto error
-
 psql -v ON_ERROR_STOP=1 -c "CREATE DATABASE gamecheck;"
 if errorlevel 1 goto error
 
-psql -v ON_ERROR_STOP=1 -c "CREATE DATABASE gamecheck_progress;"
-if errorlevel 1 goto error
-
 echo.
-echo Базы данных успешно созданы:
-echo - gamecheck
-echo - gamecheck_progress
+echo Базы данных успешно созданы.
 goto end
 
 :error

@@ -1,81 +1,54 @@
-# GameCheck Backend
+# Backend
 
-Серверная часть приложения GameCheck, построенная на Go с использованием Gin и PostgreSQL.
+## Документация
 
-## Технологии
-
-- Go
-- Gin Web Framework
-- PostgreSQL
-- GORM
-- JWT
-
-## Установка и запуск
-
-1. **Клонирование репозитория**
+1. **Установка зависимостей**
 
 ```bash
-git clone https://github.com/darkfated/gamecheck.git
-cd gamecheck/backend
+go mod tidy
 ```
 
-2. **Настройка окружения**
-
-Скопируйте файл `.env.example` и создайте `.env`:
-
-```bash
-copy .env.example .env
-```
-
-Отредактируйте `.env` файл, установив:
-
-- Настройки базы данных
-- JWT секретный ключ
-- Ключ Steam API (получите на [Steam Dev](https://steamcommunity.com/dev/apikey))
-
-3. **Создание базы данных:** зайдите в PostgreSQL и создайте базу данных `gamecheck`
-
-4. **Запуск приложения**
+2. **Запуск**
 
 ```bash
 go run cmd/server/main.go
 ```
 
-Сервер запустится по адресу: http://localhost:5000
+## API методы
 
-## API Endpoints
+### Auth
 
-### Аутентификация
-
-| Метод | URL                      | Описание                       |
-| ----- | ------------------------ | ------------------------------ |
-| GET   | /api/auth/steam          | Инициировать вход через Steam  |
-| GET   | /api/auth/steam/callback | Обработать ответ от Steam      |
-| GET   | /api/auth/validate-token | Проверить валидность токена    |
-| GET   | /api/auth/current        | Получить текущего пользователя |
-| POST  | /api/auth/logout         | Выйти из приложения            |
+- `GET /api/auth/steam` - Steam login redirect
+- `GET /api/auth/steam/callback` - Steam callback
+- `GET /api/auth/validate-token` - Validate JWT token
+- `POST /api/auth/logout` - Logout (требует auth)
+- `GET /api/auth/current` - Get current user (требует auth)
+- `GET /api/auth/check` - Check auth status (опционально)
 
 ### Пользователи
 
-| Метод | URL                      | Описание                      |
-| ----- | ------------------------ | ----------------------------- |
-| GET   | /api/users/:id           | Получить профиль пользователя |
-| GET   | /api/users/search/:query | Поиск пользователей           |
-| PATCH | /api/users/profile       | Обновить профиль              |
+- `GET /api/users/:id` - Get user profile
+- `PATCH /api/users/profile` - Update profile (требует auth)
+- `GET /api/users/search/:query` - Search users
+
+### Прогресс игр
+
+- `GET /api/progress` - Get current user games (требует auth)
+- `GET /api/progress/user/:userId` - Get user games by ID
+- `POST /api/progress` - Add game (требует auth)
+- `PATCH /api/progress/:id` - Update game (требует auth)
+- `DELETE /api/progress/:id` - Delete game (требует auth)
+- `POST /api/progress/:id/update-steam` - Update Steam data (требует auth)
+
+### Активности
+
+- `GET /api/activity` - Get activity feed (требует auth)
+- `GET /api/activity/user/:userId` - Get user activity
+- `GET /api/activity/following` - Get following activity (требует auth)
 
 ### Подписки
 
-| Метод  | URL                              | Описание                    |
-| ------ | -------------------------------- | --------------------------- |
-| GET    | /api/subscriptions/:id/followers | Получить подписчиков        |
-| GET    | /api/subscriptions/:id/following | Получить подписки           |
-| POST   | /api/subscriptions/follow/:id    | Подписаться на пользователя |
-| DELETE | /api/subscriptions/unfollow/:id  | Отписаться от пользователя  |
-
-### Активность
-
-| Метод | URL                     | Описание                         |
-| ----- | ----------------------- | -------------------------------- |
-| GET   | /api/activity           | Получить общую ленту активности  |
-| GET   | /api/activity/user/:id  | Получить активность пользователя |
-| GET   | /api/activity/following | Получить активность подписок     |
+- `GET /api/subscriptions/:userId/followers` - Get followers
+- `GET /api/subscriptions/:userId/following` - Get following
+- `POST /api/subscriptions/follow/:userId` - Follow user (требует auth)
+- `DELETE /api/subscriptions/unfollow/:userId` - Unfollow user (требует auth)

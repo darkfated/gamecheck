@@ -1,151 +1,170 @@
 package services
 
 import (
-	"context"
-	"errors"
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+	"strings"
 	"time"
 
-	"gamecheck/config"
+	"gamecheck/internal/config"
 	"gamecheck/internal/domain/models"
-	"gamecheck/internal/domain/repositories"
+	"gamecheck/internal/infra/db/repositories"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
-// AuthService предоставляет методы для работы с аутентификацией
 type AuthService struct {
-	config       *config.Config
-	userRepo     repositories.UserRepository
-	tokenRepo    repositories.TokenRepository
-	activityRepo repositories.ActivityRepository
+	config             *config.Config
+	userRepository     *repositories.UserRepository
+	tokenRepository    *repositories.TokenRepository
+	activityRepository *repositories.ActivityRepository
 }
 
-// NewAuthService создает новый экземпляр сервиса аутентификации
 func NewAuthService(
-	config *config.Config,
-	userRepo repositories.UserRepository,
-	tokenRepo repositories.TokenRepository,
-	activityRepo repositories.ActivityRepository,
+	cfg *config.Config,
+	userRepo *repositories.UserRepository,
+	tokenRepo *repositories.TokenRepository,
+	activityRepo *repositories.ActivityRepository,
 ) *AuthService {
 	return &AuthService{
-		config:       config,
-		userRepo:     userRepo,
-		tokenRepo:    tokenRepo,
-		activityRepo: activityRepo,
+		config:             cfg,
+		userRepository:     userRepo,
+		tokenRepository:    tokenRepo,
+		activityRepository: activityRepo,
 	}
 }
 
-// AuthenticateWithSteam аутентифицирует пользователя через Steam
-func (s *AuthService) AuthenticateWithSteam(ctx context.Context, steamID, displayName, avatarURL, profileURL string) (string, error) {
-	user, err := s.userRepo.GetUserBySteamID(ctx, steamID)
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return "", fmt.Errorf("ошибка при поиске пользователя: %w", err)
+func (s *AuthService) HandleSteamCallback(steamID string) (string, *models.User, error) {
+	steamAPIURL := fmt.Sprintf(
+		"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=%s&steamids=%s&format=json",
+		s.config.Steam.APIKey,
+		steamID,
+	)
+
+	resp, err := http.Get(steamAPIURL)
+	if err != nil {
+		return "", nil, fmt.Errorf("failed to fetch steam data: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", nil, fmt.Errorf("failed to read steam response: %w", err)
 	}
 
-	if user == nil || errors.Is(err, gorm.ErrRecordNotFound) {
+	if resp.StatusCode != http.StatusOK {
+		return "", nil, fmt.Errorf("steam api returned status %d: %s", resp.StatusCode, string(body))
+	}
+
+	var steamResponse struct {
+		Response struct {
+			Players []struct {
+				SteamID      string `json:"steamid"`
+				PersonaName  string `json:"personaname"`
+				ProfileURL   string `json:"profileurl"`
+				AvatarFull   string `json:"avatarfull"`
+				AvatarMedium string `json:"avatarmedium"`
+			} `json:"players"`
+		} `json:"response"`
+	}
+
+	if err := json.Unmarshal(body, &steamResponse); err != nil {
+		return "", nil, fmt.Errorf("failed to parse steam response: %w", err)
+	}
+
+	if len(steamResponse.Response.Players) == 0 {
+		return "", nil, fmt.Errorf("no player data returned from steam")
+	}
+
+	player := steamResponse.Response.Players[0]
+	displayName := player.PersonaName
+	avatarURL := player.AvatarFull
+	profileURL := player.ProfileURL
+
+	user, err := s.userRepository.GetBySteamID(steamID)
+	if err != nil {
 		user = &models.User{
 			ID:          uuid.New().String(),
 			SteamID:     steamID,
 			DisplayName: displayName,
 			AvatarURL:   avatarURL,
 			ProfileURL:  profileURL,
+			ShowWelcome: true,
 		}
-		if err := s.userRepo.CreateUser(ctx, user); err != nil {
-			return "", fmt.Errorf("ошибка при создании пользователя: %w", err)
+		if err := s.userRepository.Create(user); err != nil {
+			return "", nil, fmt.Errorf("failed to create user: %w", err)
 		}
 	} else {
 		user.DisplayName = displayName
 		user.AvatarURL = avatarURL
 		user.ProfileURL = profileURL
-		user.LastLoginAt = time.Now()
-		if err := s.userRepo.UpdateUser(ctx, user); err != nil {
-			return "", fmt.Errorf("ошибка при обновлении пользователя: %w", err)
+		user.UpdateLastLogin()
+		if err := s.userRepository.Update(user); err != nil {
+			return "", nil, fmt.Errorf("failed to update user: %w", err)
 		}
 	}
 
-	token, err := s.GenerateToken(ctx, user.ID)
+	token, err := s.GenerateJWT(user.ID)
 	if err != nil {
-		return "", fmt.Errorf("ошибка при генерации токена: %w", err)
+		return "", nil, fmt.Errorf("failed to generate token: %w", err)
 	}
 
-	return token, nil
+	return token, user, nil
 }
 
-// GenerateToken генерирует JWT токен для пользователя
-func (s *AuthService) GenerateToken(ctx context.Context, userID string) (string, error) {
-	expiresAt := time.Now().Add(s.config.JWT.ExpiresIn)
-	claims := jwt.MapClaims{
-		"user_id": userID,
-		"exp":     expiresAt.Unix(),
+func (s *AuthService) GenerateJWT(userID string) (string, error) {
+	duration, err := time.ParseDuration(s.config.JWT.Expiry)
+	if err != nil {
+		return "", err
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub": userID,
+		"exp": time.Now().Add(duration).Unix(),
+		"iat": time.Now().Unix(),
+	})
+
 	tokenString, err := token.SignedString([]byte(s.config.JWT.Secret))
 	if err != nil {
-		return "", fmt.Errorf("ошибка при подписании токена: %w", err)
-	}
-
-	dbToken := &models.Token{
-		UserID:    userID,
-		Token:     tokenString,
-		ExpiresAt: expiresAt,
-	}
-	if err := s.tokenRepo.CreateToken(ctx, dbToken); err != nil {
-		return "", fmt.Errorf("ошибка при сохранении токена: %w", err)
+		return "", err
 	}
 
 	return tokenString, nil
 }
 
-// ValidateToken проверяет валидность JWT токена
-func (s *AuthService) ValidateToken(ctx context.Context, tokenString string) (*models.User, error) {
-	dbToken, err := s.tokenRepo.GetTokenByValue(ctx, tokenString)
-	if err != nil {
-		return nil, errors.New("токен не найден")
-	}
-
-	if time.Now().After(dbToken.ExpiresAt) {
-		_ = s.tokenRepo.DeleteToken(ctx, tokenString)
-		return nil, errors.New("токен истек")
-	}
+func (s *AuthService) ValidateJWT(tokenString string) (string, error) {
+	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("неожиданный метод подписи: %v", token.Header["alg"])
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 		return []byte(s.config.JWT.Secret), nil
 	})
-
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при проверке токена: %w", err)
-	}
-
-	if !token.Valid {
-		return nil, errors.New("недействительный токен")
+		return "", err
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok || !token.Valid {
+		return "", fmt.Errorf("invalid token")
+	}
+
+	userID, ok := claims["sub"].(string)
 	if !ok {
-		return nil, errors.New("недействительные данные токена")
+		return "", fmt.Errorf("invalid user id in token")
 	}
 
-	userID, ok := claims["user_id"].(string)
-	if !ok {
-		return nil, errors.New("недействительный ID пользователя в токене")
-	}
-
-	user, err := s.userRepo.GetUserByID(ctx, userID)
-	if err != nil {
-		return nil, fmt.Errorf("ошибка при получении пользователя: %w", err)
-	}
-
-	return user, nil
+	return userID, nil
 }
 
-// Logout выполняет выход пользователя из системы
-func (s *AuthService) Logout(ctx context.Context, tokenString string) error {
-	return s.tokenRepo.DeleteToken(ctx, tokenString)
+func (s *AuthService) GetUserByID(userID string) (*models.User, error) {
+	return s.userRepository.GetByID(userID)
+}
+
+func (s *AuthService) Logout(userID string) error {
+	return s.tokenRepository.DeleteByUserID(userID)
 }

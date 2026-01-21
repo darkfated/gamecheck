@@ -1,100 +1,76 @@
 package repositories
 
 import (
-	"context"
-	"fmt"
-
 	"gamecheck/internal/domain/models"
-	"gamecheck/internal/domain/repositories"
 
 	"gorm.io/gorm"
 )
 
-// SubscriptionRepositoryImpl реализация репозитория подписок
-type SubscriptionRepositoryImpl struct {
+type SubscriptionRepository struct {
 	db *gorm.DB
 }
 
-// NewSubscriptionRepository создает новый экземпляр репозитория подписок
-func NewSubscriptionRepository(db *gorm.DB) repositories.SubscriptionRepository {
-	return &SubscriptionRepositoryImpl{db: db}
+func NewSubscriptionRepository(db *gorm.DB) *SubscriptionRepository {
+	return &SubscriptionRepository{db: db}
 }
 
-// Follow создает новую подписку между пользователями
-func (r *SubscriptionRepositoryImpl) Follow(ctx context.Context, followerID, followingID string) error {
-	if followerID == followingID {
-		return fmt.Errorf("нельзя подписаться на самого себя")
-	}
-
-	var count int64
-	if err := r.db.WithContext(ctx).
-		Model(&models.Subscription{}).
-		Where("follower_id = ? AND following_id = ?", followerID, followingID).
-		Count(&count).Error; err != nil {
-		return err
-	}
-
-	if count > 0 {
-		return fmt.Errorf("вы уже подписаны на этого пользователя")
-	}
-
-	subscription := &models.Subscription{
-		FollowerID:  followerID,
-		FollowingID: followingID,
-	}
-
-	return r.db.WithContext(ctx).Create(subscription).Error
+func (r *SubscriptionRepository) Create(sub *models.Subscription) error {
+	return r.db.Create(sub).Error
 }
 
-// Unfollow удаляет подписку между пользователями
-func (r *SubscriptionRepositoryImpl) Unfollow(ctx context.Context, followerID, followingID string) error {
-	result := r.db.WithContext(ctx).
-		Where("follower_id = ? AND following_id = ?", followerID, followingID).
-		Delete(&models.Subscription{})
-
-	if result.Error != nil {
-		return result.Error
+func (r *SubscriptionRepository) GetByID(id string) (*models.Subscription, error) {
+	var sub models.Subscription
+	if err := r.db.
+		Preload("Follower").
+		Preload("Following").
+		First(&sub, "id = ?", id).Error; err != nil {
+		return nil, err
 	}
-
-	if result.RowsAffected == 0 {
-		return fmt.Errorf("подписка не найдена")
-	}
-
-	return nil
+	return &sub, nil
 }
 
-// GetFollowers возвращает всех подписчиков пользователя
-func (r *SubscriptionRepositoryImpl) GetFollowers(ctx context.Context, userID string) ([]*models.User, error) {
+func (r *SubscriptionRepository) GetFollowers(userID string) ([]*models.User, error) {
 	var users []*models.User
-
-	err := r.db.WithContext(ctx).
-		Table("users").
-		Joins("JOIN subscriptions ON users.id = subscriptions.follower_id").
+	err := r.db.
+		Joins("INNER JOIN subscriptions ON subscriptions.follower_id = users.id").
 		Where("subscriptions.following_id = ?", userID).
-		Order("subscriptions.created_at DESC").
 		Find(&users).Error
-
-	if err != nil {
-		return nil, err
-	}
-
-	return users, nil
+	return users, err
 }
 
-// GetFollowing возвращает всех пользователей, на которых подписан указанный пользователь
-func (r *SubscriptionRepositoryImpl) GetFollowing(ctx context.Context, userID string) ([]*models.User, error) {
+func (r *SubscriptionRepository) GetFollowing(userID string) ([]*models.User, error) {
 	var users []*models.User
-
-	err := r.db.WithContext(ctx).
-		Table("users").
-		Joins("JOIN subscriptions ON users.id = subscriptions.following_id").
+	err := r.db.
+		Joins("INNER JOIN subscriptions ON subscriptions.following_id = users.id").
 		Where("subscriptions.follower_id = ?", userID).
-		Order("subscriptions.created_at DESC").
 		Find(&users).Error
+	return users, err
+}
 
-	if err != nil {
-		return nil, err
-	}
+func (r *SubscriptionRepository) IsFollowing(followerID, followingID string) (bool, error) {
+	var count int64
+	err := r.db.Model(&models.Subscription{}).
+		Where("follower_id = ? AND following_id = ?", followerID, followingID).
+		Count(&count).Error
+	return count > 0, err
+}
 
-	return users, nil
+func (r *SubscriptionRepository) Delete(id string) error {
+	return r.db.Delete(&models.Subscription{}, "id = ?", id).Error
+}
+
+func (r *SubscriptionRepository) DeleteByUsers(followerID, followingID string) error {
+	return r.db.Delete(&models.Subscription{}, "follower_id = ? AND following_id = ?", followerID, followingID).Error
+}
+
+func (r *SubscriptionRepository) GetFollowersCount(userID string) (int64, error) {
+	var count int64
+	err := r.db.Model(&models.Subscription{}).Where("following_id = ?", userID).Count(&count).Error
+	return count, err
+}
+
+func (r *SubscriptionRepository) GetFollowingCount(userID string) (int64, error) {
+	var count int64
+	err := r.db.Model(&models.Subscription{}).Where("follower_id = ?", userID).Count(&count).Error
+	return count, err
 }

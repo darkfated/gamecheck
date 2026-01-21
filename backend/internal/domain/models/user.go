@@ -7,7 +7,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// User представляет модель пользователя в системе
 type User struct {
 	ID             string    `json:"id" gorm:"type:uuid;primary_key"`
 	SteamID        string    `json:"steamId" gorm:"unique"`
@@ -21,10 +20,12 @@ type User struct {
 	ShowWelcome    bool      `json:"showWelcome" gorm:"default:true"`
 	FollowersCount int       `json:"followersCount" gorm:"-"`
 	FollowingCount int       `json:"followingCount" gorm:"-"`
+	GamesCount     int       `json:"gamesCount" gorm:"-"`
+	TotalPlaytime  int       `json:"totalPlaytime" gorm:"-"`
+	AverageRating  float64   `json:"averageRating" gorm:"-"`
 	IsFollowing    bool      `json:"isFollowing,omitempty" gorm:"-"`
 }
 
-// BeforeCreate хук для установки UUID и временных меток
 func (u *User) BeforeCreate(tx *gorm.DB) error {
 	if u.ID == "" {
 		u.ID = uuid.New().String()

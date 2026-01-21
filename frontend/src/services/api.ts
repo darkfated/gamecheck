@@ -1,8 +1,6 @@
 import axios, { AxiosInstance } from 'axios'
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api'
-const PROGRESS_API_URL =
-  process.env.REACT_APP_PROGRESS_API_URL || 'http://localhost:5001/api'
 
 interface User {
   id: string
@@ -65,15 +63,6 @@ const axiosInstance: AxiosInstance = axios.create({
   },
 })
 
-const progressAxiosInstance: AxiosInstance = axios.create({
-  baseURL: PROGRESS_API_URL,
-  withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-    Accept: 'application/json',
-  },
-})
-
 const tokenService: TokenService = {
   getToken: () => localStorage.getItem('authToken'),
   saveToken: (token: string) => {
@@ -104,42 +93,6 @@ axiosInstance.interceptors.response.use(
   async error => {
     console.error(
       'API Error:',
-      error.response
-        ? {
-            status: error.response.status,
-            message: error.response.data,
-            url: error.config.url,
-          }
-        : error.message,
-    )
-
-    if (error.response?.status === 401) {
-      tokenService.removeToken()
-      if (!window.location.pathname.includes('/auth')) {
-        window.location.href = '/'
-      }
-    }
-
-    return Promise.reject(error)
-  },
-)
-
-progressAxiosInstance.interceptors.request.use(
-  config => {
-    const token = tokenService.getToken()
-    if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`
-    }
-    return config
-  },
-  error => Promise.reject(error),
-)
-
-progressAxiosInstance.interceptors.response.use(
-  response => response,
-  async error => {
-    console.error(
-      'Progress API Error:',
       error.response
         ? {
             status: error.response.status,
@@ -208,7 +161,7 @@ const authApi = {
 
 const progressApi = {
   getUserGames: (userId?: string) =>
-    progressAxiosInstance.get<Game[]>(
+    axiosInstance.get<Game[]>(
       userId ? `/progress/user/${userId}` : '/progress',
     ),
 
@@ -216,34 +169,41 @@ const progressApi = {
     if (!tokenService.getToken()) {
       return Promise.reject(new Error('Missing authentication token'))
     }
-    return progressAxiosInstance.post<Game>('/progress', data)
+    return axiosInstance.post<Game>('/progress', data)
   },
 
   updateGame: (id: string, data: Partial<GameData>) => {
     if (!tokenService.getToken()) {
       return Promise.reject(new Error('Missing authentication token'))
     }
-    return progressAxiosInstance.patch<Game>(`/progress/${id}`, data)
+    return axiosInstance.patch<Game>(`/progress/${id}`, data)
   },
 
   deleteGame: (id: string) => {
     if (!tokenService.getToken()) {
       return Promise.reject(new Error('Missing authentication token'))
     }
-    return progressAxiosInstance.delete(`/progress/${id}`)
+    return axiosInstance.delete(`/progress/${id}`)
   },
 
   updateSteamData: (id: string) => {
     if (!tokenService.getToken()) {
       return Promise.reject(new Error('Missing authentication token'))
     }
-    return progressAxiosInstance.post(`/progress/${id}/update-steam`)
+    return axiosInstance.post(`/progress/${id}/update-steam`)
   },
 }
 
 const gamesApi = progressApi
 
 const usersApi = {
+  listUsers: (limit = 10, offset = 0, sort = 'createdAt', order = 'desc') =>
+    axiosInstance.get<{
+      data: User[]
+      total: number
+      limit: number
+      offset: number
+    }>('/users', { params: { limit, offset, sort, order } }),
   getProfile: (id: string) => axiosInstance.get<User>(`/users/${id}`),
   updateProfile: (data: Partial<User>) =>
     axiosInstance.patch<User>('/users/profile', data),
@@ -252,11 +212,10 @@ const usersApi = {
 }
 
 const activitiesApi = {
-  getFeed: () => axiosInstance.get<Activity[]>('/activity'),
+  getAllActivities: () => axiosInstance.get<Activity[]>('/activity/all'),
+  getFeed: () => axiosInstance.get<Activity[]>('/activity/feed'),
   getUserActivity: (userId: string) =>
     axiosInstance.get<Activity[]>(`/activity/user/${userId}`),
-  getFollowingActivity: () =>
-    axiosInstance.get<Activity[]>('/activity/following'),
 }
 
 const subscriptionsApi = {

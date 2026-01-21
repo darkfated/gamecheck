@@ -1,4 +1,6 @@
 @echo off
+chcp 65001 >nul
+setlocal ENABLEDELAYEDEXPANSION
 
 REM
 if exist backend\go.mod (
@@ -6,14 +8,6 @@ if exist backend\go.mod (
     start cmd /k "cd backend && go run ./cmd/server/main.go"
 ) else (
     echo [Error] go.mod не найден в папке backend
-)
-
-REM
-if exist backend-progress\go.mod (
-    echo Запуск Backend Progress...
-    start cmd /k "cd backend-progress && go run ./cmd/server/main.go"
-) else (
-    echo [Error] go.mod не найден в папке backend-progress
 )
 
 REM
@@ -25,4 +19,3 @@ if exist frontend\package.json (
 )
 
 REM
-pause

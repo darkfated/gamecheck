@@ -1,119 +1,100 @@
 package services
 
 import (
-	"context"
-	"fmt"
-
 	"gamecheck/internal/domain/models"
-	"gamecheck/internal/domain/repositories"
+	"gamecheck/internal/infra/db/repositories"
 )
 
-// UserService предоставляет методы для работы с пользователями
 type UserService struct {
-	userRepo         repositories.UserRepository
-	subscriptionRepo repositories.SubscriptionRepository
-	activityRepo     repositories.ActivityRepository
+	userRepository         *repositories.UserRepository
+	subscriptionRepository *repositories.SubscriptionRepository
+	activityRepository     *repositories.ActivityRepository
 }
 
-// NewUserService создает новый экземпляр сервиса пользователей
 func NewUserService(
-	userRepo repositories.UserRepository,
-	subscriptionRepo repositories.SubscriptionRepository,
-	activityRepo repositories.ActivityRepository,
+	userRepo *repositories.UserRepository,
+	subscriptionRepo *repositories.SubscriptionRepository,
+	activityRepo *repositories.ActivityRepository,
 ) *UserService {
 	return &UserService{
-		userRepo:         userRepo,
-		subscriptionRepo: subscriptionRepo,
-		activityRepo:     activityRepo,
+		userRepository:         userRepo,
+		subscriptionRepository: subscriptionRepo,
+		activityRepository:     activityRepo,
 	}
 }
 
-// UpdateProfile обновляет профиль пользователя
-func (s *UserService) UpdateProfile(ctx context.Context, userID string, bio, discordTag *string) (*models.User, error) {
-	user, err := s.userRepo.GetUserByID(ctx, userID)
+func (s *UserService) GetUser(id string) (*models.User, error) {
+	return s.userRepository.GetByID(id)
+}
+
+func (s *UserService) UpdateProfile(id string, displayName, discordTag string) (*models.User, error) {
+	user, err := s.userRepository.GetByID(id)
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при получении пользователя: %w", err)
+		return nil, err
 	}
 
-	if discordTag != nil {
-		user.DiscordTag = *discordTag
-	}
+	user.DisplayName = displayName
+	user.DiscordTag = discordTag
 
-	if err := s.userRepo.UpdateUser(ctx, user); err != nil {
-		return nil, fmt.Errorf("ошибка при обновлении пользователя: %w", err)
+	if err := s.userRepository.Update(user); err != nil {
+		return nil, err
 	}
 
 	return user, nil
 }
 
-// GetUserProfile получает профиль пользователя с дополнительной информацией
-func (s *UserService) GetUserProfile(ctx context.Context, id string, currentUserID string) (*models.User, error) {
-	user, err := s.userRepo.GetUserByID(ctx, id)
+func (s *UserService) SearchUsers(query string, limit int) ([]*models.User, error) {
+	return s.userRepository.Search(query, limit)
+}
+
+func (s *UserService) GetUserWithStats(id string) (*models.User, error) {
+	user, err := s.userRepository.GetByID(id)
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при получении пользователя: %w", err)
+		return nil, err
+	}
+
+	followersCount, _ := s.subscriptionRepository.GetFollowersCount(id)
+	followingCount, _ := s.subscriptionRepository.GetFollowingCount(id)
+
+	user.FollowersCount = int(followersCount)
+	user.FollowingCount = int(followingCount)
+
+	return user, nil
+}
+
+func (s *UserService) GetUserProfile(userID, currentUserID string) (*models.User, error) {
+	user, err := s.GetUserWithStats(userID)
+	if err != nil {
+		return nil, err
 	}
 
 	if currentUserID != "" {
-		isFollowing, err := s.userRepo.IsFollowing(ctx, currentUserID, id)
-		if err != nil {
-			return nil, fmt.Errorf("ошибка при проверке подписки: %w", err)
-		}
+		isFollowing, _ := s.subscriptionRepository.IsFollowing(currentUserID, userID)
 		user.IsFollowing = isFollowing
 	}
-
-	followersCount, err := s.userRepo.CountFollowers(ctx, id)
-	if err != nil {
-		return nil, fmt.Errorf("ошибка при подсчете подписчиков: %w", err)
-	}
-	user.FollowersCount = followersCount
-
-	followingCount, err := s.userRepo.CountFollowing(ctx, id)
-	if err != nil {
-		return nil, fmt.Errorf("ошибка при подсчете подписок: %w", err)
-	}
-	user.FollowingCount = followingCount
 
 	return user, nil
 }
 
-// SearchUsers ищет пользователей по части имени
-func (s *UserService) SearchUsers(ctx context.Context, query string) ([]*models.User, error) {
-	users, err := s.userRepo.SearchUsers(ctx, query)
+func (s *UserService) ListUsers(limit, offset int, sortBy, order string) ([]*models.User, int64, error) {
+	users, err := s.userRepository.List(limit, offset)
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при поиске пользователей: %w", err)
-	}
-	return users, nil
-}
-
-// FollowUser подписывает пользователя на другого пользователя
-func (s *UserService) FollowUser(ctx context.Context, followerID, followingID string) error {
-	if err := s.subscriptionRepo.Follow(ctx, followerID, followingID); err != nil {
-		return fmt.Errorf("ошибка при подписке: %w", err)
+		return nil, 0, err
 	}
 
-	activity := &models.Activity{
-		UserID:       followerID,
-		Type:         models.ActivityTypeFollow,
-		TargetUserID: &followingID,
-	}
-	if err := s.activityRepo.CreateActivity(ctx, activity); err != nil {
-		return fmt.Errorf("ошибка при создании активности: %w", err)
+	total, err := s.userRepository.Count()
+	if err != nil {
+		return nil, 0, err
 	}
 
-	return nil
-}
+	for _, user := range users {
+		stats, _ := s.userRepository.GetWithStats(user.ID)
+		if stats != nil {
+			user.GamesCount = stats.GamesCount
+			user.TotalPlaytime = stats.TotalPlaytime
+			user.AverageRating = stats.AverageRating
+		}
+	}
 
-// UnfollowUser отписывает пользователя от другого пользователя
-func (s *UserService) UnfollowUser(ctx context.Context, followerID, followingID string) error {
-	return s.subscriptionRepo.Unfollow(ctx, followerID, followingID)
-}
-
-// GetFollowers получает список подписчиков пользователя
-func (s *UserService) GetFollowers(ctx context.Context, userID string) ([]*models.User, error) {
-	return s.subscriptionRepo.GetFollowers(ctx, userID)
-}
-
-// GetFollowing получает список подписок пользователя
-func (s *UserService) GetFollowing(ctx context.Context, userID string) ([]*models.User, error) {
-	return s.subscriptionRepo.GetFollowing(ctx, userID)
+	return users, total, nil
 }

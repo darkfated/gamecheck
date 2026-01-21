@@ -7,12 +7,11 @@ import (
 	"gorm.io/gorm"
 )
 
-// Token представляет JWT токен сессии
 type Token struct {
 	ID        string    `json:"id" gorm:"type:uuid;primary_key"`
-	UserID    string    `json:"userId" gorm:"type:uuid;index"`
-	User      User      `json:"-" gorm:"foreignKey:UserID"`
-	Token     string    `json:"token" gorm:"unique"`
+	UserID    string    `json:"userId" gorm:"type:uuid;index;not null"`
+	User      User      `json:"user" gorm:"foreignKey:UserID"`
+	Token     string    `json:"token" gorm:"unique;not null"`
 	ExpiresAt time.Time `json:"expiresAt"`
 	CreatedAt time.Time `json:"createdAt"`
 }

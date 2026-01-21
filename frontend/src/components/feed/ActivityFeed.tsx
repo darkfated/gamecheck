@@ -48,10 +48,10 @@ export const ActivityFeed: FC<ActivityFeedProps> = ({
 
         if (userId) {
           response = await api.activities.getUserActivity(userId)
-        } else if (showFollowingOnly || !userId) {
-          response = await api.activities.getFollowingActivity()
-        } else {
+        } else if (showFollowingOnly) {
           response = await api.activities.getFeed()
+        } else {
+          response = await api.activities.getAllActivities()
         }
 
         if (!Array.isArray(response.data)) {

@@ -1,4 +1,6 @@
 @echo off
+chcp 65001 >nul
+setlocal ENABLEDELAYEDEXPANSION
 
 REM
 if exist backend\go.mod (
@@ -6,14 +8,6 @@ if exist backend\go.mod (
     cd backend && go mod tidy && cd ..
 ) else (
     echo [Error] go.mod не найден в папке backend
-)
-
-REM
-if exist backend-progress\go.mod (
-    echo Установка зависимостей для Backend Progress...
-    cd backend-progress && go mod tidy && cd ..
-) else (
-    echo [Error] go.mod не найден в папке backend-progress
 )
 
 REM

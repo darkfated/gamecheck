@@ -1,125 +1,87 @@
 package repositories
 
 import (
-	"context"
-	"fmt"
-	"strings"
-
 	"gamecheck/internal/domain/models"
-	"gamecheck/internal/domain/repositories"
 
 	"gorm.io/gorm"
 )
 
-// UserRepositoryImpl реализация репозитория пользователей
-type UserRepositoryImpl struct {
+type UserRepository struct {
 	db *gorm.DB
 }
 
-// NewUserRepository создает новый экземпляр репозитория пользователей
-func NewUserRepository(db *gorm.DB) repositories.UserRepository {
-	return &UserRepositoryImpl{db: db}
+func NewUserRepository(db *gorm.DB) *UserRepository {
+	return &UserRepository{db: db}
 }
 
-// CreateUser создает нового пользователя
-func (r *UserRepositoryImpl) CreateUser(ctx context.Context, user *models.User) error {
-	return r.db.WithContext(ctx).Create(user).Error
+func (r *UserRepository) Create(user *models.User) error {
+	return r.db.Create(user).Error
 }
 
-// UpdateUser обновляет существующего пользователя
-func (r *UserRepositoryImpl) UpdateUser(ctx context.Context, user *models.User) error {
-	return r.db.WithContext(ctx).Model(user).Updates(user).Error
-}
-
-// GetUserByID получает пользователя по ID
-func (r *UserRepositoryImpl) GetUserByID(ctx context.Context, id string) (*models.User, error) {
+func (r *UserRepository) GetByID(id string) (*models.User, error) {
 	var user models.User
-	err := r.db.WithContext(ctx).Where("id = ?", id).First(&user).Error
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, fmt.Errorf("пользователь не найден с ID: %s", id)
-		}
+	if err := r.db.First(&user, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
 }
 
-// GetUserBySteamID получает пользователя по Steam ID
-func (r *UserRepositoryImpl) GetUserBySteamID(ctx context.Context, steamID string) (*models.User, error) {
+func (r *UserRepository) GetBySteamID(steamID string) (*models.User, error) {
 	var user models.User
-	err := r.db.WithContext(ctx).Where("steam_id = ?", steamID).First(&user).Error
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, gorm.ErrRecordNotFound // Возвращаем ошибку gorm.ErrRecordNotFound вместо nil, nil
-		}
+	if err := r.db.First(&user, "steam_id = ?", steamID).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
 }
 
-// SearchUsers ищет пользователей по части имени
-func (r *UserRepositoryImpl) SearchUsers(ctx context.Context, query string) ([]*models.User, error) {
+func (r *UserRepository) Update(user *models.User) error {
+	return r.db.Save(user).Error
+}
+
+func (r *UserRepository) Delete(id string) error {
+	return r.db.Delete(&models.User{}, "id = ?", id).Error
+}
+
+func (r *UserRepository) Search(query string, limit int) ([]*models.User, error) {
 	var users []*models.User
-
-	searchQuery := "%" + strings.ToLower(query) + "%"
-
-	err := r.db.WithContext(ctx).
-		Where("LOWER(display_name) LIKE ?", searchQuery).
-		Order("display_name ASC").
-		Limit(20).
+	err := r.db.Where("display_name ILIKE ?", "%"+query+"%").
+		Limit(limit).
 		Find(&users).Error
+	return users, err
+}
 
+func (r *UserRepository) List(limit, offset int) ([]*models.User, error) {
+	var users []*models.User
+	err := r.db.Offset(offset).Limit(limit).Find(&users).Error
+	return users, err
+}
+
+func (r *UserRepository) Count() (int64, error) {
+	var count int64
+	err := r.db.Model(&models.User{}).Count(&count).Error
+	return count, err
+}
+
+func (r *UserRepository) GetWithStats(userID string) (*models.User, error) {
+	user, err := r.GetByID(userID)
 	if err != nil {
 		return nil, err
 	}
 
-	return users, nil
-}
-
-// IsFollowing проверяет, подписан ли пользователь followerID на пользователя followingID
-func (r *UserRepositoryImpl) IsFollowing(ctx context.Context, followerID, followingID string) (bool, error) {
-	var count int64
-
-	err := r.db.WithContext(ctx).
-		Model(&models.Subscription{}).
-		Where("follower_id = ? AND following_id = ?", followerID, followingID).
-		Count(&count).Error
-
-	if err != nil {
-		return false, err
+	var stats struct {
+		GameCount     int64
+		TotalPlaytime int64
+		AverageRating float64
 	}
 
-	return count > 0, nil
-}
+	r.db.Model(&models.Progress{}).
+		Where("user_id = ?", userID).
+		Select("COUNT(*) as game_count, COALESCE(SUM(steam_playtime_forever), 0) as total_playtime, COALESCE(AVG(rating), 0) as average_rating").
+		Row().Scan(&stats.GameCount, &stats.TotalPlaytime, &stats.AverageRating)
 
-// CountFollowers подсчитывает количество подписчиков у пользователя
-func (r *UserRepositoryImpl) CountFollowers(ctx context.Context, userID string) (int, error) {
-	var count int64
+	user.GamesCount = int(stats.GameCount)
+	user.TotalPlaytime = int(stats.TotalPlaytime)
+	user.AverageRating = stats.AverageRating
 
-	err := r.db.WithContext(ctx).
-		Model(&models.Subscription{}).
-		Where("following_id = ?", userID).
-		Count(&count).Error
-
-	if err != nil {
-		return 0, err
-	}
-
-	return int(count), nil
-}
-
-// CountFollowing подсчитывает количество подписок пользователя
-func (r *UserRepositoryImpl) CountFollowing(ctx context.Context, userID string) (int, error) {
-	var count int64
-
-	err := r.db.WithContext(ctx).
-		Model(&models.Subscription{}).
-		Where("follower_id = ?", userID).
-		Count(&count).Error
-
-	if err != nil {
-		return 0, err
-	}
-
-	return int(count), nil
+	return user, nil
 }

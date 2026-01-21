@@ -3,165 +3,395 @@ package services
 import (
 	"encoding/json"
 	"fmt"
-	"log"
+	"io"
 	"net/http"
+	"net/url"
+	"strconv"
 	"strings"
-	"time"
 
-	"gamecheck/config"
+	"gamecheck/internal/config"
 )
 
 type SteamService struct {
 	config *config.Config
-	client *http.Client
 }
 
-// NewSteamService создает новый экземпляр сервиса Steam
-func NewSteamService(config *config.Config) *SteamService {
-	return &SteamService{
-		config: config,
-		client: &http.Client{
-			Timeout: 30 * time.Second,
-		},
-	}
+type SteamGameResponse struct {
+	AppID    int    `json:"appid"`
+	Name     string `json:"name"`
+	Icon     string `json:"icon"`
+	LogoURL  string `json:"logo_url"`
+	StoreURL string `json:"store_url"`
 }
 
-// SteamGame представляет игру из Steam API
-type SteamGame struct {
-	AppID                    int    `json:"appid"`
-	Name                     string `json:"name"`
-	PlaytimeForever          int    `json:"playtime_forever"` // в минутах
-	Playtime2Weeks           int    `json:"playtime_2weeks"`  // в минутах
-	ImgIconURL               string `json:"img_icon_url"`
-	ImgLogoURL               string `json:"img_logo_url"`
-	HasCommunityVisibleStats bool   `json:"has_community_visible_stats"`
-}
-
-// SteamOwnedGamesResponse представляет ответ Steam API GetOwnedGames
-type SteamOwnedGamesResponse struct {
+type SteamPlayerGamesResponse struct {
 	Response struct {
-		GameCount int         `json:"game_count"`
-		Games     []SteamGame `json:"games"`
+		GameCount int `json:"game_count"`
+		Games     []struct {
+			AppID                    int  `json:"appid"`
+			PlaytimeForever          int  `json:"playtime_forever"`
+			HasCommunityVisibleStats bool `json:"has_community_visible_stats"`
+		} `json:"games"`
 	} `json:"response"`
 }
 
-// GetUserOwnedGames получает список игр пользователя из Steam
-func (s *SteamService) GetUserOwnedGames(steamID string) ([]SteamGame, error) {
-	if s.config.SteamAPI.APIKey == "" || s.config.SteamAPI.APIKey == "your_steam_api_key_here" {
-		return nil, fmt.Errorf("Steam API ключ не настроен. Получите ключ на https://steamcommunity.com/dev/apikey")
-	}
+func NewSteamService(cfg *config.Config) *SteamService {
+	return &SteamService{config: cfg}
+}
 
-	apiURL := fmt.Sprintf(
-		"https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=%s&steamid=%s&include_appinfo=true&include_played_free_games=true&format=json",
-		s.config.SteamAPI.APIKey,
-		steamID,
-	)
+func (s *SteamService) SearchGameByName(gameName string) (*SteamGameResponse, error) {
+	gameName = strings.ReplaceAll(strings.TrimSpace(gameName), "’", "'")
+	escaped := url.PathEscape(gameName)
+	reqURL := "https://steamcommunity.com/actions/SearchApps/" + escaped
 
-	log.Printf("[STEAM] Запрос к Steam API: %s", strings.Replace(apiURL, s.config.SteamAPI.APIKey, "***", 1))
-
-	resp, err := s.client.Get(apiURL)
+	req, err := http.NewRequest("GET", reqURL, nil)
 	if err != nil {
-		return nil, fmt.Errorf("ошибка запроса к Steam API: %w", err)
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+	req.Header.Set("User-Agent", "gamecheck-backend/1.0")
+	req.Header.Set("Accept", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to search games: %w", err)
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode == 401 {
-		return nil, fmt.Errorf("неверный Steam API ключ. Проверьте настройки")
-	}
-
-	if resp.StatusCode == 403 {
-		return nil, fmt.Errorf("профиль Steam пользователя приватный или недоступен")
-	}
-
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("Steam API вернул код %d", resp.StatusCode)
+		return nil, fmt.Errorf("steam search returned status %d", resp.StatusCode)
 	}
 
-	var steamResponse SteamOwnedGamesResponse
-	if err := json.NewDecoder(resp.Body).Decode(&steamResponse); err != nil {
-		return nil, fmt.Errorf("ошибка декодирования ответа Steam API: %w", err)
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	return steamResponse.Response.Games, nil
+	var rawResults []struct {
+		AppID string `json:"appid"`
+		Name  string `json:"name"`
+		Icon  string `json:"icon"`
+		Logo  string `json:"logo"`
+	}
+
+	if err := json.Unmarshal(body, &rawResults); err != nil {
+		return nil, fmt.Errorf("failed to decode search results: %w", err)
+	}
+
+	if len(rawResults) == 0 {
+		return nil, fmt.Errorf("game not found on steam")
+	}
+
+	appIDInt, err := strconv.Atoi(rawResults[0].AppID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid appid format: %w", err)
+	}
+
+	return s.GetGameInfo(appIDInt)
 }
 
-// FindGameByName ищет игру в Steam библиотеке пользователя по точному названию
-func (s *SteamService) FindGameByName(steamID, gameName string) (*SteamGame, error) {
-	log.Printf("[STEAM] Поиск игры '%s' для пользователя Steam ID: %s", gameName, steamID)
+func (s *SteamService) SearchGameBySteamID(steamID string, gameName string) (*SteamGameResponse, error) {
+	return s.SearchGameByName(gameName)
+}
 
-	games, err := s.GetUserOwnedGames(steamID)
+func (s *SteamService) GetGameInfo(appID int) (*SteamGameResponse, error) {
+	url := fmt.Sprintf("https://store.steampowered.com/api/appdetails?appids=%d", appID)
+
+	resp, err := http.Get(url)
 	if err != nil {
-		log.Printf("[STEAM ERROR] Ошибка получения библиотеки Steam: %v", err)
+		return nil, fmt.Errorf("failed to fetch game info: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("store api returned status %d", resp.StatusCode)
+	}
+
+	var storeData map[string]struct {
+		Success bool `json:"success"`
+		Data    struct {
+			Name           string `json:"name"`
+			SteamAppid     int    `json:"steam_appid"`
+			HeaderImage    string `json:"header_image"`
+			CapsuleImage   string `json:"capsule_image"`
+			CapsuleImageV5 string `json:"capsule_imagev5"`
+		} `json:"data"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&storeData); err != nil {
+		return nil, fmt.Errorf("failed to decode store data: %w", err)
+	}
+
+	appIDStr := strconv.Itoa(appID)
+	storeInfo, exists := storeData[appIDStr]
+	if !exists || !storeInfo.Success {
+		return nil, fmt.Errorf("game not found in store api")
+	}
+
+	iconURL := ""
+
+	if storeInfo.Data.CapsuleImageV5 != "" {
+		iconURL = storeInfo.Data.CapsuleImageV5
+	} else if storeInfo.Data.CapsuleImage != "" {
+		iconURL = storeInfo.Data.CapsuleImage
+	} else {
+		iconURL = storeInfo.Data.HeaderImage
+	}
+
+	return &SteamGameResponse{
+		AppID:    appID,
+		Name:     storeInfo.Data.Name,
+		Icon:     iconURL,
+		StoreURL: fmt.Sprintf("https://store.steampowered.com/app/%d/", appID),
+	}, nil
+}
+
+func (s *SteamService) GetUserGames(steamID string) ([]map[string]interface{}, error) {
+	url := fmt.Sprintf(
+		"https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=%s&steamid=%s&include_appinfo=true",
+		s.config.Steam.APIKey,
+		steamID,
+	)
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var data struct {
+		Response struct {
+			GameCount int `json:"game_count"`
+			Games     []struct {
+				AppID           int    `json:"appid"`
+				Name            string `json:"name"`
+				PlaytimeForever int    `json:"playtime_forever"`
+				ImgIconURL      string `json:"img_icon_url"`
+				ImgLogoURL      string `json:"img_logo_url"`
+			} `json:"games"`
+		} `json:"response"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		return nil, err
 	}
 
-	log.Printf("[STEAM] Получено игр из Steam библиотеки: %d", len(games))
+	var games []map[string]interface{}
+	for _, game := range data.Response.Games {
+		games = append(games, map[string]interface{}{
+			"appid":            game.AppID,
+			"name":             game.Name,
+			"playtime_forever": game.PlaytimeForever,
+			"img_icon_url":     game.ImgIconURL,
+			"img_logo_url":     game.ImgLogoURL,
+			"store_url":        fmt.Sprintf("https://store.steampowered.com/app/%d/", game.AppID),
+		})
+	}
 
-	// Ищем только точное совпадение названий (без учета регистра)
-	for _, game := range games {
-		if strings.EqualFold(strings.TrimSpace(game.Name), strings.TrimSpace(gameName)) {
-			log.Printf("[STEAM] Найдено точное совпадение: '%s' (AppID: %d)", game.Name, game.AppID)
-			return &game, nil
+	return games, nil
+}
+
+func (s *SteamService) GetGamePlaytime(steamID string, appID int) (int, error) {
+	url := fmt.Sprintf(
+		"https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=%s&steamid=%s&include_appinfo=true",
+		s.config.Steam.APIKey,
+		steamID,
+	)
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return 0, fmt.Errorf("failed to fetch owned games: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return 0, fmt.Errorf("steam api returned status %d", resp.StatusCode)
+	}
+
+	var data struct {
+		Response struct {
+			Games []struct {
+				AppID           int `json:"appid"`
+				PlaytimeForever int `json:"playtime_forever"`
+			} `json:"games"`
+		} `json:"response"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+		return 0, fmt.Errorf("failed to decode owned games: %w", err)
+	}
+
+	for _, game := range data.Response.Games {
+		if game.AppID == appID {
+			return game.PlaytimeForever, nil
 		}
 	}
 
-	log.Printf("[STEAM] Игра '%s' не найдена в Steam библиотеке. Требуется точное название.", gameName)
-	return nil, nil
+	return 0, nil
 }
 
-// normalizeGameName нормализует название игры для поиска
-func normalizeGameName(name string) string {
-	normalized := strings.ToLower(strings.TrimSpace(name))
-
-	normalized = strings.ReplaceAll(normalized, ":", " ")
-	normalized = strings.ReplaceAll(normalized, "®", " ")
-	normalized = strings.ReplaceAll(normalized, "™", " ")
-	normalized = strings.ReplaceAll(normalized, "©", " ")
-	normalized = strings.ReplaceAll(normalized, ".", " ")
-	normalized = strings.ReplaceAll(normalized, "-", " ")
-	normalized = strings.ReplaceAll(normalized, "_", " ")
-
-	normalized = strings.Join(strings.Fields(normalized), " ")
-
-	return normalized
-}
-
-// GetSteamIconURL возвращает полный URL иконки игры
-func (s *SteamService) GetSteamIconURL(appID int, iconHash string) string {
-	if iconHash == "" {
-		return ""
-	}
-	return fmt.Sprintf("https://media.steampowered.com/steamcommunity/public/images/apps/%d/%s.jpg", appID, iconHash)
-}
-
-// GetSteamStoreURL возвращает URL страницы игры в Steam Store
-func (s *SteamService) GetSteamStoreURL(appID int) string {
-	return fmt.Sprintf("https://store.steampowered.com/app/%d/", appID)
-}
-
-// SteamGameInfo содержит информацию об игре из Steam для интеграции с Progress
-type SteamGameInfo struct {
-	AppID           int
-	IconURL         string
-	PlaytimeForever int
-	StoreURL        string
-}
-
-// GetGameInfoForProgress получает информацию об игре для интеграции с Progress
-func (s *SteamService) GetGameInfoForProgress(steamID, gameName string) (*SteamGameInfo, error) {
-	game, err := s.FindGameByName(steamID, gameName)
+func (s *SteamService) GetAppInfoByID(appID int) (map[string]interface{}, error) {
+	url := fmt.Sprintf("https://store.steampowered.com/api/appdetails?appids=%d", appID)
+	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 
-	if game == nil {
-		return nil, nil // игра не найдена
+	var data map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+		return nil, err
 	}
 
-	return &SteamGameInfo{
-		AppID:           game.AppID,
-		IconURL:         s.GetSteamIconURL(game.AppID, game.ImgIconURL),
-		PlaytimeForever: game.PlaytimeForever,
-		StoreURL:        s.GetSteamStoreURL(game.AppID),
+	return data, nil
+}
+
+func (s *SteamService) GetPlayerSummaries(steamID string) (*struct {
+	SteamID                  string `json:"steamid"`
+	PersonaName              string `json:"personaname"`
+	ProfileURL               string `json:"profileurl"`
+	Avatar                   string `json:"avatar"`
+	AvatarMedium             string `json:"avatarmedium"`
+	AvatarFull               string `json:"avatarfull"`
+	CommunityVisibilityState int    `json:"communityvisibilitystate"`
+	ProfileState             int    `json:"profilestate"`
+	LastLogOff               int64  `json:"lastlogoff"`
+}, error,
+) {
+	url := fmt.Sprintf(
+		"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=%s&steamids=%s",
+		s.config.Steam.APIKey,
+		steamID,
+	)
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch player summaries: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("steam api returned status %d", resp.StatusCode)
+	}
+
+	var data struct {
+		Response struct {
+			Players []struct {
+				SteamID                  string `json:"steamid"`
+				PersonaName              string `json:"personaname"`
+				ProfileURL               string `json:"profileurl"`
+				Avatar                   string `json:"avatar"`
+				AvatarMedium             string `json:"avatarmedium"`
+				AvatarFull               string `json:"avatarfull"`
+				CommunityVisibilityState int    `json:"communityvisibilitystate"`
+				ProfileState             int    `json:"profilestate"`
+				LastLogOff               int64  `json:"lastlogoff"`
+			} `json:"players"`
+		} `json:"response"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+		return nil, fmt.Errorf("failed to decode player summaries: %w", err)
+	}
+
+	if len(data.Response.Players) == 0 {
+		return nil, fmt.Errorf("player not found")
+	}
+
+	player := data.Response.Players[0]
+	return &struct {
+		SteamID                  string `json:"steamid"`
+		PersonaName              string `json:"personaname"`
+		ProfileURL               string `json:"profileurl"`
+		Avatar                   string `json:"avatar"`
+		AvatarMedium             string `json:"avatarmedium"`
+		AvatarFull               string `json:"avatarfull"`
+		CommunityVisibilityState int    `json:"communityvisibilitystate"`
+		ProfileState             int    `json:"profilestate"`
+		LastLogOff               int64  `json:"lastlogoff"`
+	}{
+		SteamID:                  player.SteamID,
+		PersonaName:              player.PersonaName,
+		ProfileURL:               player.ProfileURL,
+		Avatar:                   player.Avatar,
+		AvatarMedium:             player.AvatarMedium,
+		AvatarFull:               player.AvatarFull,
+		CommunityVisibilityState: player.CommunityVisibilityState,
+		ProfileState:             player.ProfileState,
+		LastLogOff:               player.LastLogOff,
 	}, nil
+}
+
+func (s *SteamService) GetPlayerBans(steamID string) (*struct {
+	SteamID          string `json:"steamid"`
+	CommunityBanned  bool   `json:"CommunityBanned"`
+	VACBanned        bool   `json:"VACBanned"`
+	NumberOfVACBans  int    `json:"NumberOfVACBans"`
+	DaysSinceLastBan int    `json:"DaysSinceLastBan"`
+	EconomyBan       string `json:"EconomyBan"`
+}, error,
+) {
+	url := fmt.Sprintf(
+		"https://api.steampowered.com/ISteamUser/GetPlayerBans/v1/?key=%s&steamids=%s",
+		s.config.Steam.APIKey,
+		steamID,
+	)
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch player bans: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("steam api returned status %d", resp.StatusCode)
+	}
+
+	var data struct {
+		Players []struct {
+			SteamID          string `json:"steamid"`
+			CommunityBanned  bool   `json:"CommunityBanned"`
+			VACBanned        bool   `json:"VACBanned"`
+			NumberOfVACBans  int    `json:"NumberOfVACBans"`
+			DaysSinceLastBan int    `json:"DaysSinceLastBan"`
+			EconomyBan       string `json:"EconomyBan"`
+		} `json:"players"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+		return nil, fmt.Errorf("failed to decode player bans: %w", err)
+	}
+
+	if len(data.Players) == 0 {
+		return nil, fmt.Errorf("player bans not found")
+	}
+
+	player := data.Players[0]
+	return &struct {
+		SteamID          string `json:"steamid"`
+		CommunityBanned  bool   `json:"CommunityBanned"`
+		VACBanned        bool   `json:"VACBanned"`
+		NumberOfVACBans  int    `json:"NumberOfVACBans"`
+		DaysSinceLastBan int    `json:"DaysSinceLastBan"`
+		EconomyBan       string `json:"EconomyBan"`
+	}{
+		SteamID:          player.SteamID,
+		CommunityBanned:  player.CommunityBanned,
+		VACBanned:        player.VACBanned,
+		NumberOfVACBans:  player.NumberOfVACBans,
+		DaysSinceLastBan: player.DaysSinceLastBan,
+		EconomyBan:       player.EconomyBan,
+	}, nil
+}
+
+func (s *SteamService) ExtractSteamID(claimedID string) (string, error) {
+	parts := []rune(claimedID)
+	for i := len(parts) - 1; i >= 0; i-- {
+		if parts[i] == '/' {
+			steamID := string(parts[i+1:])
+			if _, err := strconv.ParseInt(steamID, 10, 64); err == nil {
+				return steamID, nil
+			}
+		}
+	}
+	return "", fmt.Errorf("invalid steam id")
 }

@@ -5,6 +5,7 @@ import Navbar from './components/Navbar'
 import Feed from './pages/Feed'
 import Profile from './pages/Profile'
 import QuizPage from './pages/QuizPage'
+import Users from './pages/Users'
 import api from './services/api'
 
 function AuthCallback() {
@@ -44,6 +45,7 @@ function App() {
       <main className='flex-1'>
         <Routes>
           <Route path='/' element={<Feed />} />
+          <Route path='/users' element={<Users />} />
           <Route path='/profile/:id' element={<Profile />} />
           <Route path='/quizzes' element={<QuizPage />} />
           <Route path='/auth/callback' element={<AuthCallback />} />

@@ -1,56 +1,51 @@
 package repositories
 
-import (
-	"context"
+import "gamecheck/internal/domain/models"
 
-	"gamecheck/internal/domain/models"
-)
-
-// Repository определяет интерфейс для всех репозиториев приложения
-type Repository interface {
-	UserRepository
-	ActivityRepository
-	SubscriptionRepository
-	TokenRepository
-}
-
-// UserRepository определяет методы для работы с пользователями
 type UserRepository interface {
-	CreateUser(ctx context.Context, user *models.User) error
-	UpdateUser(ctx context.Context, user *models.User) error
-
-	GetUserByID(ctx context.Context, id string) (*models.User, error)
-	GetUserBySteamID(ctx context.Context, steamID string) (*models.User, error)
-	SearchUsers(ctx context.Context, query string) ([]*models.User, error)
-
-	IsFollowing(ctx context.Context, followerID, followingID string) (bool, error)
-	CountFollowers(ctx context.Context, userID string) (int, error)
-	CountFollowing(ctx context.Context, userID string) (int, error)
+	Create(user *models.User) error
+	GetByID(id string) (*models.User, error)
+	GetBySteamID(steamID string) (*models.User, error)
+	Update(user *models.User) error
+	Delete(id string) error
+	Search(query string, limit int) ([]*models.User, error)
+	List(limit, offset int) ([]*models.User, error)
 }
 
-// ActivityRepository определяет методы для работы с активностями
+type ProgressRepository interface {
+	Create(progress *models.Progress) error
+	GetByID(id string) (*models.Progress, error)
+	GetByUserID(userID string) ([]*models.Progress, error)
+	Update(progress *models.Progress) error
+	Delete(id string) error
+	GetByUserIDAndName(userID, name string) (*models.Progress, error)
+}
+
 type ActivityRepository interface {
-	CreateActivity(ctx context.Context, activity *models.Activity) error
-
-	GetFeed(ctx context.Context, limit, offset int) ([]*models.Activity, error)
-	GetUserActivity(ctx context.Context, userID string, limit, offset int) ([]*models.Activity, error)
-	GetFollowingActivity(ctx context.Context, userID string, limit, offset int) ([]*models.Activity, error)
+	Create(activity *models.Activity) error
+	GetByID(id string) (*models.Activity, error)
+	GetByUserID(userID string, limit int) ([]*models.Activity, error)
+	GetFeed(userID string, limit int) ([]*models.Activity, error)
+	Delete(id string) error
+	DeleteByProgressID(progressID string) error
 }
 
-// SubscriptionRepository определяет методы для работы с подписками
-type SubscriptionRepository interface {
-	Follow(ctx context.Context, followerID, followingID string) error
-	Unfollow(ctx context.Context, followerID, followingID string) error
-
-	GetFollowers(ctx context.Context, userID string) ([]*models.User, error)
-	GetFollowing(ctx context.Context, userID string) ([]*models.User, error)
-}
-
-// TokenRepository определяет методы для работы с токенами
 type TokenRepository interface {
-	CreateToken(ctx context.Context, token *models.Token) error
-	DeleteToken(ctx context.Context, tokenString string) error
-	DeleteUserTokens(ctx context.Context, userID string) error
+	Create(token *models.Token) error
+	GetByToken(token string) (*models.Token, error)
+	GetByUserID(userID string) (*models.Token, error)
+	Delete(id string) error
+	DeleteByUserID(userID string) error
+}
 
-	GetTokenByValue(ctx context.Context, tokenString string) (*models.Token, error)
+type SubscriptionRepository interface {
+	Create(sub *models.Subscription) error
+	GetByID(id string) (*models.Subscription, error)
+	GetFollowers(userID string) ([]*models.User, error)
+	GetFollowing(userID string) ([]*models.User, error)
+	IsFollowing(followerID, followingID string) (bool, error)
+	Delete(id string) error
+	DeleteByUsers(followerID, followingID string) error
+	GetFollowersCount(userID string) (int64, error)
+	GetFollowingCount(userID string) (int64, error)
 }

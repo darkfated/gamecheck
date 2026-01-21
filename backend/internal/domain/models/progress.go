@@ -10,27 +10,28 @@ import (
 type GameStatus string
 
 const (
-	// Статусы игр
 	StatusPlaying    GameStatus = "playing"
 	StatusCompleted  GameStatus = "completed"
 	StatusPlanToPlay GameStatus = "plan_to_play"
 	StatusDropped    GameStatus = "dropped"
 )
 
-// Progress представляет прогресс пользователя в игре
 type Progress struct {
-	ID        string     `json:"id" gorm:"type:uuid;primary_key"`
-	UserID    string     `json:"userId" gorm:"type:uuid;index;not null"`
-	User      User       `json:"user" gorm:"foreignKey:UserID"`
-	Name      string     `json:"name" gorm:"not null"` // Название игры
-	Status    GameStatus `json:"status" gorm:"not null"`
-	Rating    *int       `json:"rating,omitempty" gorm:"default:null"` // Оценка от 1 до 10
-	Review    string     `json:"review,omitempty" gorm:"type:text;default:null"`
-	CreatedAt time.Time  `json:"createdAt"`
-	UpdatedAt time.Time  `json:"updatedAt"`
+	ID                   string     `json:"id" gorm:"type:uuid;primary_key"`
+	UserID               string     `json:"userId" gorm:"type:uuid;index;not null"`
+	User                 User       `json:"user" gorm:"foreignKey:UserID"`
+	Name                 string     `json:"name" gorm:"not null"`
+	Status               GameStatus `json:"status" gorm:"not null"`
+	Rating               *int       `json:"rating,omitempty" gorm:"default:null"`
+	Review               string     `json:"review,omitempty" gorm:"type:text;default:null"`
+	SteamAppID           *int       `json:"steamAppId,omitempty" gorm:"default:null"`
+	SteamIconURL         string     `json:"steamIconUrl,omitempty" gorm:"default:null"`
+	SteamPlaytimeForever *int       `json:"steamPlaytimeForever,omitempty" gorm:"default:null"`
+	SteamStoreURL        string     `json:"steamStoreUrl,omitempty" gorm:"default:null"`
+	CreatedAt            time.Time  `json:"createdAt"`
+	UpdatedAt            time.Time  `json:"updatedAt"`
 }
 
-// BeforeCreate хук для установки UUID и временных меток
 func (p *Progress) BeforeCreate(tx *gorm.DB) error {
 	if p.ID == "" {
 		p.ID = uuid.New().String()
