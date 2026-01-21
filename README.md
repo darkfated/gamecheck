@@ -12,7 +12,7 @@ GameCheck - это веб-приложение для отслеживания �
 - 🌓 Тёмная и светлая тема
 - 📱 Мобильная поддержка
 - 🎯 **Steam интеграция**
-  - Данные игр
+  - Данные тайтлов
   - Наигранное время
 
 ## 📚 Архитектура
@@ -28,24 +28,28 @@ GameCheck - это веб-приложение для отслеживания �
 
 ### Главная страница
 
-![Главная страница](https://github.com/user-attachments/assets/a9482b08-3a19-43c5-a2a3-1faca0888797)
+![Главная страница](https://github.com/user-attachments/assets/e09a86c6-4ebd-42e3-8805-009423b635d4)
 
 ### Подписки
 
-![Подписки](https://github.com/user-attachments/assets/a57d41ac-bd1d-499d-ac34-03e098e6b79c)
+![Подписки](https://github.com/user-attachments/assets/2ca6a332-b890-42b9-a2ac-423c4063d656)
 
 ## Список участников
 
-![Подписки](https://github.com/user-attachments/assets/f2d00a79-dffb-4984-8cf3-ab578288d613)
+![Список участников](https://github.com/user-attachments/assets/3d84fbb9-2a53-42e5-a3bb-b6850648025a)
 
 ### Статистика
 
-![Информация игрока](https://github.com/user-attachments/assets/aa566d50-c039-4eac-ab21-de96d24c5931)
+![Статистика](https://github.com/user-attachments/assets/ba19ac6f-0149-46b5-a2fa-755f12e64a68)
 
 ### Квизы
 
-![Светлая тема](https://github.com/user-attachments/assets/d80928f9-292a-432f-b552-43672fe5e751)
-![Прохождение квиза](https://github.com/user-attachments/assets/03a2405c-d685-45be-aa3e-e7db6089e35c)
+![Квизы](https://github.com/user-attachments/assets/f86609a3-d235-4ede-b832-07c36aaee2d4)
+![Прохождение квиза](https://github.com/user-attachments/assets/bbbcc81b-a0d1-46b8-a1f8-5f2ecc003662)
+
+### Настройки
+
+![Настройки](https://github.com/user-attachments/assets/0b5f8090-b8b7-44f7-ac94-96439a592ed5)
 
 ## Документация
 
