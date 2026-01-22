@@ -62,19 +62,21 @@ func (s *ProgressService) AddGameWithSteamData(
 	steamAppID *int,
 	steamIconURL,
 	steamStoreURL string,
+	steamPlaytimeForever *int,
 ) (*models.Progress, error) {
 	gameStatus := models.GameStatus(status)
 
 	progress := &models.Progress{
-		ID:            uuid.New().String(),
-		UserID:        userID,
-		Name:          name,
-		Status:        gameStatus,
-		Rating:        rating,
-		Review:        review,
-		SteamAppID:    steamAppID,
-		SteamIconURL:  steamIconURL,
-		SteamStoreURL: steamStoreURL,
+		ID:                   uuid.New().String(),
+		UserID:               userID,
+		Name:                 name,
+		Status:               gameStatus,
+		Rating:               rating,
+		Review:               review,
+		SteamAppID:           steamAppID,
+		SteamIconURL:         steamIconURL,
+		SteamStoreURL:        steamStoreURL,
+		SteamPlaytimeForever: steamPlaytimeForever,
 	}
 
 	if err := s.progressRepository.Create(progress); err != nil {

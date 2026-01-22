@@ -127,12 +127,23 @@ func (h *ProgressHandler) AddGame(ctx *gin.Context) {
 	var steamAppID *int
 	var steamIconURL string
 	var steamStoreURL string
+	var playtimeForever *int
 
 	steamGame, err := h.steamService.SearchGameByName(normalizedName)
 	if err == nil && steamGame != nil {
 		steamAppID = &steamGame.AppID
 		steamIconURL = steamGame.Icon
 		steamStoreURL = steamGame.StoreURL
+
+		user, err := h.authService.GetUserByID(userID)
+		if err == nil && user != nil {
+			playtime, err := h.steamService.GetGamePlaytime(user.SteamID, steamGame.AppID)
+			if err == nil {
+				playtimeForever = &playtime
+			} else {
+				log.Printf("failed to fetch playtime for app %d: %v", steamGame.AppID, err)
+			}
+		}
 	} else if err != nil {
 		log.Printf("steam lookup failed for %q: %v", req.Name, err)
 	}
@@ -146,6 +157,7 @@ func (h *ProgressHandler) AddGame(ctx *gin.Context) {
 		steamAppID,
 		steamIconURL,
 		steamStoreURL,
+		playtimeForever,
 	)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to add game"})
@@ -287,7 +299,23 @@ func (h *ProgressHandler) UpdateSteamData(ctx *gin.Context) {
 		return
 	}
 
-	updated, err := h.progressService.UpdateSteamData(gameID, nil, "", nil, "")
+	user, err := h.authService.GetUserByID(userID)
+	if err != nil || user == nil || user.SteamID == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "steam account not connected"})
+		return
+	}
+
+	var playtimeForever *int
+	if game.SteamAppID != nil {
+		playtime, err := h.steamService.GetGamePlaytime(user.SteamID, *game.SteamAppID)
+		if err == nil {
+			playtimeForever = &playtime
+		} else {
+			log.Printf("failed to fetch playtime for app %d: %v", *game.SteamAppID, err)
+		}
+	}
+
+	updated, err := h.progressService.UpdateSteamData(gameID, game.SteamAppID, game.SteamIconURL, playtimeForever, game.SteamStoreURL)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update steam data"})
 		return
