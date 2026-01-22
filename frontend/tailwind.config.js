@@ -26,5 +26,8 @@ export default {
       },
     },
   },
+  corePlugins: {
+    focusVisible: false,
+  },
   plugins: [require('@tailwindcss/line-clamp')],
 }

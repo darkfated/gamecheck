@@ -79,6 +79,19 @@ export const useGameManagement = (
 
     try {
       setIsSubmitting(true)
+
+      const gamesResponse = await api.games.getUserGames()
+      const existingGames = gamesResponse.data
+
+      const duplicateGame = existingGames.find(
+        g => g.name.toLowerCase() === gameData.name.toLowerCase(),
+      )
+
+      if (duplicateGame) {
+        alert(`Игра "${gameData.name}" уже добавлена в вашу библиотеку`)
+        return false
+      }
+
       await api.games.addGame(gameData)
       onUpdateCallback()
       return true

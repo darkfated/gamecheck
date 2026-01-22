@@ -243,32 +243,34 @@ export const GameCard: FC<GameCardProps> = ({
 
               {editable && (
                 <div className='flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity'>
-                  <button
-                    onClick={toggleEdit}
-                    className='text-[var(--accent-primary)] hover:text-[var(--accent-primary-hover)] p-1.5 rounded-lg hover:bg-[var(--accent-primary)]/10 transition-all duration-200'
-                    title='Редактировать'
-                  >
-                    <svg
-                      className='w-4 h-4'
-                      fill='none'
-                      stroke='currentColor'
-                      viewBox='0 0 24 24'
+                  {!isEditing && (
+                    <button
+                      onClick={toggleEdit}
+                      className='text-[var(--text-secondary)] hover:text-[var(--accent-primary)] p-1 md:p-1.5 rounded-lg hover:bg-[var(--accent-primary)]/10 transition-all duration-200'
+                      title='Редактировать'
                     >
-                      <path
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                        strokeWidth='2'
-                        d='M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z'
-                      />
-                    </svg>
-                  </button>
+                      <svg
+                        className='w-4 md:w-5 h-4 md:h-5'
+                        fill='none'
+                        stroke='currentColor'
+                        viewBox='0 0 24 24'
+                      >
+                        <path
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                          strokeWidth='2'
+                          d='M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z'
+                        />
+                      </svg>
+                    </button>
+                  )}
                   <button
                     onClick={() => onDelete && onDelete(game.id)}
-                    className='text-[var(--error)] hover:text-[var(--error-hover)] p-1.5 rounded-lg hover:bg-[var(--error)]/10 transition-all duration-200'
+                    className='text-[var(--error)] hover:text-[var(--error-hover)] p-1 md:p-1.5 rounded-lg hover:bg-[var(--error)]/10 transition-all duration-200'
                     title='Удалить игру'
                   >
                     <svg
-                      className='w-4 h-4'
+                      className='w-4 md:w-5 h-4 md:h-5'
                       fill='none'
                       stroke='currentColor'
                       viewBox='0 0 24 24'
@@ -333,31 +335,6 @@ export const GameCard: FC<GameCardProps> = ({
                     ))}
                   </select>
                 </div>
-
-                {isOwner && onUpdateSteam && (
-                  <div className='flex items-end'>
-                    <button
-                      onClick={handleUpdateSteam}
-                      className='w-full px-3 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-lg transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2'
-                      title='Обновить статистику Steam'
-                    >
-                      <svg
-                        className='w-4 h-4'
-                        fill='none'
-                        stroke='currentColor'
-                        viewBox='0 0 24 24'
-                      >
-                        <path
-                          strokeLinecap='round'
-                          strokeLinejoin='round'
-                          strokeWidth={2}
-                          d='M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15'
-                        />
-                      </svg>
-                      Обновить статистику
-                    </button>
-                  </div>
-                )}
               </div>
 
               <div>
@@ -407,14 +384,14 @@ export const GameCard: FC<GameCardProps> = ({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className='group bg-[var(--card-bg)] backdrop-blur-sm border border-[var(--border-color)] rounded-xl hover:border-[var(--border-color-hover)] transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1'
+      className='group bg-[var(--card-bg)] backdrop-blur-sm border border-[var(--border-color)] rounded-lg md:rounded-xl hover:border-[var(--border-color-hover)] transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1'
     >
-      <div className='p-4 h-full flex flex-col'>
-        <div className='flex items-start justify-between gap-3 mb-4'>
-          <div className='flex items-center gap-3 flex-1 min-w-0'>
+      <div className='p-3 md:p-4 h-full flex flex-col'>
+        <div className='flex items-start justify-between gap-2 md:gap-3 mb-3 md:mb-4'>
+          <div className='flex items-center gap-2 md:gap-3 flex-1 min-w-0'>
             <GameIcon game={game} size='md' />
             <div className='flex-1 min-w-0'>
-              <h3 className='text-lg font-semibold text-[var(--text-primary)] line-clamp-3 leading-tight'>
+              <h3 className='text-sm md:text-lg font-semibold text-[var(--text-primary)] line-clamp-3 leading-tight'>
                 {game.name}
               </h3>
             </div>
@@ -422,36 +399,34 @@ export const GameCard: FC<GameCardProps> = ({
 
           {editable && (
             <div className='flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity'>
-              <button
-                onClick={toggleEdit}
-                className='text-[var(--accent-primary)] hover:text-[var(--accent-primary-hover)] p-1.5 rounded-lg hover:bg-[var(--accent-primary)]/10 transition-all duration-200'
-                title={isEditing ? 'Сохранить изменения' : 'Редактировать'}
-              >
-                <svg
-                  className='w-5 h-5'
-                  fill='none'
-                  stroke='currentColor'
-                  viewBox='0 0 24 24'
+              {!isEditing && (
+                <button
+                  onClick={toggleEdit}
+                  className='text-[var(--text-secondary)] hover:text-[var(--accent-primary)] p-1 md:p-1.5 rounded-lg hover:bg-[var(--accent-primary)]/10 transition-all duration-200'
+                  title='Редактировать'
                 >
-                  <path
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    strokeWidth='2'
-                    d={
-                      isEditing
-                        ? 'M5 13l4 4L19 7'
-                        : 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z'
-                    }
-                  />
-                </svg>
-              </button>
+                  <svg
+                    className='w-4 md:w-5 h-4 md:h-5'
+                    fill='none'
+                    stroke='currentColor'
+                    viewBox='0 0 24 24'
+                  >
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth='2'
+                      d='M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z'
+                    />
+                  </svg>
+                </button>
+              )}
               <button
                 onClick={() => onDelete && onDelete(game.id)}
-                className='text-[var(--error)] hover:text-[var(--error-hover)] p-1.5 rounded-lg hover:bg-[var(--error)]/10 transition-all duration-200'
+                className='text-[var(--error)] hover:text-[var(--error-hover)] p-1 md:p-1.5 rounded-lg hover:bg-[var(--error)]/10 transition-all duration-200'
                 title='Удалить игру'
               >
                 <svg
-                  className='w-5 h-5'
+                  className='w-4 md:w-5 h-4 md:h-5'
                   fill='none'
                   stroke='currentColor'
                   viewBox='0 0 24 24'
@@ -478,8 +453,8 @@ export const GameCard: FC<GameCardProps> = ({
                 exit={{ opacity: 0 }}
                 className='flex-1 flex flex-col'
               >
-                <div className='flex items-center justify-between gap-2 mb-2'>
-                  <div className='flex flex-wrap gap-2'>
+                <div className='flex items-center justify-between gap-1 md:gap-2 mb-2 md:mb-3 flex-wrap'>
+                  <div className='flex flex-wrap gap-1 md:gap-2'>
                     <StatusBadge
                       status={game.status}
                       label={
@@ -562,31 +537,6 @@ export const GameCard: FC<GameCardProps> = ({
                       className='w-full p-2.5 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--input-focus)] text-sm resize-none'
                     />
                   </div>
-
-                  {isOwner && onUpdateSteam && (
-                    <div>
-                      <button
-                        onClick={handleUpdateSteam}
-                        className='w-full px-3 py-2.5 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-lg transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2 shadow-sm'
-                        title='Обновить статистику Steam'
-                      >
-                        <svg
-                          className='w-4 h-4'
-                          fill='none'
-                          stroke='currentColor'
-                          viewBox='0 0 24 24'
-                        >
-                          <path
-                            strokeLinecap='round'
-                            strokeLinejoin='round'
-                            strokeWidth={2}
-                            d='M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15'
-                          />
-                        </svg>
-                        Обновить статистику
-                      </button>
-                    </div>
-                  )}
                 </div>
 
                 <div className='flex justify-end gap-2 mt-4 pt-4 border-t border-[var(--border-color)]/30'>

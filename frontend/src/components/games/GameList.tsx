@@ -1,8 +1,9 @@
-import { motion } from 'framer-motion'
-import React, { FC, useMemo, useState } from 'react'
-import { GAME_STATUSES, getStatusOptions } from '../../constants'
+import { AnimatePresence, motion } from 'framer-motion'
+import { FC, useMemo, useState } from 'react'
+import { getStatusOptions } from '../../constants'
 import { useAuth } from '../../contexts/AuthContext'
 import { useGameManagement } from '../../hooks/useGameManagement'
+import { GameAddForm } from './GameAddForm'
 import { GameCard } from './GameCard'
 
 interface Game {
@@ -54,12 +55,6 @@ export const GameList: FC<GameListProps> = ({
   }
 
   const [isFormVisible, setIsFormVisible] = useState(false)
-  const [newGame, setNewGame] = useState<any>({
-    name: '',
-    status: GAME_STATUSES.PLAYING,
-    rating: '',
-    review: '',
-  })
 
   const enableEditMode = () => {
     setIsFormVisible(true)
@@ -67,24 +62,9 @@ export const GameList: FC<GameListProps> = ({
 
   const statusOptions: StatusOption[] = getStatusOptions()
 
-  const handleAddGame = async (e: React.FormEvent) => {
-    e.preventDefault()
-    const gameToAdd = { ...newGame }
-
-    if (gameToAdd.rating) {
-      gameToAdd.rating = Number(gameToAdd.rating)
-    } else {
-      gameToAdd.rating = null
-    }
-
-    if (!gameToAdd.review) {
-      gameToAdd.review = ''
-    }
-
+  const handleAddGame = async (gameData: any) => {
     try {
-      await addGame(gameToAdd)
-      const lastStatus = newGame.status
-      setNewGame({ name: '', status: lastStatus, rating: '', review: '' })
+      await addGame(gameData)
       setIsFormVisible(false)
     } catch (error) {
       console.error('Ошибка при добавлении игры:', error)
@@ -171,110 +151,27 @@ export const GameList: FC<GameListProps> = ({
           </motion.button>
         )}
 
-        {isOwner && isAuthenticated && isFormVisible && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className='mt-6 bg-[var(--card-bg)] p-4 rounded-xl border border-[var(--border-color)]'
-          >
-            <form onSubmit={handleAddGame} className='space-y-4'>
-              <div>
-                <label className='block text-sm font-medium text-[var(--text-secondary)]'>
-                  Название игры
-                </label>
-                <input
-                  type='text'
-                  value={newGame.name}
-                  onChange={e =>
-                    setNewGame({ ...newGame, name: e.target.value })
-                  }
-                  required
-                  placeholder='Название игры'
-                  className='w-full p-2 mt-1 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg'
-                />
-              </div>
-
-              <div>
-                <label className='block text-sm font-medium text-[var(--text-secondary)]'>
-                  Статус
-                </label>
-                <select
-                  value={newGame.status}
-                  onChange={e =>
-                    setNewGame({ ...newGame, status: e.target.value })
-                  }
-                  className='w-full p-2 mt-1 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg'
-                >
-                  {statusOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className='block text-sm font-medium text-[var(--text-secondary)]'>
-                  Оценка (опционально)
-                </label>
-                <select
-                  value={newGame.rating}
-                  onChange={e =>
-                    setNewGame({ ...newGame, rating: e.target.value })
-                  }
-                  className='w-full p-2 mt-1 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg'
-                >
-                  <option value=''>Без оценки</option>
-                  {[...Array(10)].map((_, i) => (
-                    <option key={i + 1} value={i + 1}>
-                      {i + 1}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className='block text-sm font-medium text-[var(--text-secondary)]'>
-                  Заметки (опционально)
-                </label>
-                <textarea
-                  value={newGame.review}
-                  onChange={e =>
-                    setNewGame({ ...newGame, review: e.target.value })
-                  }
-                  placeholder='Ваши впечатления об игре'
-                  className='w-full p-2 mt-1 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg'
-                  rows={3}
-                />
-              </div>
-
-              <div className='flex gap-2'>
-                <motion.button
-                  type='submit'
-                  disabled={isSubmitting}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className='flex-1 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white rounded-lg py-2'
-                >
-                  {isSubmitting ? 'Добавляю...' : 'Добавить игру'}
-                </motion.button>
-                <motion.button
-                  type='button'
-                  onClick={() => setIsFormVisible(false)}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className='bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-lg px-3 py-2'
-                >
-                  Отмена
-                </motion.button>
-              </div>
-
+        <AnimatePresence>
+          {isOwner && isAuthenticated && isFormVisible && (
+            <div className='mt-6'>
+              <GameAddForm
+                onSubmit={handleAddGame}
+                onCancel={() => setIsFormVisible(false)}
+                isSubmitting={isSubmitting}
+              />
               {authError && (
-                <div className='text-red-500 text-sm mt-2'>{authError}</div>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className='text-red-500 text-sm mt-4 text-center'
+                >
+                  {authError}
+                </motion.div>
               )}
-            </form>
-          </motion.div>
-        )}
+            </div>
+          )}
+        </AnimatePresence>
       </motion.div>
     )
   }
@@ -298,107 +195,20 @@ export const GameList: FC<GameListProps> = ({
         </div>
       )}
 
-      {isOwner && isAuthenticated && isFormVisible && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className='bg-[var(--card-bg)] p-4 rounded-xl border border-[var(--border-color)]'
-        >
-          <form onSubmit={handleAddGame} className='space-y-4'>
-            <div>
-              <label className='block text-sm font-medium text-[var(--text-secondary)]'>
-                Название игры
-              </label>
-              <input
-                type='text'
-                value={newGame.name}
-                onChange={e => setNewGame({ ...newGame, name: e.target.value })}
-                required
-                placeholder='Название игры'
-                className='w-full p-2 mt-1 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg'
-              />
-            </div>
+      <AnimatePresence>
+        {isOwner && isAuthenticated && isFormVisible && (
+          <GameAddForm
+            onSubmit={handleAddGame}
+            onCancel={() => setIsFormVisible(false)}
+            isSubmitting={isSubmitting}
+          />
+        )}
+      </AnimatePresence>
 
-            <div>
-              <label className='block text-sm font-medium text-[var(--text-secondary)]'>
-                Статус
-              </label>
-              <select
-                value={newGame.status}
-                onChange={e =>
-                  setNewGame({ ...newGame, status: e.target.value })
-                }
-                className='w-full p-2 mt-1 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg'
-              >
-                {statusOptions.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className='block text-sm font-medium text-[var(--text-secondary)]'>
-                Оценка (опционально)
-              </label>
-              <select
-                value={newGame.rating}
-                onChange={e =>
-                  setNewGame({ ...newGame, rating: e.target.value })
-                }
-                className='w-full p-2 mt-1 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg'
-              >
-                <option value=''>Без оценки</option>
-                {[...Array(10)].map((_, i) => (
-                  <option key={i + 1} value={i + 1}>
-                    {i + 1}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className='block text-sm font-medium text-[var(--text-secondary)]'>
-                Заметки (опционально)
-              </label>
-              <textarea
-                value={newGame.review}
-                onChange={e =>
-                  setNewGame({ ...newGame, review: e.target.value })
-                }
-                placeholder='Ваши впечатления об игре'
-                className='w-full p-2 mt-1 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg'
-                rows={3}
-              />
-            </div>
-
-            <div className='flex gap-2'>
-              <motion.button
-                type='submit'
-                disabled={isSubmitting}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className='flex-1 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white rounded-lg py-2'
-              >
-                {isSubmitting ? 'Добавляю...' : 'Добавить игру'}
-              </motion.button>
-              <motion.button
-                type='button'
-                onClick={() => setIsFormVisible(false)}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className='bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-lg px-3 py-2'
-              >
-                Отмена
-              </motion.button>
-            </div>
-
-            {authError && (
-              <div className='text-red-500 text-sm mt-2'>{authError}</div>
-            )}
-          </form>
-        </motion.div>
+      {authError && (
+        <div className='text-red-500 text-sm mt-4 text-center bg-red-500/10 p-4 rounded-lg'>
+          {authError}
+        </div>
       )}
 
       {statusOptions.map(status => {

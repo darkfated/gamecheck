@@ -124,6 +124,19 @@ func (h *ProgressHandler) AddGame(ctx *gin.Context) {
 		return
 	}
 
+	existingGames, err := h.progressService.GetUserGames(userID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to check existing games"})
+		return
+	}
+
+	for _, existingGame := range existingGames {
+		if strings.EqualFold(existingGame.Name, normalizedName) {
+			ctx.JSON(http.StatusConflict, gin.H{"error": "game already exists in your library"})
+			return
+		}
+	}
+
 	var steamAppID *int
 	var steamIconURL string
 	var steamStoreURL string
@@ -150,7 +163,7 @@ func (h *ProgressHandler) AddGame(ctx *gin.Context) {
 
 	game, err := h.progressService.AddGameWithSteamData(
 		userID,
-		req.Name,
+		normalizedName,
 		req.Status,
 		req.Rating,
 		req.Review,

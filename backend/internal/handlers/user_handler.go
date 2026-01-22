@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"net/http"
+	"regexp"
+	"strings"
 
 	"gamecheck/internal/middleware"
 	"gamecheck/internal/services"
@@ -105,6 +107,23 @@ func (h *UserHandler) UpdateProfile(ctx *gin.Context) {
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
 		return
+	}
+
+	if req.DiscordTag != nil && *req.DiscordTag != "" {
+		discordTag := strings.TrimSpace(*req.DiscordTag)
+		if len(discordTag) < 4 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "discord tag must be at least 4 characters"})
+			return
+		}
+		if len(discordTag) > 20 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "discord tag must be at most 20 characters"})
+			return
+		}
+		if !regexp.MustCompile(`^[a-z0-9]+$`).MatchString(discordTag) {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "discord tag can only contain lowercase letters (a-z) and digits (0-9)"})
+			return
+		}
+		req.DiscordTag = &discordTag
 	}
 
 	user, err := h.userService.GetUser(userID)

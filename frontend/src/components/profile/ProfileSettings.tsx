@@ -39,8 +39,8 @@ export const ProfileSettings: FC<ProfileSettingsProps> = ({
   const handleDiscordTagChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toLowerCase()
     if (value.length > 20) return
-    if (!/^[a-z]*$/.test(value) && value !== '') {
-      setDiscordError('Только английские буквы в нижнем регистре')
+    if (!/^[a-z0-9]*$/.test(value) && value !== '') {
+      setDiscordError('Только английские буквы (a-z) и цифры (0-9)')
       return
     }
     setDiscordError('')
@@ -48,8 +48,19 @@ export const ProfileSettings: FC<ProfileSettingsProps> = ({
   }
 
   const handleDiscordTagSave = async () => {
-    if (discordTag.length < 4 && discordTag !== '') {
+    if (!discordTag && !profile?.discordTag) {
+      return
+    }
+    if (discordTag && discordTag.length < 4) {
       setDiscordError('Минимум 4 символа')
+      return
+    }
+    if (discordTag && discordTag.length > 20) {
+      setDiscordError('Максимум 20 символов')
+      return
+    }
+    if (discordTag && !/^[a-z0-9]+$/.test(discordTag)) {
+      setDiscordError('Только английские буквы (a-z) и цифры (0-9)')
       return
     }
     try {
