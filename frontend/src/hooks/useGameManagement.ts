@@ -101,6 +101,8 @@ export const useGameManagement = (
       if (error.response?.status === 401) {
         setAuthError(true)
         alert('Authentication required to add game')
+      } else if (error.response?.status === 429) {
+        alert('Слишком много запросов. Подожди немного и попробуй снова')
       } else {
         alert(
           `Error adding game: ${
@@ -153,6 +155,8 @@ export const useGameManagement = (
       if (error.response?.status === 401) {
         setAuthError(true)
         alert('Authentication required to update game')
+      } else if (error.response?.status === 429) {
+        alert('Слишком много запросов. Подожди немного и попробуй снова')
       } else {
         alert(
           `Error updating game: ${
@@ -183,6 +187,8 @@ export const useGameManagement = (
       if (error.response?.status === 401) {
         setAuthError(true)
         alert('Authentication required to delete game')
+      } else if (error.response?.status === 429) {
+        alert('Слишком много запросов. Подожди немного и попробуй снова')
       } else {
         alert(
           `Error deleting game: ${
@@ -209,6 +215,8 @@ export const useGameManagement = (
       if (error.response?.status === 401) {
         setAuthError(true)
         alert('Authentication required to update Steam data')
+      } else if (error.response?.status === 429) {
+        alert('Слишком много запросов. Подожди немного и попробуй снова')
       } else {
         alert(
           `Error updating Steam data: ${

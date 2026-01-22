@@ -31,7 +31,7 @@ func (h *UserHandler) RegisterRoutes(router *gin.RouterGroup) {
 	{
 		users.GET("", h.ListUsers)
 		users.GET("/:id", middleware.OptionalAuthMiddleware(h.authService), h.GetProfile)
-		users.PATCH("/profile", middleware.AuthMiddleware(h.authService), h.UpdateProfile)
+		users.PATCH("/profile", middleware.AuthMiddleware(h.authService), middleware.RateLimitByUserOrIPFromContext("gameAddUpdateLimiter"), h.UpdateProfile)
 		users.GET("/search/:query", h.SearchUsers)
 	}
 }

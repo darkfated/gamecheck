@@ -105,6 +105,19 @@ func setupRouter(cfg *config.Config, hdlrs *handlers.Handlers) *gin.Engine {
 	router.Use(cors.New(corsConfig))
 	router.Use(middleware.ErrorHandler())
 
+	gameAddUpdateLimiter := middleware.NewRateLimiter(1, time.Second, 3)
+	readLimiter := middleware.NewRateLimiter(5, time.Second, 10)
+	authLimiter := middleware.NewRateLimiter(10, time.Second, 20)
+	deleteLimiter := middleware.NewRateLimiter(3, time.Second, 5)
+
+	router.Use(func(c *gin.Context) {
+		c.Set("gameAddUpdateLimiter", gameAddUpdateLimiter)
+		c.Set("readLimiter", readLimiter)
+		c.Set("authLimiter", authLimiter)
+		c.Set("deleteLimiter", deleteLimiter)
+		c.Next()
+	})
+
 	api := router.Group("/api")
 	hdlrs.RegisterRoutes(api)
 

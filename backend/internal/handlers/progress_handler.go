@@ -37,10 +37,10 @@ func (h *ProgressHandler) RegisterRoutes(router *gin.RouterGroup) {
 	{
 		progress.GET("", middleware.AuthMiddleware(h.authService), h.GetUserGames)
 		progress.GET("/user/:userId", h.GetUserGamesByID)
-		progress.POST("", middleware.AuthMiddleware(h.authService), h.AddGame)
-		progress.PATCH("/:id", middleware.AuthMiddleware(h.authService), h.UpdateGame)
-		progress.DELETE("/:id", middleware.AuthMiddleware(h.authService), h.DeleteGame)
-		progress.POST("/:id/update-steam", middleware.AuthMiddleware(h.authService), h.UpdateSteamData)
+		progress.POST("", middleware.AuthMiddleware(h.authService), middleware.RateLimitByUserOrIPFromContext("gameAddUpdateLimiter"), h.AddGame)
+		progress.PATCH("/:id", middleware.AuthMiddleware(h.authService), middleware.RateLimitByUserOrIPFromContext("gameAddUpdateLimiter"), h.UpdateGame)
+		progress.DELETE("/:id", middleware.AuthMiddleware(h.authService), middleware.RateLimitByUserOrIPFromContext("deleteLimiter"), h.DeleteGame)
+		progress.POST("/:id/update-steam", middleware.AuthMiddleware(h.authService), middleware.RateLimitByUserOrIPFromContext("gameAddUpdateLimiter"), h.UpdateSteamData)
 	}
 }
 

@@ -37,9 +37,9 @@ func NewAuthHandler(
 func (h *AuthHandler) RegisterRoutes(router *gin.RouterGroup) {
 	auth := router.Group("/auth")
 	{
-		auth.GET("/steam", h.SteamLogin)
-		auth.GET("/steam/callback", h.SteamCallback)
-		auth.GET("/validate-token", h.ValidateToken)
+		auth.GET("/steam", middleware.RateLimitByUserOrIPFromContext("authLimiter"), h.SteamLogin)
+		auth.GET("/steam/callback", middleware.RateLimitByUserOrIPFromContext("authLimiter"), h.SteamCallback)
+		auth.GET("/validate-token", middleware.RateLimitByUserOrIPFromContext("authLimiter"), h.ValidateToken)
 		auth.POST("/logout", middleware.AuthMiddleware(h.authService), h.Logout)
 		auth.GET("/current", middleware.AuthMiddleware(h.authService), h.GetCurrent)
 		auth.GET("/check", middleware.OptionalAuthMiddleware(h.authService), h.CheckAuth)

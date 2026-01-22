@@ -28,9 +28,9 @@ func NewActivityHandler(
 func (h *ActivityHandler) RegisterRoutes(router *gin.RouterGroup) {
 	activity := router.Group("/activity")
 	{
-		activity.GET("/all", h.GetAllActivities)
-		activity.GET("/feed", middleware.AuthMiddleware(h.authService), h.GetFeed)
-		activity.GET("/user/:userId", h.GetUserActivity)
+		activity.GET("/all", middleware.RateLimitByUserOrIPFromContext("readLimiter"), h.GetAllActivities)
+		activity.GET("/feed", middleware.AuthMiddleware(h.authService), middleware.RateLimitByUserOrIPFromContext("readLimiter"), h.GetFeed)
+		activity.GET("/user/:userId", middleware.RateLimitByUserOrIPFromContext("readLimiter"), h.GetUserActivity)
 	}
 }
 
