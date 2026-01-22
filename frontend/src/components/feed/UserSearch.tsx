@@ -7,7 +7,10 @@ interface User {
   id: string
   displayName: string
   avatarUrl: string
+  profileUrl?: string
   steamId?: string
+  gamesCount?: number
+  followersCount?: number
 }
 
 export const UserSearch: FC = () => {

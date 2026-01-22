@@ -10,6 +10,7 @@ interface User {
   id: string
   displayName: string
   avatarUrl: string
+  profileUrl?: string
 }
 
 const containerVariants = {

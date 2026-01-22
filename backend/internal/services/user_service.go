@@ -43,6 +43,10 @@ func (s *UserService) UpdateProfile(id string, displayName, discordTag string) (
 	return user, nil
 }
 
+func (s *UserService) UpdateUser(user *models.User) error {
+	return s.userRepository.Update(user)
+}
+
 func (s *UserService) SearchUsers(query string, limit int) ([]*models.User, error) {
 	return s.userRepository.Search(query, limit)
 }

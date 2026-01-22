@@ -98,8 +98,8 @@ func (h *UserHandler) UpdateProfile(ctx *gin.Context) {
 	}
 
 	var req struct {
-		DisplayName string `json:"displayName"`
-		DiscordTag  string `json:"discordTag"`
+		DisplayName *string `json:"displayName"`
+		DiscordTag  *string `json:"discordTag"`
 	}
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -107,8 +107,20 @@ func (h *UserHandler) UpdateProfile(ctx *gin.Context) {
 		return
 	}
 
-	user, err := h.userService.UpdateProfile(userID, req.DisplayName, req.DiscordTag)
+	user, err := h.userService.GetUser(userID)
 	if err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		return
+	}
+
+	if req.DisplayName != nil {
+		user.DisplayName = *req.DisplayName
+	}
+	if req.DiscordTag != nil {
+		user.DiscordTag = *req.DiscordTag
+	}
+
+	if err := h.userService.UpdateUser(user); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update profile"})
 		return
 	}

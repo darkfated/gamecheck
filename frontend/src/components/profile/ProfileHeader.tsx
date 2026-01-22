@@ -1,20 +1,20 @@
-import { format } from 'date-fns'
-import { ru } from 'date-fns/locale'
 import { motion } from 'framer-motion'
 import React, { FC, useEffect, useState } from 'react'
 import { ProfileStats } from './ProfileStats'
 
 interface Profile {
+  id: string
   displayName: string
   avatarUrl: string
-  verified?: boolean
-  isOnline?: boolean
+  profileUrl: string
+  steamId?: string
   discordTag?: string
-  lastLoginAt?: string
-  memberSince?: string
   isFollowing?: boolean
   followersCount?: number
   followingCount?: number
+  gamesCount?: number
+  totalPlaytime?: number
+  averageRating?: number
 }
 
 interface ProfileHeaderProps {
@@ -63,14 +63,6 @@ export const ProfileHeader: FC<ProfileHeaderProps> = ({
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-  }
-
-  const pulseVariant = {
-    pulse: {
-      scale: [1, 1.05, 1],
-      opacity: [0.9, 1, 0.9],
-      transition: { repeat: Infinity, duration: 2.5 },
-    },
   }
 
   const handleDiscordTagChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -187,13 +179,6 @@ export const ProfileHeader: FC<ProfileHeaderProps> = ({
                 className='w-full h-full object-cover transition-transform duration-300 group-hover:scale-110'
               />
             </div>
-            {profile.isOnline && (
-              <motion.div
-                className='absolute bottom-1 right-1 md:bottom-3 md:right-3 w-4 h-4 md:w-5 md:h-5 bg-green-500 rounded-full border-2 border-[var(--bg-primary)]'
-                variants={pulseVariant}
-                animate='pulse'
-              />
-            )}
           </motion.div>
 
           <div className='flex-1'>
@@ -202,26 +187,8 @@ export const ProfileHeader: FC<ProfileHeaderProps> = ({
               className='flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4'
             >
               <div>
-                <h1 className='text-2xl md:text-3xl font-bold text-[var(--text-primary)] flex items-center gap-2'>
+                <h1 className='text-2xl md:text-3xl font-bold text-[var(--text-primary)]'>
                   {profile.displayName}
-                  {profile.verified && (
-                    <span
-                      className='text-blue-400'
-                      title='Подтверждённый профиль'
-                    >
-                      <svg
-                        className='w-5 h-5 md:w-6 md:h-6'
-                        viewBox='0 0 20 20'
-                        fill='currentColor'
-                      >
-                        <path
-                          fillRule='evenodd'
-                          d='M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z'
-                          clipRule='evenodd'
-                        />
-                      </svg>
-                    </span>
-                  )}
                 </h1>
 
                 <div className='mt-1 flex flex-wrap items-center gap-3 text-[var(--text-secondary)] text-sm'>
@@ -304,48 +271,6 @@ export const ProfileHeader: FC<ProfileHeaderProps> = ({
                     )}
                   </div>
 
-                  {profile.lastLoginAt && !isOwnProfile && (
-                    <span className='flex items-center gap-1'>
-                      <svg
-                        className='w-4 h-4 opacity-70'
-                        fill='none'
-                        stroke='currentColor'
-                        viewBox='0 0 24 24'
-                      >
-                        <path
-                          strokeLinecap='round'
-                          strokeLinejoin='round'
-                          strokeWidth={2}
-                          d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'
-                        />
-                      </svg>
-                      Был в сети:{' '}
-                      {format(new Date(profile.lastLoginAt), 'd MMMM', {
-                        locale: ru,
-                      })}
-                    </span>
-                  )}
-                  {profile.memberSince && (
-                    <span className='flex items-center gap-1'>
-                      <svg
-                        className='w-4 h-4 opacity-70'
-                        fill='none'
-                        stroke='currentColor'
-                        viewBox='0 0 24 24'
-                      >
-                        <path
-                          strokeLinecap='round'
-                          strokeLinejoin='round'
-                          strokeWidth={2}
-                          d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'
-                        />
-                      </svg>
-                      С нами с{' '}
-                      {format(new Date(profile.memberSince), 'MMMM yyyy', {
-                        locale: ru,
-                      })}
-                    </span>
-                  )}
                   {isOwnProfile && (
                     <span className='py-1 px-2 text-xs bg-[var(--accent-primary)]/20 rounded-full text-[var(--accent-tertiary)] select-none'>
                       Это ваш профиль

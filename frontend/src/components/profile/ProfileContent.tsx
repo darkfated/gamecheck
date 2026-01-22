@@ -12,19 +12,26 @@ interface Game {
   status: string
   rating?: number | null
   review?: string
-  description?: string
+  userId: string
+  steamAppId?: number | null
+  steamStoreUrl?: string
+  steamIconUrl?: string
+  steamPlaytimeForever?: number | null
 }
 
 interface ProfileData {
   id: string
   displayName: string
   avatarUrl: string
-  verified?: boolean
-  isOnline?: boolean
+  profileUrl: string
+  steamId?: string
   discordTag?: string
-  lastLoginAt?: string
-  memberSince?: string
-  profileUrl?: string
+  isFollowing?: boolean
+  followersCount?: number
+  followingCount?: number
+  gamesCount?: number
+  totalPlaytime?: number
+  averageRating?: number
 }
 
 interface Tab {

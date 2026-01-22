@@ -13,15 +13,15 @@ interface ProfileData {
   id: string
   displayName: string
   avatarUrl: string
-  verified?: boolean
-  isOnline?: boolean
+  profileUrl: string
+  steamId?: string
   discordTag?: string
-  lastLoginAt?: string
-  memberSince?: string
-  profileUrl?: string
   isFollowing?: boolean
   followersCount?: number
   followingCount?: number
+  gamesCount?: number
+  totalPlaytime?: number
+  averageRating?: number
 }
 
 interface Game {
@@ -30,7 +30,11 @@ interface Game {
   status: string
   rating?: number | null
   review?: string
-  description?: string
+  userId: string
+  steamAppId?: number | null
+  steamStoreUrl?: string
+  steamIconUrl?: string
+  steamPlaytimeForever?: number | null
 }
 
 interface Tab {
@@ -42,6 +46,7 @@ interface UserProfile {
   id: string
   displayName: string
   avatarUrl: string
+  profileUrl?: string
 }
 
 const safeFetch = async <T,>(fn: () => Promise<{ data: T }>, fallback: T) => {
@@ -52,11 +57,6 @@ const safeFetch = async <T,>(fn: () => Promise<{ data: T }>, fallback: T) => {
     console.error(err)
     return fallback
   }
-}
-
-const sectionVariants = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
 }
 
 const Profile: FC = () => {
@@ -73,7 +73,7 @@ const Profile: FC = () => {
   const [showFollowersModal, setShowFollowersModal] = useState(false)
   const [showFollowingModal, setShowFollowingModal] = useState(false)
   const [activeTab, setActiveTab] = useState('progress')
-  const [followLoading, setFollowLoading] = useState(false)
+  const [, setFollowLoading] = useState(false)
   const [listsLoaded, setListsLoaded] = useState(false)
 
   const statusOptions = useMemo(() => getStatusOptions(), [])
@@ -159,15 +159,6 @@ const Profile: FC = () => {
       [] as UserProfile[],
     )
     setFollowers(followersData)
-  }, [id])
-
-  const refreshFollowing = useCallback(async () => {
-    if (!id) return
-    const followingData = await safeFetch(
-      () => api.subscriptions.getFollowing(id),
-      [] as UserProfile[],
-    )
-    setFollowing(followingData)
   }, [id])
 
   const handleFollow = async () => {

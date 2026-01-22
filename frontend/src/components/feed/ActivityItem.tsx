@@ -8,19 +8,19 @@ interface User {
   id: string
   displayName: string
   avatarUrl: string
-}
-
-interface Progress {
-  name: string
-  status: string
-  rating?: number
+  profileUrl?: string
 }
 
 interface Activity {
   id: string
   type: string
+  userId: string
   user: User
-  progress?: Progress
+  progressId?: string
+  gameName?: string
+  status?: string
+  rating?: number
+  targetUserId?: string
   targetUser?: {
     id: string
     displayName: string
@@ -41,66 +41,66 @@ export const ActivityItem: FC<ActivityItemProps> = ({ activity }) => {
   }
 
   const renderActivityContent = () => {
-    const { type, progress, targetUser } = activity
+    const { type, gameName, status, rating, targetUser } = activity
 
     switch (type) {
       case 'add_game':
-        if (!progress) return <span>добавил(а) игру</span>
+        if (!gameName) return <span>добавил(а) игру</span>
         return (
           <span>
             добавил(а) игру{' '}
             <span className='font-medium text-[var(--accent-tertiary)]'>
-              {progress.name}
+              {gameName}
             </span>{' '}
-            в список "{getStatusLabel(progress.status)}"
+            в список "{status ? getStatusLabel(status) : ''}"
           </span>
         )
       case 'update_game':
       case 'update_status':
-        if (!progress) return <span>изменил(а) статус игры</span>
+        if (!gameName) return <span>изменил(а) статус игры</span>
         return (
           <span>
             изменил(а) статус игры{' '}
             <span className='font-medium text-[var(--accent-tertiary)]'>
-              {progress.name}
+              {gameName}
             </span>{' '}
-            на "{getStatusLabel(progress.status)}"
+            на "{status ? getStatusLabel(status) : ''}"
           </span>
         )
       case 'rate_game':
-        if (!progress) return <span>оценил(а) игру</span>
+        if (!gameName) return <span>оценил(а) игру</span>
         return (
           <span>
             оценил(а) игру{' '}
             <span className='font-medium text-[var(--accent-tertiary)]'>
-              {progress.name}
+              {gameName}
             </span>{' '}
-            на {progress.rating}/10
+            на {rating}/10
           </span>
         )
       case 'follow':
-        if (!targetUser) return <span>подписался(ась) на пользователя</span>
+        if (!activity.targetUser) return <span>подписался(ась) на пользователя</span>
         return (
           <span>
             подписался(ась) на{' '}
             <Link
-              to={`/profile/${targetUser.id}`}
+              to={`/profile/${activity.targetUser.id}`}
               className='font-medium text-[var(--accent-tertiary)] hover:text-[var(--accent-secondary)] transition-colors'
             >
-              {targetUser.displayName}
+              {activity.targetUser.displayName}
             </Link>
           </span>
         )
       case 'unfollow':
-        if (!targetUser) return <span>отписался(ась) от пользователя</span>
+        if (!activity.targetUser) return <span>отписался(ась) от пользователя</span>
         return (
           <span>
             отписался(ась) от{' '}
             <Link
-              to={`/profile/${targetUser.id}`}
+              to={`/profile/${activity.targetUser.id}`}
               className='font-medium text-[var(--accent-tertiary)] hover:text-[var(--accent-secondary)] transition-colors'
             >
-              {targetUser.displayName}
+              {activity.targetUser.displayName}
             </Link>
           </span>
         )

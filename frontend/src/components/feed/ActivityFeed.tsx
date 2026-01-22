@@ -7,19 +7,21 @@ import { ActivityItem } from './ActivityItem'
 interface ActivityData {
   id: string
   type: string
+  userId: string
   user: {
     id: string
     displayName: string
     avatarUrl: string
   }
-  progress?: {
-    name: string
-    status: string
-    rating?: number
-  }
+  progressId?: string
+  gameName?: string
+  status?: string
+  rating?: number
+  targetUserId?: string
   targetUser?: {
     id: string
     displayName: string
+    avatarUrl?: string
   }
   createdAt: string
 }

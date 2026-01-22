@@ -12,7 +12,14 @@ interface User {
   id: string
   displayName: string
   avatarUrl: string
+  profileUrl: string
   steamId?: string
+  discordTag?: string
+  followersCount?: number
+  followingCount?: number
+  gamesCount?: number
+  totalPlaytime?: number
+  averageRating?: number
 }
 
 interface AuthContextType {

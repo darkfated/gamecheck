@@ -7,12 +7,12 @@ interface Game {
   id: string
   name: string
   status: string
-  rating?: number
+  rating?: number | null
   review?: string
-  steamAppId?: string
+  steamAppId?: number | null
   steamStoreUrl?: string
   steamIconUrl?: string
-  steamPlaytimeForever?: number
+  steamPlaytimeForever?: number | null
 }
 
 interface StatusOption {

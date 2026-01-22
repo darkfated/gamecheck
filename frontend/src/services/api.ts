@@ -6,7 +6,15 @@ interface User {
   id: string
   displayName: string
   avatarUrl: string
+  profileUrl: string
   steamId?: string
+  discordTag?: string
+  followersCount?: number
+  followingCount?: number
+  gamesCount?: number
+  totalPlaytime?: number
+  averageRating?: number
+  isFollowing?: boolean
 }
 
 interface GameData {
@@ -14,27 +22,31 @@ interface GameData {
   status: string
   rating?: number | null
   review?: string
-  description?: string
 }
 
 interface Game extends GameData {
   id: string
   userId: string
+  steamAppId?: number | null
+  steamStoreUrl?: string
+  steamIconUrl?: string
+  steamPlaytimeForever?: number | null
 }
 
 interface Activity {
   id: string
   type: string
+  userId: string
   user: {
     id: string
     displayName: string
     avatarUrl: string
   }
-  progress?: {
-    name: string
-    status: string
-    rating?: number
-  }
+  progressId?: string
+  gameName?: string
+  status?: string
+  rating?: number
+  targetUserId?: string
   targetUser?: {
     id: string
     displayName: string

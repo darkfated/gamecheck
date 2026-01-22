@@ -8,6 +8,12 @@ interface Game {
   id: string
   name: string
   status: string
+  rating?: number | null
+  review?: string
+  steamAppId?: number | null
+  steamStoreUrl?: string
+  steamIconUrl?: string
+  steamPlaytimeForever?: number | null
 }
 
 interface GameProgressSectionProps {
