@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion'
 import { FC, useEffect, useMemo, useRef } from 'react'
 
 interface Game {
@@ -178,24 +179,55 @@ export const GameStats: FC<GameStatsProps> = ({
 
   if (stats.total === 0) {
     return (
-      <div className='mt-6 p-4 bg-[var(--card-bg)] rounded-xl border border-[var(--border-color)] shadow-md'>
-        <h3 className='text-lg font-semibold text-[var(--text-primary)] mb-4'>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className='mt-6 bg-gradient-to-br from-[var(--card-bg)] to-[var(--bg-tertiary)]/80 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-[var(--border-color)] overflow-hidden relative'
+      >
+        <div className='absolute top-0 right-0 w-40 h-40 bg-gradient-to-r from-indigo-600/5 to-purple-600/5 rounded-full -translate-y-1/2 translate-x-1/4 blur-xl'></div>
+        <div className='absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-r from-purple-600/5 to-pink-600/5 rounded-full translate-y-1/2 -translate-x-1/3 blur-xl'></div>
+
+        <h2 className='text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-500 mb-6'>
           Статистика игр
-        </h3>
+        </h2>
         <p className='text-[var(--text-secondary)] italic text-center py-4'>
           Нет данных для отображения статистики.
         </p>
-      </div>
+      </motion.div>
     )
   }
 
-  return (
-    <div className='mt-6 p-4 bg-[var(--card-bg)] rounded-xl border border-[var(--border-color)] shadow-md overflow-hidden'>
-      <h3 className='text-lg font-semibold text-[var(--text-primary)] mb-6'>
-        Статистика игр
-      </h3>
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        when: 'beforeChildren' as const,
+        staggerChildren: 0.1,
+      },
+    },
+  }
 
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+  }
+
+  return (
+    <motion.div
+      initial='hidden'
+      animate='visible'
+      variants={containerVariants}
+      className='mt-6 bg-gradient-to-br from-[var(--card-bg)] to-[var(--bg-tertiary)]/80 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-[var(--border-color)] overflow-hidden relative'
+    >
+      <div className='absolute top-0 right-0 w-40 h-40 bg-gradient-to-r from-indigo-600/5 to-purple-600/5 rounded-full -translate-y-1/2 translate-x-1/4 blur-xl'></div>
+      <div className='absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-r from-purple-600/5 to-pink-600/5 rounded-full translate-y-1/2 -translate-x-1/3 blur-xl'></div>
+
+      <motion.h2 variants={itemVariants} className='text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-500 mb-6'>
+        Статистика игр
+      </motion.h2>
+
+      <motion.div variants={itemVariants} className='grid grid-cols-1 md:grid-cols-3 gap-6'>
         <div className='md:col-span-1 flex justify-center items-center'>
           <canvas
             ref={canvasRef}
@@ -207,7 +239,7 @@ export const GameStats: FC<GameStatsProps> = ({
 
         <div className='md:col-span-2'>
           <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-            <div>
+            <motion.div variants={itemVariants}>
               <h4 className='text-sm font-medium text-[var(--text-secondary)] mb-4'>
                 По статусам
               </h4>
@@ -236,7 +268,7 @@ export const GameStats: FC<GameStatsProps> = ({
                           {count} ({percentage}%)
                         </span>
                       </div>
-                      <div className='w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2'>
+                      <div className='w-full bg-[var(--bg-secondary)] rounded-full h-2'>
                         <div
                           className={`${getProgressColor(
                             status.value,
@@ -248,13 +280,13 @@ export const GameStats: FC<GameStatsProps> = ({
                   )
                 })}
               </div>
-            </div>
+            </motion.div>
 
-            <div>
+            <motion.div variants={itemVariants}>
               <h4 className='text-sm font-medium text-[var(--text-secondary)] mb-4'>
                 Общая статистика
               </h4>
-              <div className='bg-gradient-to-br from-[var(--accent-primary)]/5 to-[var(--accent-secondary)]/5 rounded-lg p-4 space-y-4'>
+              <div className='bg-gradient-to-br from-[var(--accent-primary)]/5 to-[var(--accent-secondary)]/5 rounded-lg p-4 space-y-4 border border-[var(--border-color)]/30'>
                 <div className='flex justify-between items-center'>
                   <span className='text-sm text-[var(--text-primary)]'>
                     Всего игр
@@ -303,10 +335,10 @@ export const GameStats: FC<GameStatsProps> = ({
                   </span>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
