@@ -1,7 +1,11 @@
 import { motion } from 'framer-motion'
 import React from 'react'
+import { Link } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 
 export const Footer: React.FC = () => {
+  const { user } = useAuth()
+
   return (
     <motion.footer
       className='border-t border-[var(--border-color)] bg-[var(--bg-secondary)] mt-auto'
@@ -11,7 +15,6 @@ export const Footer: React.FC = () => {
     >
       <div className='container mx-auto px-4 py-8'>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
-          {/* О проекте */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -37,11 +40,37 @@ export const Footer: React.FC = () => {
               GameCheck
             </h3>
             <p className='text-sm text-[var(--text-secondary)] leading-relaxed'>
-              Платформа для отслеживания игровой активности.
+              Открытая платформа по отслеживания игровой активности с
+              социальными функциями.
             </p>
+
+            {user && (
+              <div className='mt-4 flex items-center gap-3'>
+                <Link
+                  to={`/profile/${user.id}`}
+                  className='flex items-center gap-3'
+                >
+                  <img
+                    src={user.avatarUrl}
+                    alt={user.displayName}
+                    className='w-10 h-10 rounded-full object-cover ring-2'
+                    style={{
+                      borderColor: 'rgba(var(--accent-primary-rgb), 0.25)',
+                    }}
+                  />
+                  <div className='flex flex-col'>
+                    <span className='text-sm font-medium text-[var(--text-primary)] truncate'>
+                      {user.displayName}
+                    </span>
+                    <span className='text-xs text-[var(--text-secondary)]'>
+                      Перейти в профиль
+                    </span>
+                  </div>
+                </Link>
+              </div>
+            )}
           </motion.div>
 
-          {/* Социальные сети */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -99,3 +128,5 @@ export const Footer: React.FC = () => {
     </motion.footer>
   )
 }
+
+export default Footer
