@@ -11,7 +11,6 @@ import (
 	"gamecheck/pkg/utils"
 
 	"github.com/gin-gonic/gin"
-	"github.com/k0kubun/pp/v3"
 )
 
 type ProgressHandler struct {
@@ -60,8 +59,6 @@ func (h *ProgressHandler) GetUserGames(ctx *gin.Context) {
 	if games == nil {
 		games = []*models.Progress{}
 	}
-
-	pp.Println(games)
 
 	ctx.JSON(http.StatusOK, games)
 }
