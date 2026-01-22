@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import React, { FC, useEffect, useState } from 'react'
+import { useAuth } from '../../contexts/AuthContext'
 import { ProfileStats } from './ProfileStats'
 
 interface Profile {
@@ -44,6 +45,7 @@ export const ProfileHeader: FC<ProfileHeaderProps> = ({
   followersCount = 0,
   followingCount = 0,
 }) => {
+  const user = useAuth()
   const [isEditingDiscord, setIsEditingDiscord] = useState(false)
   const [discordTag, setDiscordTag] = useState(profile?.discordTag || '')
   const [discordError, setDiscordError] = useState('')
@@ -291,7 +293,7 @@ export const ProfileHeader: FC<ProfileHeaderProps> = ({
               </div>
 
               <div className='mt-2 sm:mt-0'>
-                {!isOwnProfile && (
+                {!user && !isOwnProfile && (
                   <motion.button
                     onClick={onFollow}
                     whileHover={{ scale: 1.03 }}
