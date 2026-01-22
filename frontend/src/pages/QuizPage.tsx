@@ -151,7 +151,7 @@ export default function QuizPage() {
                     <motion.button
                       variants={chipItem}
                       onClick={() => setSelectedCategory(null)}
-                      className={`relative z-10 px-6 py-3 rounded-lg text-sm font-medium transition-all focus:outline-none focus-visible:outline-none ${
+                      className={`relative z-10 px-6 py-3 rounded-lg text-sm font-medium transition-all ${
                         selectedCategory === null
                           ? 'text-[var(--text-primary)]'
                           : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -192,7 +192,7 @@ export default function QuizPage() {
                       <motion.button
                         variants={chipItem}
                         onClick={() => setSelectedCategory(category)}
-                        className={`relative z-10 px-6 py-3 rounded-lg text-sm font-medium transition-all outline-none ${
+                        className={`relative z-10 px-6 py-3 rounded-lg text-sm font-medium transition-all ${
                           selectedCategory === category
                             ? 'text-[var(--text-primary)]'
                             : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
