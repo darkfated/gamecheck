@@ -2,13 +2,9 @@ import { motion } from 'framer-motion'
 import { FC, useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import Modal from '../components/common/Modal'
-import { ActivityFeed } from '../components/feed/ActivityFeed'
-import GameProgressSection from '../components/games/GameProgressSection'
-import { GameStats } from '../components/profile/GameStats'
+import { ProfileContent } from '../components/profile/ProfileContent'
 import { ProfileHeader } from '../components/profile/ProfileHeader'
-import { ProfileInfo } from '../components/profile/ProfileInfo'
-import { ProfileSettings } from '../components/profile/ProfileSettings'
-import { ProfileSidebar } from '../components/profile/ProfileSidebar'
+import { ProfileTabs } from '../components/profile/ProfileTabs'
 import { getStatusOptions } from '../constants'
 import { useAuth } from '../contexts/AuthContext'
 import api from '../services/api'
@@ -272,7 +268,7 @@ const Profile: FC = () => {
   }
 
   return (
-    <div>
+    <div className='min-h-screen'>
       <ProfileHeader
         profile={profile}
         isOwnProfile={isOwnProfile}
@@ -283,56 +279,54 @@ const Profile: FC = () => {
         showFollowingModal={() => setShowFollowingModal(true)}
         gamesCount={games.length}
         updateProfile={updateProfile}
+        followersCount={profile.followersCount || 0}
+        followingCount={profile.followingCount || 0}
       />
 
-      <div className='container mx-auto px-4 pb-8'>
-        <div className='flex flex-col lg:flex-row gap-6'>
-          <ProfileSidebar
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            tabs={tabs}
-          />
+      <div className='container mx-auto px-4 pt-2 pb-8'>
+        <motion.div
+          className='flex flex-col lg:flex-row gap-6 items-start'
+          layout
+        >
+          <motion.div
+            className='w-full lg:w-72 flex-shrink-0'
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className='sticky top-20'>
+              <ProfileTabs
+                activeTab={activeTab}
+                tabs={tabs}
+                onSelectTab={setActiveTab}
+              />
+            </div>
+          </motion.div>
 
           <motion.div
-            className='flex-1'
-            initial='hidden'
-            animate='show'
-            variants={sectionVariants}
-            key={activeTab}
+            className='flex-1 w-full'
+            layout
+            transition={{
+              layout: { duration: 0.3, ease: 'easeInOut' },
+            }}
           >
-            {activeTab === 'progress' && profile && (
-              <div>
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <GameProgressSection userId={id!} isOwner={isOwnProfile} />
-                </motion.div>
-              </div>
-            )}
-
-            {activeTab === 'activity' && profile && (
-              <div>
-                <ActivityFeed userId={id!} />
-              </div>
-            )}
-
-            {activeTab === 'info' && profile && (
-              <div>
-                <ProfileInfo profile={profile} isOwnProfile={isOwnProfile} />
-                <GameStats games={games} statusOptions={statusOptions} />
-              </div>
-            )}
-
-            {activeTab === 'settings' && isOwnProfile && (
-              <ProfileSettings
-                profile={profile}
-                updateProfile={updateProfile}
-              />
-            )}
+            <ProfileContent
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              tabs={tabs}
+              games={games}
+              isOwnProfile={isOwnProfile}
+              profile={profile}
+              profileId={id}
+              updateProfile={updateProfile}
+              statusOptions={statusOptions}
+              followers={followers}
+              following={following}
+              onShowFollowersModal={() => setShowFollowersModal(true)}
+              onShowFollowingModal={() => setShowFollowingModal(true)}
+            />
           </motion.div>
-        </div>
+        </motion.div>
       </div>
 
       <Modal
