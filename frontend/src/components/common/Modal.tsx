@@ -1,4 +1,9 @@
-import { AnimatePresence, motion } from 'framer-motion'
+import {
+  AnimatePresence,
+  motion,
+  type Transition,
+  type Variants,
+} from 'framer-motion'
 import React, { FC, ReactNode, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 
@@ -19,37 +24,49 @@ const sizeClasses: Record<string, string> = {
   full: 'max-w-full mx-4',
 }
 
-const overlayVariants = {
+const overlayVariants: Variants = {
   hidden: { opacity: 0, backdropFilter: 'blur(0px)' },
   visible: {
     opacity: 1,
     backdropFilter: 'blur(4px)',
-    transition: { duration: 0.22 },
+    transition: { duration: 0.22 } as unknown as Transition,
   },
   exit: {
     opacity: 0,
     backdropFilter: 'blur(0px)',
-    transition: { duration: 0.18 },
+    transition: { duration: 0.18 } as unknown as Transition,
   },
 }
 
-const panelVariants = {
+const panelVariants: Variants = {
   hidden: { opacity: 0, y: 18, scale: 0.995 },
   visible: {
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: { type: 'spring', stiffness: 340, damping: 32 },
+    transition: {
+      type: 'spring',
+      stiffness: 340,
+      damping: 32,
+    } as unknown as Transition,
   },
-  exit: { opacity: 0, y: 18, scale: 0.995, transition: { duration: 0.18 } },
+  exit: {
+    opacity: 0,
+    y: 18,
+    scale: 0.995,
+    transition: { duration: 0.18 } as unknown as Transition,
+  },
 }
 
-const contentVariants = {
+const contentVariants: Variants = {
   hidden: { opacity: 0, y: 6 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.28, ease: [0.25, 0.8, 0.25, 1] },
+    transition: {
+      duration: 0.28,
+      ease: [0.25, 0.8, 0.25, 1] as unknown,
+    } as unknown as Transition,
   },
 }
 
@@ -94,15 +111,15 @@ const Modal: FC<ModalProps> = ({
       if (e.key === 'Tab') {
         const panel = panelRef.current
         if (!panel) return
-        const focusables = Array.from(
-          panel.querySelectorAll<HTMLElement>(focusableSelectors),
+        const focusableElements = Array.from(
+          panel.querySelectorAll<HTMLElement>(focusableSelectors)
         ).filter(el => el.offsetParent !== null && !el.hasAttribute('disabled'))
-        if (focusables.length === 0) {
+        if (focusableElements.length === 0) {
           e.preventDefault()
           return
         }
-        const first = focusables[0]
-        const last = focusables[focusables.length - 1]
+        const first = focusableElements[0]
+        const last = focusableElements[focusableElements.length - 1]
         if (e.shiftKey) {
           if (document.activeElement === first) {
             e.preventDefault()
@@ -122,11 +139,11 @@ const Modal: FC<ModalProps> = ({
     requestAnimationFrame(() => {
       const panel = panelRef.current
       if (!panel) return
-      const focusables = Array.from(
-        panel.querySelectorAll<HTMLElement>(focusableSelectors),
+      const focusableElements = Array.from(
+        panel.querySelectorAll<HTMLElement>(focusableSelectors)
       ).filter(el => el.offsetParent !== null && !el.hasAttribute('disabled'))
-      if (focusables.length > 0) {
-        focusables[0].focus()
+      if (focusableElements.length > 0) {
+        focusableElements[0].focus()
       } else {
         panel.setAttribute('tabindex', '-1')
         panel.focus()
@@ -225,7 +242,7 @@ const Modal: FC<ModalProps> = ({
         </div>
       )}
     </AnimatePresence>,
-    document.body,
+    document.body
   )
 }
 

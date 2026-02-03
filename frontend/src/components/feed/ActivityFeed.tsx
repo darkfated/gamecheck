@@ -67,7 +67,7 @@ export const ActivityFeed: FC<ActivityFeedProps> = ({
           err.response?.data?.error ||
             err.response?.data?.message ||
             err.message ||
-            'Ошибка загрузки активностей',
+            'Ошибка загрузки активностей'
         )
       } finally {
         setLoading(false)

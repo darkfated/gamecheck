@@ -76,7 +76,7 @@ const Users: FC = () => {
       setError(
         err?.response?.data?.message ||
           err?.message ||
-          'Ошибка при загрузке пользователей',
+          'Ошибка при загрузке пользователей'
       )
       setUsers([])
       setTotal(0)
@@ -135,7 +135,7 @@ const Users: FC = () => {
     return baseList.filter(
       u =>
         u.displayName.toLowerCase().includes(q) ||
-        (u.discordTag ?? '').toLowerCase().includes(q),
+        (u.discordTag ?? '').toLowerCase().includes(q)
     )
   }, [baseList, debouncedQuery])
 
@@ -161,7 +161,7 @@ const Users: FC = () => {
 
   const rankedUsers = useMemo(
     () => sortedUsers.map((u, idx) => ({ ...u, rank: page * limit + idx + 1 })),
-    [sortedUsers, page, limit],
+    [sortedUsers, page, limit]
   )
 
   const containerVariants = {

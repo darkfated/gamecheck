@@ -62,14 +62,8 @@ const StatusBadgeInline: FC<{ status: string }> = ({ status }) => {
 }
 
 export const ActivityItem: FC<ActivityItemProps> = ({ activity }) => {
-  const getStatusLabel = (status: string): string => {
-    return (
-      GAME_STATUS_LABELS[status as keyof typeof GAME_STATUS_LABELS] || status
-    )
-  }
-
   const renderActivityContent = () => {
-    const { type, gameName, status, rating, targetUser } = activity
+    const { type, gameName, status, rating } = activity
 
     switch (type) {
       case 'add_game':

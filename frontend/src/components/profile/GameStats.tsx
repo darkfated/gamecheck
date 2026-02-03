@@ -69,7 +69,7 @@ export const GameStats: FC<GameStatsProps> = ({
             acc[status.value] = 0
             return acc
           },
-          {} as Record<string, number>,
+          {} as Record<string, number>
         ),
         avgRating: 0,
         ratingCount: 0,
@@ -81,15 +81,15 @@ export const GameStats: FC<GameStatsProps> = ({
         acc[game.status] = (acc[game.status] || 0) + 1
         return acc
       },
-      {} as Record<string, number>,
+      {} as Record<string, number>
     )
 
     const gamesWithRating = games.filter(
-      game => game.rating !== null && game.rating !== undefined,
+      game => game.rating !== null && game.rating !== undefined
     )
     const sumRatings = gamesWithRating.reduce(
       (sum, game) => sum + (game.rating || 0),
-      0,
+      0
     )
     const avgRating =
       gamesWithRating.length > 0
@@ -223,11 +223,17 @@ export const GameStats: FC<GameStatsProps> = ({
       <div className='absolute top-0 right-0 w-40 h-40 bg-gradient-to-r from-indigo-600/5 to-purple-600/5 rounded-full -translate-y-1/2 translate-x-1/4 blur-xl'></div>
       <div className='absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-r from-purple-600/5 to-pink-600/5 rounded-full translate-y-1/2 -translate-x-1/3 blur-xl'></div>
 
-      <motion.h2 variants={itemVariants} className='text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-500 mb-6'>
+      <motion.h2
+        variants={itemVariants}
+        className='text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-500 mb-6'
+      >
         Статистика игр
       </motion.h2>
 
-      <motion.div variants={itemVariants} className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+      <motion.div
+        variants={itemVariants}
+        className='grid grid-cols-1 md:grid-cols-3 gap-6'
+      >
         <div className='md:col-span-1 flex justify-center items-center'>
           <canvas
             ref={canvasRef}
@@ -257,7 +263,7 @@ export const GameStats: FC<GameStatsProps> = ({
                         <div className='flex items-center'>
                           <div
                             className={`w-3 h-3 rounded-full mr-2 ${getStatusColor(
-                              status.value,
+                              status.value
                             )}`}
                           ></div>
                           <span className='text-sm text-[var(--text-primary)]'>
@@ -271,7 +277,7 @@ export const GameStats: FC<GameStatsProps> = ({
                       <div className='w-full bg-[var(--bg-secondary)] rounded-full h-2'>
                         <div
                           className={`${getProgressColor(
-                            status.value,
+                            status.value
                           )} h-2 rounded-full`}
                           style={{ width: `${percentage}%` }}
                         ></div>

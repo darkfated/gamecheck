@@ -5,17 +5,17 @@
 1. **Установка зависимостей**
 
 ```bash
-npm install
+yarn install
 ```
 
 2. **Запуск**
 
 ```bash
-npm start
+yarn start
 ```
 
 3. **Сборка проекта**
 
 ```bash
-npm run build
+yarn build
 ```

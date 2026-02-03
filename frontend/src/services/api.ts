@@ -97,7 +97,7 @@ axiosInstance.interceptors.request.use(
     }
     return config
   },
-  error => Promise.reject(error),
+  error => Promise.reject(error)
 )
 
 axiosInstance.interceptors.response.use(
@@ -111,7 +111,7 @@ axiosInstance.interceptors.response.use(
             message: error.response.data,
             url: error.config.url,
           }
-        : error.message,
+        : error.message
     )
 
     if (error.response?.status === 401) {
@@ -122,7 +122,7 @@ axiosInstance.interceptors.response.use(
     }
 
     return Promise.reject(error)
-  },
+  }
 )
 
 const authApi = {
@@ -134,7 +134,7 @@ const authApi = {
       }
 
       const response = await axiosInstance.get<{ user: User }>(
-        '/auth/validate-token',
+        '/auth/validate-token'
       )
       return { isAuthenticated: true, user: response.data.user }
     } catch (error) {
@@ -174,7 +174,7 @@ const authApi = {
 const progressApi = {
   getUserGames: (userId?: string) =>
     axiosInstance.get<Game[]>(
-      userId ? `/progress/user/${userId}` : '/progress',
+      userId ? `/progress/user/${userId}` : '/progress'
     ),
 
   addGame: (data: GameData) => {

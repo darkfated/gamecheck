@@ -18,7 +18,7 @@ export const ProfileSettings: FC<ProfileSettingsProps> = ({
   const [discordTag, setDiscordTag] = useState(profile?.discordTag || '')
   const [discordError, setDiscordError] = useState('')
   const [isEditingDiscord, setIsEditingDiscord] = useState(false)
-  const [showSaved, setShowSaved] = useState(false)
+  const [, setShowSaved] = useState(false)
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -72,7 +72,7 @@ export const ProfileSettings: FC<ProfileSettingsProps> = ({
     } catch (err: any) {
       console.error('Error updating discord tag:', err)
       setDiscordError(
-        err.response?.data?.message || 'Ошибка при обновлении тега',
+        err.response?.data?.message || 'Ошибка при обновлении тега'
       )
     }
   }
@@ -101,7 +101,7 @@ export const ProfileSettings: FC<ProfileSettingsProps> = ({
             <circle cx='12' cy='12' r='3' />
             <path d='M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51h.09a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z' />
           </svg>
-          <h2 className='text-2xl font-semibold text-[var(--text-primary)]'>
+          <h2 className='text-2xl font-semibold text-[var(--text-primary)] select-none'>
             Интерфейс
           </h2>
         </div>
@@ -140,7 +140,7 @@ export const ProfileSettings: FC<ProfileSettingsProps> = ({
             <path d='M5.121 17.804A8.966 8.966 0 0112 15c2.485 0 4.73.997 6.364 2.636M15 11a3 3 0 11-6 0 3 3 0 016 0z' />
             <path d='M12 3a9 9 0 00-9 9 9 9 0 009 9 9 9 0 009-9 9 9 0 00-9-9z' />
           </svg>
-          <h2 className='text-2xl font-semibold text-[var(--text-primary)]'>
+          <h2 className='text-2xl font-semibold text-[var(--text-primary)] select-none'>
             Профиль
           </h2>
         </div>

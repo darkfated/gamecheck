@@ -101,7 +101,7 @@ export const ProfileHeader: FC<ProfileHeaderProps> = ({
     } catch (err: any) {
       console.error('Error updating discord tag:', err)
       setDiscordError(
-        err.response?.data?.message || 'Ошибка при обновлении тега',
+        err.response?.data?.message || 'Ошибка при обновлении тега'
       )
     }
   }
@@ -225,7 +225,7 @@ export const ProfileHeader: FC<ProfileHeaderProps> = ({
                             if (!discordError) handleDiscordTagSave()
                           }}
                           onKeyDown={(
-                            e: React.KeyboardEvent<HTMLInputElement>,
+                            e: React.KeyboardEvent<HTMLInputElement>
                           ) => {
                             if (e.key === 'Enter' && !discordError) {
                               handleDiscordTagSave()

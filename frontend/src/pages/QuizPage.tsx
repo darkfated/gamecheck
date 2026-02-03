@@ -1,4 +1,10 @@
-import { AnimatePresence, LayoutGroup, motion } from 'framer-motion'
+import {
+  AnimatePresence,
+  LayoutGroup,
+  motion,
+  type Transition,
+  type Variants,
+} from 'framer-motion'
 import { useMemo, useState } from 'react'
 import { QuizList } from '../components/quiz/QuizList'
 import { QuizPlayer } from '../components/quiz/QuizPlayer'
@@ -13,36 +19,55 @@ interface QuizState {
   totalQuestions: number | null
 }
 
-const pageVariants = {
+const pageVariants: Variants = {
   hidden: { opacity: 0, y: 18 },
   enter: {
     opacity: 1,
     y: 0,
-    transition: { type: 'spring', stiffness: 260, damping: 28 },
+    transition: {
+      type: 'spring',
+      stiffness: 260,
+      damping: 28,
+    } as unknown as Transition,
   },
-  exit: { opacity: 0, y: -12, transition: { duration: 0.18 } },
+  exit: {
+    opacity: 0,
+    y: -12,
+    transition: { duration: 0.18 } as unknown as Transition,
+  },
 }
 
-const headerVariants = {
+const headerVariants: Variants = {
   hidden: { opacity: 0, y: -8 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.28 } },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.28 } as unknown as Transition,
+  },
 }
 
-const chipsContainer = {
+const chipsContainer: Variants = {
   hidden: { opacity: 0, y: 8 },
   show: {
     opacity: 1,
     y: 0,
-    transition: { staggerChildren: 0.04, delayChildren: 0.06 },
+    transition: {
+      staggerChildren: 0.04,
+      delayChildren: 0.06,
+    } as unknown as Transition,
   },
 }
 
-const chipItem = {
+const chipItem: Variants = {
   hidden: { opacity: 0, y: 6 },
   show: {
     opacity: 1,
     y: 0,
-    transition: { type: 'spring', stiffness: 400, damping: 28 },
+    transition: {
+      type: 'spring',
+      stiffness: 400,
+      damping: 28,
+    } as unknown as Transition,
   },
 }
 
@@ -89,7 +114,7 @@ export default function QuizPage() {
       selectedCategory
         ? quizzes.filter(q => q.category === selectedCategory)
         : quizzes,
-    [selectedCategory],
+    [selectedCategory]
   )
 
   return (
@@ -141,11 +166,13 @@ export default function QuizPage() {
                             'linear-gradient(90deg, rgba(99,102,241,0.18), rgba(168,85,247,0.18), rgba(217,70,239,0.18))',
                           boxShadow: '0 10px 28px -12px rgba(99,102,241,0.12)',
                         }}
-                        transition={{
-                          type: 'spring',
-                          stiffness: 420,
-                          damping: 28,
-                        }}
+                        transition={
+                          {
+                            type: 'spring',
+                            stiffness: 420,
+                            damping: 28,
+                          } as unknown as Transition
+                        }
                       />
                     )}
                     <motion.button
@@ -181,11 +208,13 @@ export default function QuizPage() {
                             boxShadow:
                               '0 10px 28px -12px rgba(99,102,241,0.12)',
                           }}
-                          transition={{
-                            type: 'spring',
-                            stiffness: 420,
-                            damping: 28,
-                          }}
+                          transition={
+                            {
+                              type: 'spring',
+                              stiffness: 420,
+                              damping: 28,
+                            } as unknown as Transition
+                          }
                         />
                       )}
 
@@ -211,7 +240,9 @@ export default function QuizPage() {
               <motion.div
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.28, delay: 0.04 }}
+                transition={
+                  { duration: 0.28, delay: 0.04 } as unknown as Transition
+                }
               >
                 <QuizList
                   quizzes={filteredQuizzes}
@@ -232,7 +263,13 @@ export default function QuizPage() {
               <motion.div
                 initial={{ opacity: 0, scale: 0.995 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ type: 'spring', stiffness: 280, damping: 28 }}
+                transition={
+                  {
+                    type: 'spring',
+                    stiffness: 280,
+                    damping: 28,
+                  } as unknown as Transition
+                }
               >
                 <QuizPlayer
                   quizId={quizState.quizId}
@@ -254,7 +291,7 @@ export default function QuizPage() {
               <motion.div
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.25 }}
+                transition={{ duration: 0.25 } as unknown as Transition}
               >
                 <QuizResults
                   score={quizState.score || 0}

@@ -79,7 +79,7 @@ const Profile: FC = () => {
   const statusOptions = useMemo(() => getStatusOptions(), [])
 
   const isOwnProfile: boolean = Boolean(
-    currentUser && profile && currentUser.id === profile.id,
+    currentUser && profile && currentUser.id === profile.id
   )
 
   const profileTabs: Tab[] = useMemo(
@@ -88,7 +88,7 @@ const Profile: FC = () => {
       { id: 'activity', label: 'Активность' },
       { id: 'info', label: 'Информация' },
     ],
-    [games.length],
+    [games.length]
   )
 
   const tabs: Tab[] = useMemo(
@@ -96,7 +96,7 @@ const Profile: FC = () => {
       isOwnProfile
         ? [...profileTabs, { id: 'settings', label: 'Настройки' }]
         : profileTabs,
-    [profileTabs, isOwnProfile],
+    [profileTabs, isOwnProfile]
   )
 
   const fetchProfile = useCallback(async () => {
@@ -115,11 +115,11 @@ const Profile: FC = () => {
         safeFetch(() => api.games.getUserGames(id), [] as Game[]),
         safeFetch(
           () => api.subscriptions.getFollowers(id),
-          [] as UserProfile[],
+          [] as UserProfile[]
         ),
         safeFetch(
           () => api.subscriptions.getFollowing(id),
-          [] as UserProfile[],
+          [] as UserProfile[]
         ),
       ])
 
@@ -131,13 +131,13 @@ const Profile: FC = () => {
       if (currentUser && currentUser.id !== id) {
         const myFollowingResponse = await safeFetch(
           () => api.subscriptions.getFollowing(currentUser.id),
-          [] as UserProfile[],
+          [] as UserProfile[]
         )
         const isFollowing = myFollowingResponse.some(
-          (u: UserProfile) => u.id === id,
+          (u: UserProfile) => u.id === id
         )
         setProfile(prev =>
-          prev ? ({ ...prev, isFollowing } as ProfileData) : prev,
+          prev ? ({ ...prev, isFollowing } as ProfileData) : prev
         )
       }
     } catch (err: any) {
@@ -156,7 +156,7 @@ const Profile: FC = () => {
     if (!id) return
     const followersData = await safeFetch(
       () => api.subscriptions.getFollowers(id),
-      [] as UserProfile[],
+      [] as UserProfile[]
     )
     setFollowers(followersData)
   }, [id])
@@ -175,7 +175,7 @@ const Profile: FC = () => {
               ? Math.max(0, (prev.followersCount || 0) - 1)
               : (prev.followersCount || 0) + 1,
           }
-        : prev,
+        : prev
     )
 
     try {

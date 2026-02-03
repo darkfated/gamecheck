@@ -175,7 +175,7 @@ export const ProfileInfo: FC<ProfileInfoProps> = ({
                     "d MMMM yyyy 'в' HH:mm",
                     {
                       locale: ru,
-                    },
+                    }
                   )}
                 </div>
                 <p className='text-xs text-[var(--text-secondary)] mt-1'>
@@ -211,7 +211,7 @@ export const ProfileInfo: FC<ProfileInfoProps> = ({
                   {format(
                     new Date(profile.memberSince || profile.createdAt || ''),
                     'd MMMM yyyy',
-                    { locale: ru },
+                    { locale: ru }
                   )}
                 </div>
                 <p className='text-xs text-[var(--text-secondary)] mt-1'>

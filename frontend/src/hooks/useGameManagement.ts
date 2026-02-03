@@ -19,7 +19,7 @@ interface GameManagementHook {
 }
 
 export const useGameManagement = (
-  onUpdateCallback: () => void,
+  onUpdateCallback: () => void
 ): GameManagementHook => {
   const { user, isAuthenticated, authInitialized } = useAuth()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -84,7 +84,7 @@ export const useGameManagement = (
       const existingGames = gamesResponse.data
 
       const duplicateGame = existingGames.find(
-        g => g.name.toLowerCase() === gameData.name.toLowerCase(),
+        g => g.name.toLowerCase() === gameData.name.toLowerCase()
       )
 
       if (duplicateGame) {
@@ -107,7 +107,7 @@ export const useGameManagement = (
         alert(
           `Error adding game: ${
             error.response?.data?.error || error.message || 'Unknown error'
-          }`,
+          }`
         )
       }
       return false
@@ -118,7 +118,7 @@ export const useGameManagement = (
 
   const updateGame = async (
     gameId: string,
-    updates: Partial<GameData>,
+    updates: Partial<GameData>
   ): Promise<boolean> => {
     if (!checkAuth()) {
       alert('Authentication required to update game')
@@ -161,7 +161,7 @@ export const useGameManagement = (
         alert(
           `Error updating game: ${
             error.response?.data?.error || error.message || 'Unknown error'
-          }`,
+          }`
         )
       }
       return false
@@ -193,7 +193,7 @@ export const useGameManagement = (
         alert(
           `Error deleting game: ${
             error.response?.data?.error || error.message || 'Unknown error'
-          }`,
+          }`
         )
       }
       return false
@@ -221,7 +221,7 @@ export const useGameManagement = (
         alert(
           `Error updating Steam data: ${
             error.response?.data?.error || error.message || 'Unknown error'
-          }`,
+          }`
         )
       }
       return false
