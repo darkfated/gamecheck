@@ -34,7 +34,7 @@ const GameProgressSection: FC<GameProgressSectionProps> = ({
     try {
       setLoading(true)
       setError(null)
-      const response = await api.games.getUserGames(userId)
+      const response = await api.progress.getUserGames(userId)
       setGames(response.data)
     } catch (err) {
       console.error('Ошибка загрузки игр:', err)

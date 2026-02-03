@@ -56,7 +56,7 @@ func (h *AuthHandler) SteamLogin(ctx *gin.Context) {
 			"openid.identity=http://specs.openid.net/auth/2.0/identifier_select&"+
 			"openid.claimed_id=http://specs.openid.net/auth/2.0/identifier_select",
 		h.config.Steam.RedirectURI,
-		"http://localhost:"+h.config.Port,
+		h.config.URLS.Backend,
 	)
 
 	ctx.Redirect(http.StatusTemporaryRedirect, steamLoginURL)
@@ -84,7 +84,7 @@ func (h *AuthHandler) SteamCallback(ctx *gin.Context) {
 		return
 	}
 
-	redirectURL := fmt.Sprintf("http://localhost:3000/auth/callback?token=%s", token)
+	redirectURL := fmt.Sprintf("%s/auth/callback?token=%s", h.config.URLS.Frontend, token)
 	ctx.Redirect(http.StatusTemporaryRedirect, redirectURL)
 }
 

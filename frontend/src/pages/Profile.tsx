@@ -112,7 +112,7 @@ const Profile: FC = () => {
       setProfile(currentProfile)
 
       const [gamesData, followersData, followingData] = await Promise.all([
-        safeFetch(() => api.games.getUserGames(id), [] as Game[]),
+        safeFetch(() => api.progress.getUserGames(id), [] as Game[]),
         safeFetch(
           () => api.subscriptions.getFollowers(id),
           [] as UserProfile[]

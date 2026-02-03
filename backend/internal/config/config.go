@@ -3,18 +3,23 @@ package config
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/joho/godotenv"
 )
 
 type Config struct {
+	URLS     Urls
 	Port     string
 	Env      string
 	JWT      JWTConfig
 	Database DatabaseConfig
 	Steam    SteamConfig
 	CORS     CORSConfig
+}
+
+type Urls struct {
+	Frontend string
+	Backend  string
 }
 
 type DatabaseConfig struct {
@@ -42,24 +47,16 @@ type CORSConfig struct {
 func Load() (*Config, error) {
 	godotenv.Load()
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "5000"
-	}
-
-	env := os.Getenv("ENV")
-	if env == "" {
-		env = "development"
-	}
-
-	corsOrigins := os.Getenv("CORS_ORIGINS")
-	if corsOrigins == "" {
-		corsOrigins = "http://localhost:3000"
-	}
+	frontendURL := os.Getenv("FRONTEND_URL")
+	backendURL := os.Getenv("BACKEND_URL")
 
 	cfg := &Config{
-		Port: port,
-		Env:  env,
+		URLS: Urls{
+			Frontend: frontendURL,
+			Backend:  backendURL,
+		},
+		Port: os.Getenv("BACKEND_PORT"),
+		Env:  os.Getenv("ENV"),
 		JWT: JWTConfig{
 			Secret: os.Getenv("JWT_SECRET"),
 			Expiry: os.Getenv("JWT_EXPIRY"),
@@ -73,10 +70,7 @@ func Load() (*Config, error) {
 		},
 		Steam: SteamConfig{
 			APIKey:      os.Getenv("STEAM_API_KEY"),
-			RedirectURI: os.Getenv("STEAM_REDIRECT_URI"),
-		},
-		CORS: CORSConfig{
-			Origins: strings.Split(corsOrigins, ","),
+			RedirectURI: backendURL + os.Getenv("STEAM_REDIRECT_URI"),
 		},
 	}
 

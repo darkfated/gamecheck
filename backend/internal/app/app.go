@@ -94,7 +94,7 @@ func setupRouter(cfg *config.Config, hdlrs *handlers.Handlers) *gin.Engine {
 	router := gin.Default()
 
 	corsConfig := cors.Config{
-		AllowOrigins:     cfg.CORS.Origins,
+		AllowOrigins:     []string{cfg.URLS.Frontend},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization", "Cookie", "X-Auth-Check", "X-User-ID"},
 		ExposeHeaders:    []string{"Content-Length", "Set-Cookie"},
@@ -118,7 +118,7 @@ func setupRouter(cfg *config.Config, hdlrs *handlers.Handlers) *gin.Engine {
 		c.Next()
 	})
 
-	api := router.Group("/api")
+	api := router.Group("/")
 	hdlrs.RegisterRoutes(api)
 
 	return router

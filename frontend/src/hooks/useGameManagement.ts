@@ -80,7 +80,7 @@ export const useGameManagement = (
     try {
       setIsSubmitting(true)
 
-      const gamesResponse = await api.games.getUserGames()
+      const gamesResponse = await api.progress.getUserGames()
       const existingGames = gamesResponse.data
 
       const duplicateGame = existingGames.find(
@@ -92,7 +92,7 @@ export const useGameManagement = (
         return false
       }
 
-      await api.games.addGame(gameData)
+      await api.progress.addGame(gameData)
       onUpdateCallback()
       return true
     } catch (error: any) {
@@ -147,7 +147,7 @@ export const useGameManagement = (
     }
 
     try {
-      await api.games.updateGame(gameId, updates)
+      await api.progress.updateGame(gameId, updates)
       onUpdateCallback()
       return true
     } catch (error: any) {
@@ -179,7 +179,7 @@ export const useGameManagement = (
     }
 
     try {
-      await api.games.deleteGame(gameId)
+      await api.progress.deleteGame(gameId)
       onUpdateCallback()
       return true
     } catch (error: any) {
@@ -207,7 +207,7 @@ export const useGameManagement = (
     }
 
     try {
-      await api.games.updateSteamData(gameId)
+      await api.progress.updateSteamData(gameId)
       onUpdateCallback()
       return true
     } catch (error: any) {

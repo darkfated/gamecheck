@@ -2,13 +2,13 @@
 
 ## Документация
 
-1. **Установка зависимостей**
+### Установка зависимостей
 
 ```bash
 go mod tidy
 ```
 
-2. **Запуск**
+### Запуск сервера
 
 ```bash
 go run cmd/server/main.go
@@ -16,39 +16,39 @@ go run cmd/server/main.go
 
 ## API методы
 
-### Auth
+### Аутентификация
 
-- `GET /api/auth/steam` - Steam login redirect
-- `GET /api/auth/steam/callback` - Steam callback
-- `GET /api/auth/validate-token` - Validate JWT token
-- `POST /api/auth/logout` - Logout (требует auth)
-- `GET /api/auth/current` - Get current user (требует auth)
-- `GET /api/auth/check` - Check auth status (опционально)
+- `GET /auth/steam` - редирект на авторизацию через Steam
+- `GET /auth/steam/callback` - callback от Steam
+- `GET /auth/validate-token` - проверка валидности JWT-токена
+- `POST /auth/logout` - выход из системы (требует auth)
+- `GET /auth/current` - получить текущего пользователя (требует auth)
+- `GET /auth/check` - проверка статуса авторизации (опционально)
 
 ### Пользователи
 
-- `GET /api/users/:id` - Get user profile
-- `PATCH /api/users/profile` - Update profile (требует auth)
-- `GET /api/users/search/:query` - Search users
+- `GET /users/:id` - получить профиль пользователя
+- `PATCH /users/profile` - обновить профиль пользователя (требует auth)
+- `GET /users/search/:query` - поиск пользователей
 
 ### Прогресс игр
 
-- `GET /api/progress` - Get current user games (требует auth)
-- `GET /api/progress/user/:userId` - Get user games by ID
-- `POST /api/progress` - Add game (требует auth)
-- `PATCH /api/progress/:id` - Update game (требует auth)
-- `DELETE /api/progress/:id` - Delete game (требует auth)
-- `POST /api/progress/:id/update-steam` - Update Steam data (требует auth)
+- `GET /progress` - получить список игр текущего пользователя (требует auth)
+- `GET /progress/user/:userId` - получить список игр пользователя по ID
+- `POST /progress` - добавить игру (требует auth)
+- `PATCH /progress/:id` - обновить игру (требует auth)
+- `DELETE /progress/:id` - удалить игру (требует auth)
+- `POST /progress/:id/update-steam` - обновить данные из Steam (требует auth)
 
 ### Активности
 
-- `GET /api/activity` - Get activity feed (требует auth)
-- `GET /api/activity/user/:userId` - Get user activity
-- `GET /api/activity/following` - Get following activity (требует auth)
+- `GET /activity` - получить ленту активности (требует auth)
+- `GET /activity/user/:userId` - получить активность пользователя
+- `GET /activity/following` - получить активность подписок (требует auth)
 
 ### Подписки
 
-- `GET /api/subscriptions/:userId/followers` - Get followers
-- `GET /api/subscriptions/:userId/following` - Get following
-- `POST /api/subscriptions/follow/:userId` - Follow user (требует auth)
-- `DELETE /api/subscriptions/unfollow/:userId` - Unfollow user (требует auth)
+- `GET /subscriptions/:userId/followers` - получить список подписчиков
+- `GET /subscriptions/:userId/following` - получить список подписок
+- `POST /subscriptions/follow/:userId` - подписаться на пользователя (требует auth)
+- `DELETE /subscriptions/unfollow/:userId` - отписаться от пользователя (требует auth)

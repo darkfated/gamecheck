@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios'
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api'
+const API_URL = process.env.REACT_APP_BACKEND
 
 interface User {
   id: string
@@ -206,8 +206,6 @@ const progressApi = {
   },
 }
 
-const gamesApi = progressApi
-
 const usersApi = {
   listUsers: (limit = 10, offset = 0, sort = 'createdAt', order = 'desc') =>
     axiosInstance.get<{
@@ -243,7 +241,6 @@ const subscriptionsApi = {
 
 const api = {
   auth: authApi,
-  games: gamesApi,
   progress: progressApi,
   users: usersApi,
   activities: activitiesApi,
