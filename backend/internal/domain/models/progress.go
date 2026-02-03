@@ -9,13 +9,6 @@ import (
 
 type GameStatus string
 
-const (
-	StatusPlaying    GameStatus = "playing"
-	StatusCompleted  GameStatus = "completed"
-	StatusPlanToPlay GameStatus = "plan_to_play"
-	StatusDropped    GameStatus = "dropped"
-)
-
 type Progress struct {
 	ID                   string     `json:"id" gorm:"type:uuid;primary_key"`
 	UserID               string     `json:"userId" gorm:"type:uuid;index;not null"`

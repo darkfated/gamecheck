@@ -12,10 +12,8 @@ type ActivityType string
 const (
 	ActivityTypeAddGame      ActivityType = "add_game"
 	ActivityTypeUpdateStatus ActivityType = "update_status"
-	ActivityTypeUpdateGame   ActivityType = "update_game"
 	ActivityTypeRateGame     ActivityType = "rate_game"
 	ActivityTypeFollow       ActivityType = "follow"
-	ActivityTypeUnfollow     ActivityType = "unfollow"
 )
 
 type Activity struct {
