@@ -56,7 +56,7 @@ func Load() (*Config, error) {
 			Backend:  backendURL,
 		},
 		Port: os.Getenv("BACKEND_PORT"),
-		Env:  os.Getenv("ENV"),
+		Env:  os.Getenv("GO_ENV"),
 		JWT: JWTConfig{
 			Secret: os.Getenv("JWT_SECRET"),
 			Expiry: os.Getenv("JWT_EXPIRY"),

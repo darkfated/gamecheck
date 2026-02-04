@@ -53,6 +53,64 @@ GameCheck - это веб-приложение для отслеживания �
 
 ## Документация
 
+### Стартовая инициализация
+
+1. Создайте `.env`
+
+```bash
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
+```
+
+2. Заполните требуемые поля
+
+### Сборка контейнеров
+
+```bash
+docker compose build
+```
+
+### Запуск проекта
+
+```bash
+docker compose up -d
+```
+
+Перейдите на [запущенный сайт](http://localhost:3000/).
+
+### Проверка состояния
+
+```bash
+docker compose ps
+```
+
+### Остановка проекта
+
+```bash
+docker compose down
+```
+
+### Полная очистка
+
+```bash
+docker compose down -v
+```
+
+### Бэкап данных
+
+```bash
+docker compose run --rm backup
+```
+
+В дальнейшем для восстановления из бэкапа:
+
+```bash
+gunzip -c gamecheck_XXXX.sql.gz | \
+docker exec -i gamecheck_db psql -U postgres -d gamecheck
+```
+
+### Также
+
 - [Документация по Frontend](./frontend/README.md)
 - [Документация по Backend](./backend/README.md)
 

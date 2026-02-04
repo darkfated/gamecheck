@@ -3,6 +3,7 @@ package db
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"gamecheck/internal/config"
 	"gamecheck/internal/domain/models"
@@ -37,6 +38,10 @@ func New(cfg *config.Config) (*Database, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to get database instance: %w", err)
 	}
+
+	sqlDB.SetMaxOpenConns(25)
+	sqlDB.SetMaxIdleConns(25)
+	sqlDB.SetConnMaxLifetime(5 * time.Minute)
 
 	err = sqlDB.Ping()
 	if err != nil {

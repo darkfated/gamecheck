@@ -52,3 +52,7 @@ go run cmd/server/main.go
 - `GET /subscriptions/:userId/following` - получить список подписок
 - `POST /subscriptions/follow/:userId` - подписаться на пользователя (требует auth)
 - `DELETE /subscriptions/unfollow/:userId` - отписаться от пользователя (требует auth)
+
+### Остальное
+
+- `GET /health` - проверить работоспособность сервера

@@ -4,6 +4,7 @@ import (
 	"gamecheck/internal/config"
 	"gamecheck/internal/infra/db/repositories"
 	"gamecheck/internal/services"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -55,4 +56,10 @@ func (h *Handlers) RegisterRoutes(router *gin.RouterGroup) {
 	h.Progress.RegisterRoutes(router)
 	h.Activity.RegisterRoutes(router)
 	h.Subscription.RegisterRoutes(router)
+
+	router.GET("/health", HealthHandler)
+}
+
+func HealthHandler(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"status": "ok"})
 }

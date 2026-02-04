@@ -1,0 +1,69 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: gamecheck_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: gamecheck
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d gamecheck']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: gamecheck_backend:latest
+    container_name: gamecheck_backend
+    restart: unless-stopped
+    env_file:
+      - backend/.env
+    environment:
+      DB_HOST: db
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - '5000:5000'
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: gamecheck_frontend:latest
+    container_name: gamecheck_frontend
+    restart: unless-stopped
+    env_file:
+      - frontend/.env
+    depends_on:
+      - backend
+    ports:
+      - '3000:80'
+
+  backup:
+    image: postgres:15-alpine
+    container_name: gamecheck_backup
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: password
+    volumes:
+      - db_backups:/backups
+    entrypoint: >
+      sh -c "
+      mkdir -p /backups &&
+      pg_dump -h db -U postgres -d gamecheck
+      | gzip > /backups/gamecheck_$(date +%Y%m%d_%H%M%S).sql.gz
+      "
+
+volumes:
+  db_data:
+  db_backups:
