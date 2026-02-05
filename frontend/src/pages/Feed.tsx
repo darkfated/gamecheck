@@ -1,13 +1,16 @@
 // Feed.tsx
-import { AnimatePresence, LayoutGroup, motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import React, { FC, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { ThemeToggle } from '../components/common/ThemeToggle'
 import { ActivityFeed } from '../components/feed/ActivityFeed'
+import { ArcadeGlyph } from '../components/icons/ArcadeGlyph'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { Input } from '../components/ui/Input'
 import { SectionHeader } from '../components/ui/SectionHeader'
 import { StatPill } from '../components/ui/StatPill'
+import { Tabs } from '../components/ui/Tabs'
 import { useAuth } from '../contexts/AuthContext'
 import api from '../services/api'
 
@@ -35,56 +38,6 @@ const itemVariants = {
   visible: { opacity: 1, y: 0 },
 }
 
-const tabButtonVariants = {
-  hidden: { opacity: 0, y: 6 },
-  visible: { opacity: 1, y: 0 },
-}
-
-const TabButton: FC<{
-  id: string
-  active: boolean
-  onClick: () => void
-  children: React.ReactNode
-  icon?: React.ReactNode
-}> = ({ id, active, onClick, children, icon }) => (
-  <div className='relative'>
-    {active && (
-      <motion.div
-        layoutId='feed-active-tab'
-        className='absolute rounded-xl pointer-events-none'
-        style={{
-          top: 4,
-          bottom: 4,
-          left: 4,
-          right: 4,
-          borderRadius: 14,
-          background:
-            'linear-gradient(to right, rgba(99, 102, 241, 0.22), rgba(168, 85, 247, 0.22), rgba(217, 70, 239, 0.22))',
-          boxShadow: '0 10px 28px -12px rgba(99, 102, 241, 0.17)',
-        }}
-        transition={{ type: 'spring', stiffness: 420, damping: 28 }}
-      />
-    )}
-
-    <motion.button
-      variants={tabButtonVariants}
-      initial='hidden'
-      animate='visible'
-      onClick={onClick}
-      className={`relative z-10 px-6 py-3 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
-        active
-          ? 'text-[var(--text-primary)]'
-          : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-      }`}
-      whileHover={{ scale: 1.05 }}
-      aria-pressed={active}
-    >
-      {icon}
-      {children}
-    </motion.button>
-  </div>
-)
-
 const Feed: FC = () => {
   const { user, login } = useAuth()
   const [searchQuery, setSearchQuery] = useState('')
@@ -98,6 +51,47 @@ const Feed: FC = () => {
   const [followingCount, setFollowingCount] = useState(0)
   const [gamesCount, setGamesCount] = useState(0)
   const [activityCount, setActivityCount] = useState(0)
+
+  const feedTabs = [
+    {
+      id: 'following',
+      label: 'Подписки',
+      icon: (
+        <svg
+          className='w-5 h-5'
+          viewBox='0 0 24 24'
+          fill='none'
+          stroke='currentColor'
+        >
+          <path
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            strokeWidth={2}
+            d='M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'
+          />
+        </svg>
+      ),
+    },
+    {
+      id: 'all',
+      label: 'Все активности',
+      icon: (
+        <svg
+          className='w-5 h-5'
+          viewBox='0 0 24 24'
+          fill='none'
+          stroke='currentColor'
+        >
+          <path
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            strokeWidth={2}
+            d='M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'
+          />
+        </svg>
+      ),
+    },
+  ]
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -123,7 +117,12 @@ const Feed: FC = () => {
     const loadTopPlayers = async () => {
       setIsLoadingTop(true)
       try {
-        const response = await api.users.listUsers(5, 0, 'totalPlaytime', 'desc')
+        const response = await api.users.listUsers(
+          5,
+          0,
+          'totalPlaytime',
+          'desc'
+        )
         setTopPlayers(response.data.data || [])
       } catch (error) {
         console.error('Error loading top players:', error)
@@ -159,115 +158,155 @@ const Feed: FC = () => {
   if (!user) {
     return (
       <motion.div
-        className='container mx-auto px-4 py-12 flex flex-col items-center justify-center min-h-[80vh]'
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.45 }}
+        className='relative overflow-hidden px-4 py-12'
+        variants={containerVariants}
+        initial='hidden'
+        animate='visible'
       >
+        <div className='absolute inset-0'>
+          <div className='absolute top-10 left-8 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl'></div>
+          <div className='absolute bottom-8 right-10 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl'></div>
+        </div>
+
         <motion.div
-          className='max-w-md w-full rounded-2xl shadow-2xl overflow-hidden border border-[var(--border-color)]'
-          initial={{ y: 50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{
-            type: 'spring',
-            stiffness: 100,
-            damping: 20,
-            delay: 0.12,
-          }}
-          style={{
-            background:
-              'linear-gradient(to bottom right, rgba(var(--bg-secondary-rgb), 0.9), rgba(var(--bg-tertiary-rgb), 0.9))',
-            backdropFilter: 'blur(12px)',
-          }}
+          className='relative max-w-5xl mx-auto'
+          variants={itemVariants}
         >
-          <div className='bg-gradient-to-r from-cyan-500 via-teal-500 to-amber-500 px-6 py-8'>
-            <motion.div
-              className='flex justify-center mb-4'
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{
-                type: 'spring',
-                stiffness: 360,
-                damping: 14,
-                delay: 0.2,
-              }}
-            >
-              <div className='w-20 h-20 rounded-full bg-gradient-to-br from-cyan-200 to-amber-200 flex items-center justify-center p-1 shadow-lg'>
-                <div
-                  className='w-full h-full rounded-full flex items-center justify-center'
-                  style={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                    backdropFilter: 'blur(4px)',
-                  }}
-                >
-                  <svg
-                    xmlns='http://www.w3.org/2000/svg'
-                    className='h-10 w-10 text-white'
-                    fill='none'
-                    viewBox='0 0 24 24'
-                    stroke='currentColor'
+          <div className='relative overflow-hidden rounded-3xl border border-[var(--card-border)] bg-[rgba(var(--bg-secondary-rgb),0.72)] shadow-[var(--shadow-card)]'>
+            <div className='absolute inset-0 bg-gradient-to-br from-[rgba(var(--accent-primary-rgb),0.12)] via-transparent to-[rgba(var(--accent-secondary-rgb),0.12)]'></div>
+
+            <div className='relative grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-8 p-8 lg:p-12'>
+              <div className='space-y-6'>
+                <div className='inline-flex items-center gap-3 rounded-full border border-[var(--divider-color)] bg-[rgba(var(--bg-tertiary-rgb),0.4)] px-4 py-2 text-sm text-[var(--text-secondary)]'>
+                  <ArcadeGlyph className='w-5 h-5 text-[var(--accent-primary)]' />
+                  Стартовая страница
+                </div>
+
+                <div>
+                  <h2 className='text-3xl md:text-4xl font-bold text-[var(--text-primary)]'>
+                    Добро пожаловать в GameCheck
+                  </h2>
+                  <p className='mt-3 text-[var(--text-secondary)] leading-relaxed'>
+                    Подключите Steam и управляйте коллекцией, следите за
+                    активностью друзей и находите новые игровые поводы.
+                  </p>
+                </div>
+
+                <div className='flex flex-col sm:flex-row gap-3'>
+                  <Button
+                    onClick={login}
+                    size='lg'
+                    className='w-full sm:w-auto'
                   >
-                    <path
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                      strokeWidth={2}
-                      d='M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5'
-                    />
-                  </svg>
+                    Войти через Steam
+                  </Button>
+                  <Link to='/users' className='w-full sm:w-auto'>
+                    <Button variant='secondary' size='lg' className='w-full'>
+                      Смотреть игроков
+                    </Button>
+                  </Link>
+                </div>
+
+                <div className='flex flex-wrap gap-2 text-xs text-[var(--text-tertiary)]'>
+                  <span className='rounded-full border border-[var(--divider-color)] bg-[rgba(var(--bg-tertiary-rgb),0.5)] px-3 py-1'>
+                    Коллекции и рейтинги
+                  </span>
+                  <span className='rounded-full border border-[var(--divider-color)] bg-[rgba(var(--bg-tertiary-rgb),0.5)] px-3 py-1'>
+                    Без навязчивых уведомлений
+                  </span>
+                  <span className='rounded-full border border-[var(--divider-color)] bg-[rgba(var(--bg-tertiary-rgb),0.5)] px-3 py-1'>
+                    Квизы
+                  </span>
+                </div>
+
+                <div className='flex flex-col sm:flex-row sm:items-center gap-2 text-sm text-[var(--text-secondary)]'>
+                  <span>Вы также можете сменить тему интерфейса:</span>
+                  <ThemeToggle />
                 </div>
               </div>
-            </motion.div>
 
-            <motion.h2
-              className='text-2xl md:text-3xl font-bold text-white text-center'
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.28 }}
-            >
-              Добро пожаловать в GameCheck!
-            </motion.h2>
-          </div>
-
-          <div className='px-6 py-8'>
-            <motion.p
-              className='text-[var(--text-secondary)] mb-8 text-center leading-relaxed'
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.36 }}
-            >
-              Войдите через Steam, чтобы отслеживать свои игры и следить за
-              активностью друзей в игровом сообществе.
-            </motion.p>
-
-            <motion.div
-              className='flex justify-center'
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.42 }}
-            >
-              <button
-                onClick={login}
-                className='px-8 py-3 bg-gradient-to-r from-cyan-500 via-teal-500 to-amber-500 text-[#001015] font-medium rounded-xl transition-all duration-300 shadow-lg flex items-center gap-2'
-              >
-                <svg
-                  xmlns='http://www.w3.org/2000/svg'
-                  className='h-5 w-5'
-                  viewBox='0 0 24 24'
-                  fill='none'
-                  stroke='currentColor'
-                  strokeWidth={2}
+              <div className='grid gap-4'>
+                <motion.div
+                  whileHover={{ y: -4 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                 >
-                  <path
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    d='M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1'
-                  />
-                </svg>
-                Войти через Steam
-              </button>
-            </motion.div>
+                  <Link
+                    to='/users'
+                    className='group block rounded-2xl border border-[var(--card-border)] bg-[rgba(var(--bg-tertiary-rgb),0.55)] p-4 transition-all hover:border-[var(--border-color-hover)] hover:bg-[rgba(var(--bg-tertiary-rgb),0.7)]'
+                  >
+                    <div className='flex items-start justify-between gap-3'>
+                      <div>
+                        <p className='text-sm text-[var(--text-tertiary)]'>
+                          Исследуйте
+                        </p>
+                        <h3 className='text-lg font-semibold text-[var(--text-primary)]'>
+                          Топ игроков и коллекций
+                        </h3>
+                      </div>
+                      <span className='rounded-full bg-[rgba(var(--accent-primary-rgb),0.18)] px-3 py-1 text-xs text-[var(--accent-primary)]'>
+                        Открыть
+                      </span>
+                    </div>
+                    <p className='mt-3 text-sm text-[var(--text-secondary)]'>
+                      Подглядывайте, во что играют друзья и кто собирает самые
+                      редкие тайтлы.
+                    </p>
+                  </Link>
+                </motion.div>
+
+                <motion.div
+                  whileHover={{ y: -4 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                >
+                  <Link
+                    to='/quizzes'
+                    className='group block rounded-2xl border border-[var(--card-border)] bg-[rgba(var(--bg-tertiary-rgb),0.55)] p-4 transition-all hover:border-[var(--border-color-hover)] hover:bg-[rgba(var(--bg-tertiary-rgb),0.7)]'
+                  >
+                    <div className='flex items-start justify-between gap-3'>
+                      <div>
+                        <p className='text-sm text-[var(--text-tertiary)]'>
+                          Прокачайте знания
+                        </p>
+                        <h3 className='text-lg font-semibold text-[var(--text-primary)]'>
+                          Игровые квизы
+                        </h3>
+                      </div>
+                      <span className='rounded-full bg-[rgba(var(--accent-secondary-rgb),0.2)] px-3 py-1 text-xs text-[var(--accent-secondary)]'>
+                        Играть
+                      </span>
+                    </div>
+                    <p className='mt-3 text-sm text-[var(--text-secondary)]'>
+                      Пройдите быстрый тест и поделитесь результатом с друзьями.
+                    </p>
+                  </Link>
+                </motion.div>
+
+                <motion.button
+                  type='button'
+                  onClick={login}
+                  whileHover={{ y: -4 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                  className='text-left rounded-2xl border border-[var(--card-border)] bg-[rgba(var(--bg-tertiary-rgb),0.55)] p-4 transition-all hover:border-[var(--border-color-hover)] hover:bg-[rgba(var(--bg-tertiary-rgb),0.7)]'
+                >
+                  <div className='flex items-start justify-between gap-3'>
+                    <div>
+                      <p className='text-sm text-[var(--text-tertiary)]'>
+                        Начните сейчас
+                      </p>
+                      <h3 className='text-lg font-semibold text-[var(--text-primary)]'>
+                        Синхронизация со Steam
+                      </h3>
+                    </div>
+                    <span className='rounded-full bg-[rgba(var(--accent-primary-rgb),0.18)] px-3 py-1 text-xs text-[var(--accent-primary)]'>
+                      Войти
+                    </span>
+                  </div>
+                  <p className='mt-3 text-sm text-[var(--text-secondary)]'>
+                    Данные из вашей библиотеки подтянутся и добавят информацию.
+                  </p>
+                </motion.button>
+              </div>
+            </div>
           </div>
         </motion.div>
       </motion.div>
@@ -378,57 +417,13 @@ const Feed: FC = () => {
         className='mb-8 border-b border-[var(--border-color)] pb-4'
         variants={itemVariants}
       >
-        <div className='flex space-x-2 px-1 overflow-visible'>
-          <LayoutGroup>
-            <div className='flex space-x-2 relative'>
-              <TabButton
-                id='following'
-                active={activeTab === 'following'}
-                onClick={() => setActiveTab('following')}
-                icon={
-                  <svg
-                    className='w-5 h-5'
-                    viewBox='0 0 24 24'
-                    fill='none'
-                    stroke='currentColor'
-                  >
-                    <path
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                      strokeWidth={2}
-                      d='M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'
-                    />
-                  </svg>
-                }
-              >
-                Подписки
-              </TabButton>
-
-              <TabButton
-                id='all'
-                active={activeTab === 'all'}
-                onClick={() => setActiveTab('all')}
-                icon={
-                  <svg
-                    className='w-5 h-5'
-                    viewBox='0 0 24 24'
-                    fill='none'
-                    stroke='currentColor'
-                  >
-                    <path
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                      strokeWidth={2}
-                      d='M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'
-                    />
-                  </svg>
-                }
-              >
-                Все активности
-              </TabButton>
-            </div>
-          </LayoutGroup>
-        </div>
+        <Tabs
+          tabs={feedTabs}
+          activeTab={activeTab}
+          onChange={tabId => setActiveTab(tabId as 'following' | 'all')}
+          layoutId='feed-tabs'
+          size='md'
+        />
       </motion.div>
 
       <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
@@ -580,7 +575,7 @@ const Feed: FC = () => {
                         >
                           <Link
                             to={`/profile/${user.id}`}
-                          className='flex items-center justify-center p-2 rounded-full hover:bg-[rgba(var(--accent-primary-rgb),0.1)] transition-colors'
+                            className='flex items-center justify-center p-2 rounded-full hover:bg-[rgba(var(--accent-primary-rgb),0.1)] transition-colors'
                             aria-label={`Открыть профиль ${user.displayName}`}
                           >
                             <svg

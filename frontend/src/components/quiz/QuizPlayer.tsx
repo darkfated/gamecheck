@@ -200,7 +200,7 @@ export const QuizPlayer: FC<QuizPlayerProps> = ({
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
               onClick={handleNext}
-              className='w-full py-3 bg-gradient-to-r from-cyan-500 to-amber-500 hover:from-cyan-400 hover:to-amber-400 text-[#001015] rounded-lg font-medium transition-all'
+              className='w-full py-3 bg-gradient-to-r from-cyan-500 to-amber-500 hover:from-cyan-400 hover:to-amber-400 text-[var(--button-text-on-accent)] rounded-lg font-medium transition-all'
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >

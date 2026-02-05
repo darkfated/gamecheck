@@ -1,6 +1,9 @@
-import { motion } from 'framer-motion'
-import { FC, useState } from 'react'
+﻿import { motion } from 'framer-motion'
+import { FC, FormEvent, useState } from 'react'
 import { GAME_STATUS_CONFIG, getStatusOptions } from '../../constants'
+import { Button } from '../ui/Button'
+import { Card } from '../ui/Card'
+import { Input } from '../ui/Input'
 
 interface GameAddFormProps {
   onSubmit: (gameData: any) => Promise<void>
@@ -20,7 +23,7 @@ export const GameAddForm: FC<GameAddFormProps> = ({
 
   const statusOptions = getStatusOptions()
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     await onSubmit({
       name: gameName,
@@ -81,127 +84,122 @@ export const GameAddForm: FC<GameAddFormProps> = ({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.3, ease: 'easeInOut' }}
-      className='bg-gradient-to-br from-[var(--card-bg)] to-[rgba(var(--bg-tertiary-rgb),0.5)] backdrop-blur-md p-4 md:p-6 rounded-xl border border-[var(--border-color)] shadow-xl space-y-4 md:space-y-6 max-w-2xl mx-auto'
     >
-      <h3 className='text-lg md:text-xl font-semibold text-[var(--text-primary)]'>
-        Добавить новую игру
-      </h3>
-
-      <form onSubmit={handleSubmit} className='space-y-4 md:space-y-6'>
-        <div>
-          <label className='block text-sm font-medium text-[var(--text-secondary)] mb-2'>
-            Название игры *
-          </label>
-          <input
-            type='text'
-            value={gameName}
-            onChange={e => setGameName(e.target.value)}
-            required
-            placeholder='Введите название игры'
-            disabled={isSubmitting}
-            className='w-full px-3 md:px-4 py-2 md:py-2.5 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--input-focus)] focus:border-transparent transition-all text-base'
-          />
-        </div>
-
-        <div>
-          <label className='block text-sm font-medium text-[var(--text-secondary)] mb-2 md:mb-3'>
-            Статус *
-          </label>
-          <div className='flex gap-1.5 md:gap-2 flex-wrap'>
-            {statusOptions.map(option => {
-              const statusConfig =
-                GAME_STATUS_CONFIG[
-                  option.value as keyof typeof GAME_STATUS_CONFIG
-                ]
-              const isSelected = selectedStatus === option.value
-
-              return (
-                <motion.button
-                  key={option.value}
-                  type='button'
-                  onClick={() => setSelectedStatus(option.value)}
-                  disabled={isSubmitting}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`px-2.5 md:px-4 py-1.5 md:py-2 text-sm md:text-base rounded-lg font-medium transition-all ${
-                    isSelected
-                      ? `${statusConfig.bgClass} ${statusConfig.textClass} ring-2 ring-[var(--accent-primary)]`
-                      : `${statusConfig.bgClass} ${statusConfig.textClass} hover:ring-1 hover:ring-[rgba(var(--accent-primary-rgb),0.5)]`
-                  }`}
-                >
-                  {option.label}
-                </motion.button>
-              )
-            })}
+      <Card variant='glass' className='relative overflow-hidden'>
+        <div className='absolute inset-0 bg-gradient-to-br from-[rgba(var(--accent-primary-rgb),0.08)] via-transparent to-[rgba(var(--accent-secondary-rgb),0.1)]'></div>
+        <div className='relative space-y-6'>
+          <div className='flex flex-col gap-2'>
+            <h3 className='text-xl font-semibold text-[var(--text-primary)]'>
+              Добавить новую игру
+            </h3>
+            <p className='text-sm text-[var(--text-secondary)]'>
+              Заполните детали, чтобы отслеживать прогресс и делиться
+              впечатлениями.
+            </p>
           </div>
-        </div>
 
-        <div>
-          <label className='block text-sm font-medium text-[var(--text-secondary)] mb-2 md:mb-3'>
-            Оценка (опционально)
-          </label>
-          <div className='flex items-center gap-2 md:gap-4 flex-wrap'>
-            <StarRating />
-            {selectedRating && (
-              <span className='text-sm font-medium text-[var(--text-primary)]'>
-                {selectedRating}/10
-              </span>
-            )}
-          </div>
-        </div>
+          <form onSubmit={handleSubmit} className='space-y-5'>
+            <div>
+              <label className='block text-sm font-medium text-[var(--text-secondary)] mb-2'>
+                Название игры *
+              </label>
+              <Input
+                type='text'
+                value={gameName}
+                onChange={e => setGameName(e.target.value)}
+                required
+                placeholder='Введите название игры'
+                disabled={isSubmitting}
+              />
+            </div>
 
-        <div>
-          <label className='block text-sm font-medium text-[var(--text-secondary)] mb-2'>
-            Заметки (опционально)
-          </label>
-          <textarea
-            value={review}
-            onChange={e => setReview(e.target.value)}
-            placeholder='Ваши впечатления об игре...'
-            disabled={isSubmitting}
-            maxLength={200}
-            rows={3}
-            className='w-full px-3 md:px-4 py-2 md:py-2.5 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--input-focus)] focus:border-transparent transition-all resize-none text-base'
-          />
-          <div className='text-xs text-[var(--text-tertiary)] mt-1'>
-            {review.length}/200 символов
-          </div>
-        </div>
+            <div>
+              <label className='block text-sm font-medium text-[var(--text-secondary)] mb-2'>
+                Статус *
+              </label>
+              <div className='flex flex-wrap gap-2'>
+                {statusOptions.map(option => {
+                  const statusConfig =
+                    GAME_STATUS_CONFIG[
+                      option.value as keyof typeof GAME_STATUS_CONFIG
+                    ]
+                  const isSelected = selectedStatus === option.value
 
-        <div className='flex flex-col-reverse md:flex-row justify-end gap-2 md:gap-3 pt-4 md:pt-6 border-t border-[var(--divider-color)]'>
-          <motion.button
-            type='button'
-            onClick={onCancel}
-            disabled={isSubmitting}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className='w-full md:w-auto px-3 md:px-4 py-2.5 md:py-2 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-lg font-medium hover:bg-[var(--bg-secondary-hover)] transition-all disabled:opacity-50 text-sm md:text-base'
-          >
-            Отмена
-          </motion.button>
-          <motion.button
-            type='submit'
-            disabled={!gameName.trim() || isSubmitting}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            animate={isSubmitting ? { opacity: 0.8 } : { opacity: 1 }}
-            className='w-full md:w-auto px-3 md:px-4 py-2.5 md:py-2 bg-gradient-to-r from-cyan-500 to-amber-500 hover:from-cyan-400 hover:to-amber-400 text-[#001015] rounded-lg font-medium shadow-lg hover:shadow-cyan-500/20 transition-all disabled:opacity-50 text-sm md:text-base flex items-center justify-center gap-2'
-          >
-            {isSubmitting ? (
-              <>
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                  className='w-4 h-4 border-2 border-white/30 border-t-white rounded-full'
-                />
-                Добавляю...
-              </>
-            ) : (
-              'Добавить игру'
-            )}
-          </motion.button>
+                  return (
+                    <motion.button
+                      key={option.value}
+                      type='button'
+                      onClick={() => setSelectedStatus(option.value)}
+                      disabled={isSubmitting}
+                      whileHover={{ scale: 1.04 }}
+                      whileTap={{ scale: 0.95 }}
+                      className={`px-3 py-1.5 text-sm rounded-full font-medium transition-all border ${
+                        isSelected
+                          ? `${statusConfig.bgClass} ${statusConfig.textClass} border-[rgba(var(--accent-primary-rgb),0.4)]`
+                          : `${statusConfig.bgClass} ${statusConfig.textClass} border-transparent hover:border-[rgba(var(--accent-primary-rgb),0.35)]`
+                      }`}
+                    >
+                      {option.label}
+                    </motion.button>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div>
+              <label className='block text-sm font-medium text-[var(--text-secondary)] mb-2'>
+                Оценка (опционально)
+              </label>
+              <div className='flex items-center gap-3 flex-wrap'>
+                <StarRating />
+                {selectedRating && (
+                  <span className='text-sm font-medium text-[var(--text-primary)]'>
+                    {selectedRating}/10
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <label className='block text-sm font-medium text-[var(--text-secondary)] mb-2'>
+                Заметки (опционально)
+              </label>
+              <Input
+                as='textarea'
+                value={review}
+                onChange={e => setReview(e.target.value)}
+                placeholder='Ваши впечатления об игре...'
+                disabled={isSubmitting}
+                maxLength={200}
+                rows={3}
+                className='resize-none'
+              />
+              <div className='text-xs text-[var(--text-tertiary)] mt-1'>
+                {review.length}/200 символов
+              </div>
+            </div>
+
+            <div className='flex flex-col sm:flex-row justify-end gap-3 pt-2'>
+              <Button
+                type='button'
+                variant='secondary'
+                onClick={onCancel}
+                disabled={isSubmitting}
+                className='w-full sm:w-auto'
+              >
+                Отмена
+              </Button>
+              <Button
+                type='submit'
+                disabled={!gameName.trim() || isSubmitting}
+                className='w-full sm:w-auto'
+              >
+                {isSubmitting ? 'Добавляю...' : 'Добавить игру'}
+              </Button>
+            </div>
+          </form>
         </div>
-      </form>
+      </Card>
     </motion.div>
   )
 }

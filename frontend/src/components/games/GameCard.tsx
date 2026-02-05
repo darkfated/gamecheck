@@ -1,5 +1,8 @@
-import { AnimatePresence, motion } from 'framer-motion'
+﻿import { AnimatePresence, motion } from 'framer-motion'
 import React, { FC, useEffect, useState } from 'react'
+import { ArcadeGlyph } from '../icons/ArcadeGlyph'
+import { Button } from '../ui/Button'
+import { Input } from '../ui/Input'
 import { RatingBadge } from './RatingBadge'
 import { StatusBadge } from './StatusBadge'
 
@@ -28,7 +31,6 @@ interface GameCardProps {
   onUpdate?: (id: string, data: any) => void
   onUpdateSteam?: (id: string) => void
   isOwner?: boolean
-  listMode?: boolean
 }
 
 interface SteamInfoProps {
@@ -59,17 +61,17 @@ const SteamInfo: FC<SteamInfoProps> = ({ game, compact = false }) => {
 
   return (
     <div
-      className={`flex items-center gap-1.5 ${
+      className={`flex items-center gap-2 ${
         compact ? 'text-xs' : 'text-sm'
       } text-[var(--text-secondary)]`}
     >
       <button
         onClick={handleSteamClick}
-        className='flex items-center gap-1 hover:text-blue-400 transition-colors'
+        className='flex items-center gap-1.5 hover:text-[var(--accent-primary)] transition-colors'
         title='Открыть в Steam Store'
       >
         <svg
-          className='w-4 h-4 text-blue-400'
+          className='w-4 h-4 text-[var(--accent-primary)]'
           fill='currentColor'
           viewBox='0 0 24 24'
         >
@@ -82,7 +84,7 @@ const SteamInfo: FC<SteamInfoProps> = ({ game, compact = false }) => {
         game.steamPlaytimeForever !== undefined && (
           <div className='flex items-center gap-1'>
             <svg
-              className='w-3 h-3'
+              className='w-3.5 h-3.5'
               fill='none'
               stroke='currentColor'
               viewBox='0 0 24 24'
@@ -110,9 +112,9 @@ interface GameIconProps {
 
 const GameIcon: FC<GameIconProps> = ({ game, size = 'md' }) => {
   const sizeClasses = {
-    sm: 'w-6 h-6',
-    md: 'w-8 h-8',
-    lg: 'w-10 h-10',
+    sm: 'w-9 h-9',
+    md: 'w-12 h-12',
+    lg: 'w-14 h-14',
   }
 
   if (game.steamIconUrl) {
@@ -120,7 +122,7 @@ const GameIcon: FC<GameIconProps> = ({ game, size = 'md' }) => {
       <img
         src={game.steamIconUrl}
         alt={`${game.name} icon`}
-        className={`${sizeClasses[size]} rounded border border-[var(--border-color)] shadow-sm object-cover`}
+        className={`${sizeClasses[size]} rounded-xl border border-[var(--divider-color)] shadow-sm object-cover`}
         onError={e => {
           ;(e.target as HTMLImageElement).style.display = 'none'
         }}
@@ -130,21 +132,9 @@ const GameIcon: FC<GameIconProps> = ({ game, size = 'md' }) => {
 
   return (
     <div
-      className={`${sizeClasses[size]} rounded border border-[var(--border-color)] bg-[var(--bg-secondary)] flex items-center justify-center`}
+      className={`${sizeClasses[size]} rounded-xl border border-[var(--divider-color)] bg-[rgba(var(--bg-tertiary-rgb),0.5)] flex items-center justify-center`}
     >
-      <svg
-        className='w-4 h-4 text-[var(--text-tertiary)]'
-        fill='none'
-        stroke='currentColor'
-        viewBox='0 0 24 24'
-      >
-        <path
-          strokeLinecap='round'
-          strokeLinejoin='round'
-          strokeWidth={2}
-          d='M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5'
-        />
-      </svg>
+      <ArcadeGlyph className='w-5 h-5 text-[var(--text-tertiary)]' />
     </div>
   )
 }
@@ -156,8 +146,6 @@ export const GameCard: FC<GameCardProps> = ({
   onDelete,
   onUpdate,
   onUpdateSteam,
-  isOwner = false,
-  listMode = false,
 }) => {
   const [isEditing, setIsEditing] = useState(false)
   const [editedGame, setEditedGame] = useState<any>({})
@@ -208,205 +196,47 @@ export const GameCard: FC<GameCardProps> = ({
     }
   }
 
-  if (listMode) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -10 }}
-        className='group bg-[var(--card-bg)] backdrop-blur-sm border border-[var(--border-color)] rounded-xl hover:border-[var(--border-color-hover)] transition-all duration-300 shadow-md hover:shadow-lg'
-      >
-        <div className='p-4'>
-          {!isEditing ? (
-            <div className='flex items-center gap-4'>
-              <div className='flex items-center gap-3 flex-1 min-w-0'>
-                <GameIcon game={game} size='sm' />
-                <h3 className='font-semibold text-[var(--text-primary)] truncate flex-1'>
-                  {game.name}
-                </h3>
-              </div>
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      className='group relative overflow-hidden rounded-2xl border border-[var(--card-border)] bg-[rgba(var(--bg-secondary-rgb),0.72)] shadow-[var(--shadow-soft)] transition-all duration-300 hover:border-[var(--border-color-hover)] hover:shadow-[var(--shadow-card)]'
+    >
+      <div className='absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-[rgba(var(--accent-primary-rgb),0.08)] via-transparent to-[rgba(var(--accent-secondary-rgb),0.08)]'></div>
 
-              <div className='flex items-center gap-2 flex-shrink-0'>
+      <div className='relative p-4 md:p-5 flex flex-col gap-4 h-full'>
+        <div className='flex items-start justify-between gap-3'>
+          <div className='flex items-start gap-3 min-w-0'>
+            <GameIcon game={game} size='lg' />
+            <div className='min-w-0'>
+              <h3 className='text-lg font-semibold text-[var(--text-primary)] leading-snug line-clamp-2'>
+                {game.name}
+              </h3>
+              <div className='mt-2 flex flex-wrap items-center gap-2'>
                 <StatusBadge
                   status={game.status}
                   label={
                     statusOptions.find(option => option.value === game.status)
                       ?.label || game.status
                   }
+                  className='text-xs'
                 />
                 {game.rating && <RatingBadge rating={game.rating} />}
               </div>
-
-              <div className='flex-shrink-0'>
-                <SteamInfo game={game} compact={true} />
-              </div>
-
-              {editable && (
-                <div className='flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity'>
-                  {!isEditing && (
-                    <button
-                      onClick={toggleEdit}
-                      className='text-[var(--text-secondary)] hover:text-[var(--accent-primary)] p-1 md:p-1.5 rounded-lg hover:bg-[rgba(var(--accent-primary-rgb),0.1)] transition-all duration-200'
-                      title='Редактировать'
-                    >
-                      <svg
-                        className='w-4 md:w-5 h-4 md:h-5'
-                        fill='none'
-                        stroke='currentColor'
-                        viewBox='0 0 24 24'
-                      >
-                        <path
-                          strokeLinecap='round'
-                          strokeLinejoin='round'
-                          strokeWidth='2'
-                          d='M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z'
-                        />
-                      </svg>
-                    </button>
-                  )}
-                  <button
-                    onClick={() => onDelete && onDelete(game.id)}
-                    className='text-[var(--error)] hover:text-[var(--error-hover)] p-1 md:p-1.5 rounded-lg hover:bg-red-500/10 transition-all duration-200'
-                    title='Удалить игру'
-                  >
-                    <svg
-                      className='w-4 md:w-5 h-4 md:h-5'
-                      fill='none'
-                      stroke='currentColor'
-                      viewBox='0 0 24 24'
-                    >
-                      <path
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                        strokeWidth='2'
-                        d='M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16'
-                      />
-                    </svg>
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className='space-y-4'>
-              <div className='flex items-center gap-3'>
-                <GameIcon game={game} size='sm' />
-                <h3 className='font-semibold text-[var(--text-primary)]'>
-                  {game.name}
-                </h3>
-              </div>
-
-              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-                <div>
-                  <label className='block text-sm font-medium text-[var(--text-secondary)] mb-1'>
-                    Статус
-                  </label>
-                  <select
-                    value={editedGame.status}
-                    onChange={e => handleChange('status', e.target.value)}
-                    className='w-full p-2 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--input-focus)] text-sm'
-                  >
-                    {statusOptions.map(option => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className='block text-sm font-medium text-[var(--text-secondary)] mb-1'>
-                    Оценка
-                  </label>
-                  <select
-                    value={editedGame.rating}
-                    onChange={e =>
-                      handleChange(
-                        'rating',
-                        e.target.value ? parseInt(e.target.value) : '',
-                      )
-                    }
-                    className='w-full p-2 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--input-focus)] text-sm'
-                  >
-                    <option value=''>Без оценки</option>
-                    {[...Array(10)].map((_, i) => (
-                      <option key={i + 1} value={i + 1}>
-                        {i + 1}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className='block text-sm font-medium text-[var(--text-secondary)] mb-1'>
-                  Заметки (опционально)
-                </label>
-                <textarea
-                  value={editedGame.review || ''}
-                  onChange={e => handleChange('review', e.target.value)}
-                  placeholder='Ваши впечатления об игре'
-                  rows={3}
-                  className='w-full p-2 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--input-focus)] text-sm resize-none'
-                />
-              </div>
-
-              <div className='flex justify-end gap-2'>
-                <button
-                  onClick={() => setIsEditing(false)}
-                  className='px-4 py-2 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-lg text-sm font-medium hover:bg-[var(--bg-secondary-hover)] transition-all duration-200'
-                >
-                  Отмена
-                </button>
-                <button
-                  onClick={handleSave}
-                  className='px-4 py-2 bg-[var(--accent-primary)] text-white rounded-lg text-sm font-medium hover:bg-[var(--accent-primary-hover)] transition-all duration-200 shadow-lg'
-                >
-                  Сохранить
-                </button>
-              </div>
-            </div>
-          )}
-
-          {game.review && !isEditing && (
-            <div className='mt-3 pt-3 border-t border-[var(--divider-color)]'>
-              <p className='text-sm text-[var(--text-secondary)] italic line-clamp-2'>
-                {game.review}
-              </p>
-            </div>
-          )}
-        </div>
-      </motion.div>
-    )
-  }
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      className='group bg-[var(--card-bg)] backdrop-blur-sm border border-[var(--border-color)] rounded-lg md:rounded-xl hover:border-[var(--border-color-hover)] transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1'
-    >
-      <div className='p-3 md:p-4 h-full flex flex-col'>
-        <div className='flex items-start justify-between gap-2 md:gap-3 mb-3 md:mb-4'>
-          <div className='flex items-center gap-2 md:gap-3 flex-1 min-w-0'>
-            <GameIcon game={game} size='md' />
-            <div className='flex-1 min-w-0'>
-              <h3 className='text-sm md:text-lg font-semibold text-[var(--text-primary)] line-clamp-3 leading-tight'>
-                {game.name}
-              </h3>
             </div>
           </div>
 
           {editable && (
-            <div className='flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity'>
+            <div className='flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity'>
               {!isEditing && (
                 <button
                   onClick={toggleEdit}
-                  className='text-[var(--text-secondary)] hover:text-[var(--accent-primary)] p-1 md:p-1.5 rounded-lg hover:bg-[rgba(var(--accent-primary-rgb),0.1)] transition-all duration-200'
+                  className='text-[var(--text-secondary)] hover:text-[var(--accent-primary)] p-1.5 rounded-lg hover:bg-[rgba(var(--accent-primary-rgb),0.12)] transition-all duration-200'
                   title='Редактировать'
                 >
                   <svg
-                    className='w-4 md:w-5 h-4 md:h-5'
+                    className='w-4 h-4'
                     fill='none'
                     stroke='currentColor'
                     viewBox='0 0 24 24'
@@ -422,11 +252,11 @@ export const GameCard: FC<GameCardProps> = ({
               )}
               <button
                 onClick={() => onDelete && onDelete(game.id)}
-                className='text-[var(--error)] hover:text-[var(--error-hover)] p-1 md:p-1.5 rounded-lg hover:bg-red-500/10 transition-all duration-200'
+                className='text-[var(--error)] hover:text-[var(--error-hover)] p-1.5 rounded-lg hover:bg-red-500/10 transition-all duration-200'
                 title='Удалить игру'
               >
                 <svg
-                  className='w-4 md:w-5 h-4 md:h-5'
+                  className='w-4 h-4'
                   fill='none'
                   stroke='currentColor'
                   viewBox='0 0 24 24'
@@ -443,120 +273,114 @@ export const GameCard: FC<GameCardProps> = ({
           )}
         </div>
 
-        <div className='flex-1 flex flex-col'>
-          <AnimatePresence mode='wait'>
-            {!isEditing ? (
-              <motion.div
-                key='view-mode'
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className='flex-1 flex flex-col'
-              >
-                <div className='flex items-center justify-between gap-1 md:gap-2 mb-2 md:mb-3 flex-wrap'>
-                  <div className='flex flex-wrap gap-1 md:gap-2'>
-                    <StatusBadge
-                      status={game.status}
-                      label={
-                        statusOptions.find(
-                          option => option.value === game.status,
-                        )?.label || game.status
-                      }
-                    />
-                    {game.rating && <RatingBadge rating={game.rating} />}
-                  </div>
-                  <SteamInfo game={game} />
-                </div>
-
-                {game.review && (
-                  <div className='flex-1'>
-                    <p className='text-sm text-[var(--text-secondary)] italic line-clamp-3'>
-                      {game.review}
-                    </p>
-                  </div>
+        <AnimatePresence mode='wait'>
+          {!isEditing ? (
+            <motion.div
+              key='view-mode'
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className='flex flex-col gap-3 flex-1'
+            >
+              <div className='flex items-center justify-between gap-2 text-sm text-[var(--text-secondary)]'>
+                <SteamInfo game={game} />
+                {editable && onUpdateSteam && game.steamAppId && (
+                  <button
+                    onClick={handleUpdateSteam}
+                    className='text-xs text-[var(--text-tertiary)] hover:text-[var(--accent-primary)] transition-colors'
+                  >
+                    Обновить Steam
+                  </button>
                 )}
-              </motion.div>
-            ) : (
-              <motion.div
-                key='edit-mode'
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                className='flex-1 flex flex-col'
-              >
-                <div className='space-y-4 flex-1'>
-                  <div>
-                    <label className='block text-sm font-medium text-[var(--text-secondary)] mb-1.5'>
-                      Статус
-                    </label>
-                    <select
-                      value={editedGame.status}
-                      onChange={e => handleChange('status', e.target.value)}
-                      className='w-full p-2.5 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--input-focus)] text-sm'
-                    >
-                      {statusOptions.map(option => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+              </div>
 
-                  <div>
-                    <label className='block text-sm font-medium text-[var(--text-secondary)] mb-1.5'>
-                      Оценка
-                    </label>
-                    <select
-                      value={editedGame.rating}
-                      onChange={e =>
-                        handleChange(
-                          'rating',
-                          e.target.value ? parseInt(e.target.value) : '',
-                        )
-                      }
-                      className='w-full p-2.5 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--input-focus)] text-sm'
-                    >
-                      <option value=''>Без оценки</option>
-                      {[...Array(10)].map((_, i) => (
-                        <option key={i + 1} value={i + 1}>
-                          {i + 1}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className='block text-sm font-medium text-[var(--text-secondary)] mb-1.5'>
-                      Заметки (опционально)
-                    </label>
-                    <textarea
-                      value={editedGame.review || ''}
-                      onChange={e => handleChange('review', e.target.value)}
-                      placeholder='Ваши впечатления об игре'
-                      rows={3}
-                      className='w-full p-2.5 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--input-focus)] text-sm resize-none'
-                    />
-                  </div>
+              <p className='text-sm text-[var(--text-secondary)] italic line-clamp-3'>
+                {game.review
+                  ? game.review
+                  : 'Нет заметок. Добавьте впечатления об игре.'}
+              </p>
+            </motion.div>
+          ) : (
+            <motion.div
+              key='edit-mode'
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 6 }}
+              className='flex flex-col gap-4'
+            >
+              <div className='grid gap-3 md:grid-cols-2'>
+                <div>
+                  <label className='block text-xs font-medium text-[var(--text-secondary)] mb-1.5'>
+                    Статус
+                  </label>
+                  <select
+                    value={editedGame.status}
+                    onChange={e => handleChange('status', e.target.value)}
+                    className='w-full rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] px-3 py-2 text-sm text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--input-focus)]'
+                  >
+                    {statusOptions.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
-                <div className='flex justify-end gap-2 mt-4 pt-4 border-t border-[var(--divider-color)]'>
-                  <button
-                    onClick={() => setIsEditing(false)}
-                    className='px-4 py-2 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-lg text-sm font-medium hover:bg-[var(--bg-secondary-hover)] transition-all duration-200'
+                <div>
+                  <label className='block text-xs font-medium text-[var(--text-secondary)] mb-1.5'>
+                    Оценка
+                  </label>
+                  <select
+                    value={editedGame.rating}
+                    onChange={e =>
+                      handleChange(
+                        'rating',
+                        e.target.value ? parseInt(e.target.value) : ''
+                      )
+                    }
+                    className='w-full rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] px-3 py-2 text-sm text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--input-focus)]'
                   >
-                    Отмена
-                  </button>
-                  <button
-                    onClick={handleSave}
-                    className='px-4 py-2 bg-[var(--accent-primary)] text-white rounded-lg text-sm font-medium hover:bg-[var(--accent-primary-hover)] transition-all duration-200 shadow-lg'
-                  >
-                    Сохранить
-                  </button>
+                    <option value=''>Без оценки</option>
+                    {[...Array(10)].map((_, i) => (
+                      <option key={i + 1} value={i + 1}>
+                        {i + 1}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+              </div>
+
+              <div>
+                <label className='block text-xs font-medium text-[var(--text-secondary)] mb-1.5'>
+                  Заметки (опционально)
+                </label>
+                <Input
+                  as='textarea'
+                  value={editedGame.review || ''}
+                  onChange={e => handleChange('review', e.target.value)}
+                  placeholder='Ваши впечатления об игре'
+                  rows={3}
+                  className='text-sm'
+                  maxLength={200}
+                />
+              </div>
+
+              <div className='flex justify-end gap-2'>
+                <Button
+                  type='button'
+                  variant='secondary'
+                  size='sm'
+                  onClick={() => setIsEditing(false)}
+                >
+                  Отмена
+                </Button>
+                <Button type='button' size='sm' onClick={handleSave}>
+                  Сохранить
+                </Button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </motion.div>
   )

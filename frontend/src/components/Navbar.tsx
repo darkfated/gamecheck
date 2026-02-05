@@ -1,7 +1,8 @@
 import { AnimatePresence, LayoutGroup, motion } from 'framer-motion'
-import React, { FC, useEffect, useState } from 'react'
+import { FC, useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { ArcadeGlyph } from './icons/ArcadeGlyph'
 import { Button } from './ui/Button'
 
 const Navbar: FC = () => {
@@ -57,20 +58,7 @@ const Navbar: FC = () => {
             >
               <div className='flex items-center'>
                 <div className='w-8 h-8 mr-2 rounded-lg bg-gradient-to-br from-cyan-500 via-teal-500 to-amber-500 flex items-center justify-center shadow-lg shadow-cyan-500/20'>
-                  <svg
-                    xmlns='http://www.w3.org/2000/svg'
-                    className='h-5 w-5 text-white'
-                    viewBox='0 0 24 24'
-                    fill='none'
-                    stroke='currentColor'
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                      d='M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5'
-                    />
-                  </svg>
+                  <ArcadeGlyph className='h-5 w-5 text-white' />
                 </div>
                 GameCheck
               </div>
@@ -313,7 +301,10 @@ const Navbar: FC = () => {
                     {user.displayName}
                   </span>
                 </div>
-                <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+                <motion.div
+                  whileHover={{ scale: 1.04 }}
+                  whileTap={{ scale: 0.96 }}
+                >
                   <Button
                     onClick={logout}
                     variant='outline'
@@ -325,7 +316,10 @@ const Navbar: FC = () => {
                 </motion.div>
               </>
             ) : (
-              <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+              <motion.div
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.96 }}
+              >
                 <Button onClick={login} variant='primary' size='sm'>
                   Вход
                 </Button>

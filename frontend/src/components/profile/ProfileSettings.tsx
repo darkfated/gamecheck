@@ -166,7 +166,7 @@ export const ProfileSettings: FC<ProfileSettingsProps> = ({
                 <div className='flex gap-2 mt-3'>
                   <button
                     onClick={handleDiscordTagSave}
-                    className='px-4 py-2 bg-gradient-to-r from-cyan-500 to-amber-500 text-[#001015] rounded-lg'
+                    className='px-4 py-2 bg-gradient-to-r from-cyan-500 to-amber-500 text-[var(--button-text-on-accent)] rounded-lg'
                   >
                     Сохранить
                   </button>

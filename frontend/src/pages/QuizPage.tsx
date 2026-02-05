@@ -1,6 +1,5 @@
 import {
   AnimatePresence,
-  LayoutGroup,
   motion,
   type Transition,
   type Variants,
@@ -9,6 +8,7 @@ import { useMemo, useState } from 'react'
 import { QuizList } from '../components/quiz/QuizList'
 import { QuizPlayer } from '../components/quiz/QuizPlayer'
 import { QuizResults } from '../components/quiz/QuizResults'
+import { Tabs } from '../components/ui/Tabs'
 import { getCategories, quizzes } from '../config/quizzes'
 
 type PageView = 'list' | 'playing' | 'results'
@@ -46,29 +46,193 @@ const headerVariants: Variants = {
   },
 }
 
-const chipsContainer: Variants = {
-  hidden: { opacity: 0, y: 8 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      staggerChildren: 0.04,
-      delayChildren: 0.06,
-    } as unknown as Transition,
-  },
-}
-
-const chipItem: Variants = {
-  hidden: { opacity: 0, y: 6 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: 'spring',
-      stiffness: 400,
-      damping: 28,
-    } as unknown as Transition,
-  },
+const getCategoryIcon = (category: string) => {
+  switch (category) {
+    case 'История':
+      return (
+        <svg
+          className='w-4 h-4'
+          viewBox='0 0 24 24'
+          fill='none'
+          stroke='currentColor'
+        >
+          <circle cx='12' cy='12' r='8' strokeWidth={2} />
+          <path
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            strokeWidth={2}
+            d='M12 8v4l3 2'
+          />
+        </svg>
+      )
+    case 'Хиты':
+      return (
+        <svg
+          className='w-4 h-4'
+          viewBox='0 0 24 24'
+          fill='none'
+          stroke='currentColor'
+        >
+          <path
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            strokeWidth={2}
+            d='M12 3l2.8 5.6 6.2.9-4.5 4.4 1.1 6.1L12 17l-5.6 3 1.1-6.1L3 9.5l6.2-.9L12 3z'
+          />
+        </svg>
+      )
+    case 'Инди игры':
+      return (
+        <svg
+          className='w-4 h-4'
+          viewBox='0 0 24 24'
+          fill='none'
+          stroke='currentColor'
+        >
+          <path
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            strokeWidth={2}
+            d='M12 2l2 4 4 2-4 2-2 4-2-4-4-2 4-2 2-4z'
+          />
+          <path
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            strokeWidth={2}
+            d='M5 16l1 2 2 1-2 1-1 2-1-2-2-1 2-1 1-2z'
+          />
+        </svg>
+      )
+    case 'Киберспорт':
+      return (
+        <svg
+          className='w-4 h-4'
+          viewBox='0 0 24 24'
+          fill='none'
+          stroke='currentColor'
+        >
+          <path
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            strokeWidth={2}
+            d='M7 4h10v3a5 5 0 01-10 0V4z'
+          />
+          <path
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            strokeWidth={2}
+            d='M5 7H3a3 3 0 003 3M19 7h2a3 3 0 01-3 3'
+          />
+          <path
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            strokeWidth={2}
+            d='M9 17h6m-4 0v3m2-3v3'
+          />
+        </svg>
+      )
+    case 'Разработка':
+      return (
+        <svg
+          className='w-4 h-4'
+          viewBox='0 0 24 24'
+          fill='none'
+          stroke='currentColor'
+        >
+          <path
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            strokeWidth={2}
+            d='M8 9l-3 3 3 3M16 9l3 3-3 3M10 19l4-14'
+          />
+        </svg>
+      )
+    case 'Технологии':
+      return (
+        <svg
+          className='w-4 h-4'
+          viewBox='0 0 24 24'
+          fill='none'
+          stroke='currentColor'
+        >
+          <rect x='7' y='7' width='10' height='10' rx='2' strokeWidth={2} />
+          <path
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            strokeWidth={2}
+            d='M9 3v2M15 3v2M9 19v2M15 19v2M3 9h2M3 15h2M19 9h2M19 15h2'
+          />
+        </svg>
+      )
+    case 'Жанры':
+      return (
+        <svg
+          className='w-4 h-4'
+          viewBox='0 0 24 24'
+          fill='none'
+          stroke='currentColor'
+        >
+          <path
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            strokeWidth={2}
+            d='M12 3l9 5-9 5-9-5 9-5zM21 13l-9 5-9-5'
+          />
+        </svg>
+      )
+    case 'Мемы':
+      return (
+        <svg
+          className='w-4 h-4'
+          viewBox='0 0 24 24'
+          fill='none'
+          stroke='currentColor'
+        >
+          <circle cx='12' cy='12' r='9' strokeWidth={2} />
+          <path
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            strokeWidth={2}
+            d='M8 10h.01M16 10h.01M8 15c1.5 1.5 6.5 1.5 8 0'
+          />
+        </svg>
+      )
+    case 'Механики':
+      return (
+        <svg
+          className='w-4 h-4'
+          viewBox='0 0 24 24'
+          fill='none'
+          stroke='currentColor'
+        >
+          <path
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            strokeWidth={2}
+            d='M4 6h16M4 12h16M4 18h16'
+          />
+          <circle cx='8' cy='6' r='2' strokeWidth={2} />
+          <circle cx='16' cy='12' r='2' strokeWidth={2} />
+          <circle cx='10' cy='18' r='2' strokeWidth={2} />
+        </svg>
+      )
+    default:
+      return (
+        <svg
+          className='w-4 h-4'
+          viewBox='0 0 24 24'
+          fill='none'
+          stroke='currentColor'
+        >
+          <path
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            strokeWidth={2}
+            d='M4 6h16M4 12h16M4 18h16'
+          />
+        </svg>
+      )
+  }
 }
 
 export default function QuizPage() {
@@ -117,6 +281,38 @@ export default function QuizPage() {
     [selectedCategory]
   )
 
+  const categoryTabs = useMemo(
+    () => [
+      {
+        id: 'all',
+        label: 'Все',
+        icon: (
+          <svg
+            className='w-4 h-4'
+            viewBox='0 0 24 24'
+            fill='none'
+            stroke='currentColor'
+          >
+            <path
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              strokeWidth={2}
+              d='M4 6h16M4 12h16M4 18h16'
+            />
+          </svg>
+        ),
+      },
+      ...getCategories().map(category => ({
+        id: category,
+        label: category,
+        icon: getCategoryIcon(category),
+      })),
+    ],
+    []
+  )
+
+  const activeCategory = selectedCategory ?? 'all'
+
   return (
     <div className='min-h-screen bg-[var(--bg-primary)] flex flex-col'>
       <div className='flex-1 container mx-auto px-4 py-8'>
@@ -144,99 +340,23 @@ export default function QuizPage() {
                 </p>
               </motion.div>
 
-              <LayoutGroup>
-                <motion.div
-                  className='mb-6 flex flex-wrap gap-3'
-                  variants={chipsContainer}
-                  initial='hidden'
-                  animate='show'
-                >
-                  <div className='relative'>
-                    {selectedCategory === null && (
-                      <motion.div
-                        layoutId='quiz-active-tab'
-                        className='absolute rounded-xl pointer-events-none'
-                        style={{
-                          top: 4,
-                          bottom: 4,
-                          left: 4,
-                          right: 4,
-                          borderRadius: 14,
-                          background:
-                            'linear-gradient(90deg, rgba(var(--accent-primary-rgb),0.18), rgba(var(--accent-secondary-rgb),0.18))',
-                          boxShadow:
-                            '0 10px 28px -12px rgba(var(--accent-primary-rgb),0.18)',
-                        }}
-                        transition={
-                          {
-                            type: 'spring',
-                            stiffness: 420,
-                            damping: 28,
-                          } as unknown as Transition
-                        }
-                      />
-                    )}
-                    <motion.button
-                      variants={chipItem}
-                      onClick={() => setSelectedCategory(null)}
-                      className={`relative z-10 px-6 py-3 rounded-lg text-sm font-medium transition-all ${
-                        selectedCategory === null
-                          ? 'text-[var(--text-primary)]'
-                          : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                      }`}
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.98 }}
-                      aria-pressed={selectedCategory === null}
-                    >
-                      Все
-                    </motion.button>
-                  </div>
-
-                  {getCategories().map(category => (
-                    <div key={category} className='relative'>
-                      {selectedCategory === category && (
-                        <motion.div
-                          layoutId='quiz-active-tab'
-                          className='absolute rounded-xl pointer-events-none'
-                          style={{
-                            top: 4,
-                            bottom: 4,
-                            left: 4,
-                            right: 4,
-                            borderRadius: 14,
-                            background:
-                              'linear-gradient(90deg, rgba(var(--accent-primary-rgb),0.18), rgba(var(--accent-secondary-rgb),0.18))',
-                            boxShadow:
-                              '0 10px 28px -12px rgba(var(--accent-primary-rgb),0.18)',
-                          }}
-                          transition={
-                            {
-                              type: 'spring',
-                              stiffness: 420,
-                              damping: 28,
-                            } as unknown as Transition
-                          }
-                        />
-                      )}
-
-                      <motion.button
-                        variants={chipItem}
-                        onClick={() => setSelectedCategory(category)}
-                        className={`relative z-10 px-6 py-3 rounded-lg text-sm font-medium transition-all ${
-                          selectedCategory === category
-                            ? 'text-[var(--text-primary)]'
-                            : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                        }`}
-                        whileHover={{ scale: 1.03 }}
-                        whileTap={{ scale: 0.98 }}
-                        aria-pressed={selectedCategory === category}
-                      >
-                        {category}
-                      </motion.button>
-                    </div>
-                  ))}
-                </motion.div>
-              </LayoutGroup>
+              <motion.div
+                className='mb-6'
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.25 } as unknown as Transition}
+              >
+                <Tabs
+                  tabs={categoryTabs}
+                  activeTab={activeCategory}
+                  onChange={tabId =>
+                    setSelectedCategory(tabId === 'all' ? null : tabId)
+                  }
+                  layoutId='quiz-tabs'
+                  size='md'
+                  className='flex-wrap'
+                />
+              </motion.div>
 
               <motion.div
                 initial={{ opacity: 0, y: 8 }}

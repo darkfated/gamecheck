@@ -1,10 +1,12 @@
-import { AnimatePresence, LayoutGroup, motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { FC, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { Input } from '../components/ui/Input'
 import { SectionHeader } from '../components/ui/SectionHeader'
+import { Select } from '../components/ui/Select'
+import { Tabs } from '../components/ui/Tabs'
 import { useAuth } from '../contexts/AuthContext'
 import api from '../services/api'
 
@@ -196,6 +198,47 @@ const Users: FC = () => {
     visible: { opacity: 1, y: 0 },
   }
 
+  const userTabs = [
+    {
+      id: 'following',
+      label: 'Подписки',
+      icon: (
+        <svg
+          className='w-5 h-5'
+          viewBox='0 0 24 24'
+          fill='none'
+          stroke='currentColor'
+        >
+          <path
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            strokeWidth={2}
+            d='M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'
+          />
+        </svg>
+      ),
+    },
+    {
+      id: 'all',
+      label: 'Все игроки',
+      icon: (
+        <svg
+          className='w-5 h-5'
+          viewBox='0 0 24 24'
+          fill='none'
+          stroke='currentColor'
+        >
+          <path
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            strokeWidth={2}
+            d='M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'
+          />
+        </svg>
+      ),
+    },
+  ]
+
   return (
     <motion.div
       className='bg-[var(--bg-primary)]'
@@ -223,109 +266,14 @@ const Users: FC = () => {
             variant='glass'
             className='flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-6 justify-between'
           >
-            <div style={{ overflowX: 'visible' }}>
-            <LayoutGroup>
-              <div className='flex gap-3 items-center relative'>
-                <div className='relative'>
-                  {activeTab === 'following' && (
-                    <motion.div
-                      layoutId='users-active-tab'
-                      className='absolute rounded-xl pointer-events-none'
-                      style={{
-                        top: 4,
-                        bottom: 4,
-                        left: 4,
-                        right: 4,
-                        borderRadius: 14,
-                        background:
-                          'linear-gradient(to right, rgba(var(--accent-primary-rgb), 0.18), rgba(var(--accent-secondary-rgb), 0.18))',
-                        boxShadow:
-                          '0 8px 20px -10px rgba(var(--accent-primary-rgb), 0.2)',
-                      }}
-                      transition={{
-                        type: 'spring',
-                        stiffness: 420,
-                        damping: 28,
-                      }}
-                    />
-                  )}
-
-                  <button
-                    onClick={() => setActiveTab('following')}
-                    className={`relative z-10 px-6 py-3 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
-                      activeTab === 'following'
-                        ? 'text-[var(--text-primary)]'
-                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                    }`}
-                  >
-                    <svg
-                      className='w-5 h-5'
-                      viewBox='0 0 24 24'
-                      fill='none'
-                      stroke='currentColor'
-                    >
-                      <path
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                        strokeWidth={2}
-                        d='M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'
-                      />
-                    </svg>
-                    Подписки
-                  </button>
-                </div>
-
-                <div className='relative'>
-                  {activeTab === 'all' && (
-                    <motion.div
-                      layoutId='users-active-tab'
-                      className='absolute rounded-xl pointer-events-none'
-                      style={{
-                        top: 4,
-                        bottom: 4,
-                        left: 4,
-                        right: 4,
-                        borderRadius: 14,
-                        background:
-                          'linear-gradient(to right, rgba(var(--accent-primary-rgb), 0.18), rgba(var(--accent-secondary-rgb), 0.18))',
-                        boxShadow:
-                          '0 8px 20px -10px rgba(var(--accent-primary-rgb), 0.2)',
-                      }}
-                      transition={{
-                        type: 'spring',
-                        stiffness: 420,
-                        damping: 28,
-                      }}
-                    />
-                  )}
-
-                  <button
-                    onClick={() => setActiveTab('all')}
-                    className={`relative z-10 px-6 py-3 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
-                      activeTab === 'all'
-                        ? 'text-[var(--text-primary)]'
-                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                    }`}
-                  >
-                    <svg
-                      className='w-5 h-5'
-                      viewBox='0 0 24 24'
-                      fill='none'
-                      stroke='currentColor'
-                    >
-                      <path
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                        strokeWidth={2}
-                        d='M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'
-                      />
-                    </svg>
-                    Все игроки
-                  </button>
-                </div>
-              </div>
-            </LayoutGroup>
-            </div>
+            <Tabs
+              tabs={userTabs}
+              activeTab={activeTab}
+              onChange={tabId => setActiveTab(tabId as 'all' | 'following')}
+              layoutId='users-tabs'
+              size='md'
+              className='flex-wrap'
+            />
 
             <motion.div
               className='w-full lg:w-auto flex flex-col sm:flex-row items-stretch gap-3'
@@ -340,40 +288,46 @@ const Users: FC = () => {
                 />
               </div>
 
-              <div className='flex items-center gap-2'>
-                <div className='h-12 flex items-center gap-2 bg-transparent'>
+              <div className='flex flex-col sm:flex-row sm:items-center gap-2 w-full'>
+                <div className='flex flex-wrap items-center gap-2 bg-transparent w-full sm:w-auto'>
                   <button
                     onClick={() => handleSortChange('createdAt')}
-                    className={`h-10 px-4 rounded-md text-sm border ${sortBy === 'createdAt' ? 'border-[var(--accent-primary)] bg-[var(--bg-tertiary)] text-[var(--text-primary)]' : 'border-[var(--border-color)] bg-[var(--bg-secondary)] text-[var(--text-secondary)]'}`}
+                    className={`h-10 px-4 rounded-md text-sm border whitespace-nowrap ${sortBy === 'createdAt' ? 'border-[var(--accent-primary)] bg-[var(--bg-tertiary)] text-[var(--text-primary)]' : 'border-[var(--border-color)] bg-[var(--bg-secondary)] text-[var(--text-secondary)]'}`}
                   >
                     Дата
                   </button>
                   <button
                     onClick={() => handleSortChange('totalPlaytime')}
-                    className={`h-10 px-4 rounded-md text-sm border ${sortBy === 'totalPlaytime' ? 'border-[var(--accent-primary)] bg-[var(--bg-tertiary)] text-[var(--text-primary)]' : 'border-[var(--border-color)] bg-[var(--bg-secondary)] text-[var(--text-secondary)]'}`}
+                    className={`h-10 px-4 rounded-md text-sm border whitespace-nowrap ${sortBy === 'totalPlaytime' ? 'border-[var(--accent-primary)] bg-[var(--bg-tertiary)] text-[var(--text-primary)]' : 'border-[var(--border-color)] bg-[var(--bg-secondary)] text-[var(--text-secondary)]'}`}
                   >
                     Время
                   </button>
                   <button
                     onClick={() => handleSortChange('averageRating')}
-                    className={`h-10 px-4 rounded-md text-sm border ${sortBy === 'averageRating' ? 'border-[var(--accent-primary)] bg-[var(--bg-tertiary)] text-[var(--text-primary)]' : 'border-[var(--border-color)] bg-[var(--bg-secondary)] text-[var(--text-secondary)]'}`}
+                    className={`h-10 px-4 rounded-md text-sm border whitespace-nowrap ${sortBy === 'averageRating' ? 'border-[var(--accent-primary)] bg-[var(--bg-tertiary)] text-[var(--text-primary)]' : 'border-[var(--border-color)] bg-[var(--bg-secondary)] text-[var(--text-secondary)]'}`}
                   >
                     Рейтинг
                   </button>
                 </div>
 
-                <select
-                  value={limit}
-                  onChange={e => {
-                    setLimit(Number(e.target.value))
-                    setPage(0)
-                  }}
-                  className='h-10 px-4 rounded-md text-sm border border-[var(--border-color)] bg-[var(--bg-secondary)] text-[var(--text-secondary)]'
-                >
-                  <option value={8}>8</option>
-                  <option value={12}>12</option>
-                  <option value={24}>24</option>
-                </select>
+                <div className='flex items-center gap-2 w-full sm:w-auto'>
+                  <span className='text-xs text-[var(--text-secondary)] whitespace-nowrap'>
+                    На странице
+                  </span>
+                  <Select
+                    value={limit}
+                    onChange={e => {
+                      setLimit(Number(e.target.value))
+                      setPage(0)
+                    }}
+                    wrapperClassName='w-full sm:w-[140px]'
+                    className='h-10'
+                  >
+                    <option value={8}>8</option>
+                    <option value={12}>12</option>
+                    <option value={24}>24</option>
+                  </Select>
+                </div>
               </div>
             </motion.div>
           </Card>
@@ -384,7 +338,15 @@ const Users: FC = () => {
             <AnimatePresence mode='wait'>
               <motion.div
                 key={
-                  activeTab + '-' + page + '-' + limit + '-' + sortBy + '-' + order
+                  activeTab +
+                  '-' +
+                  page +
+                  '-' +
+                  limit +
+                  '-' +
+                  sortBy +
+                  '-' +
+                  order
                 }
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -393,24 +355,28 @@ const Users: FC = () => {
               >
                 <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
                   {loading && page === 0 ? (
-                    Array.from({ length: Math.max(3, limit / 3) }).map((_, i) => (
-                      <div
-                        key={i}
-                        className='animate-pulse bg-[var(--bg-secondary)] rounded-xl p-4 border border-[var(--border-color)]'
-                      >
-                        <div className='flex items-center gap-4'>
-                          <div className='w-12 h-12 rounded-full bg-[var(--bg-tertiary)]' />
-                          <div className='flex-1 space-y-2'>
-                            <div className='h-4 bg-[var(--bg-tertiary)] rounded w-3/4' />
-                            <div className='h-3 bg-[var(--bg-tertiary)] rounded w-1/2' />
+                    Array.from({ length: Math.max(3, limit / 3) }).map(
+                      (_, i) => (
+                        <div
+                          key={i}
+                          className='animate-pulse bg-[var(--bg-secondary)] rounded-xl p-4 border border-[var(--border-color)]'
+                        >
+                          <div className='flex items-center gap-4'>
+                            <div className='w-12 h-12 rounded-full bg-[var(--bg-tertiary)]' />
+                            <div className='flex-1 space-y-2'>
+                              <div className='h-4 bg-[var(--bg-tertiary)] rounded w-3/4' />
+                              <div className='h-3 bg-[var(--bg-tertiary)] rounded w-1/2' />
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))
+                      )
+                    )
                   ) : error ? (
                     <div className='col-span-full bg-gradient-to-r from-red-500/10 to-pink-500/10 border border-red-500/20 rounded-xl p-6 shadow'>
                       <p className='text-red-400 font-semibold mb-3'>Ошибка</p>
-                      <p className='text-[var(--text-secondary)] mb-5'>{error}</p>
+                      <p className='text-[var(--text-secondary)] mb-5'>
+                        {error}
+                      </p>
                       <div>
                         <Button
                           onClick={() => fetchUsers(page * limit)}
@@ -440,7 +406,7 @@ const Users: FC = () => {
                         className='group bg-[var(--bg-secondary)] rounded-xl p-4 border border-[var(--border-color)] flex items-center gap-4'
                       >
                         <div className='relative flex-shrink-0'>
-                          <div className='absolute -left-3 -top-3 w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold bg-gradient-to-br from-[var(--accent-primary)] to-[var(--accent-secondary)] text-[#001015]'>
+                          <div className='absolute -left-3 -top-3 w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold bg-gradient-to-br from-[var(--accent-primary)] to-[var(--accent-secondary)] text-[var(--button-text-on-accent)]'>
                             {u.rank}
                           </div>
                           <img
@@ -528,24 +494,29 @@ const Users: FC = () => {
                 </button>
 
                 <div className='hidden sm:flex items-center gap-1'>
-                  {Array.from({ length: Math.min(5, totalPages) }).map((_, i) => {
-                    let pageNum = 0
-                    if (totalPages <= 5) pageNum = i
-                    else {
-                      const start = Math.max(0, Math.min(page - 2, totalPages - 5))
-                      pageNum = start + i
+                  {Array.from({ length: Math.min(5, totalPages) }).map(
+                    (_, i) => {
+                      let pageNum = 0
+                      if (totalPages <= 5) pageNum = i
+                      else {
+                        const start = Math.max(
+                          0,
+                          Math.min(page - 2, totalPages - 5)
+                        )
+                        pageNum = start + i
+                      }
+                      if (pageNum >= totalPages) return null
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => setPage(pageNum)}
+                          className={`w-9 h-9 rounded-md ${pageNum === page ? 'bg-[var(--accent-primary)] text-[var(--button-text-on-accent)]' : 'bg-[var(--bg-secondary)] border border-[var(--border-color)]'}`}
+                        >
+                          {pageNum + 1}
+                        </button>
+                      )
                     }
-                    if (pageNum >= totalPages) return null
-                    return (
-                      <button
-                        key={pageNum}
-                        onClick={() => setPage(pageNum)}
-                        className={`w-9 h-9 rounded-md ${pageNum === page ? 'bg-[var(--accent-primary)] text-[#001015]' : 'bg-[var(--bg-secondary)] border border-[var(--border-color)]'}`}
-                      >
-                        {pageNum + 1}
-                      </button>
-                    )
-                  })}
+                  )}
                 </div>
 
                 <button

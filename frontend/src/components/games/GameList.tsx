@@ -1,8 +1,14 @@
-import { AnimatePresence, motion } from 'framer-motion'
+﻿import { AnimatePresence, motion } from 'framer-motion'
 import { FC, useMemo, useState } from 'react'
 import { getStatusOptions } from '../../constants'
 import { useAuth } from '../../contexts/AuthContext'
 import { useGameManagement } from '../../hooks/useGameManagement'
+import { ArcadeGlyph } from '../icons/ArcadeGlyph'
+import { Button } from '../ui/Button'
+import { Card } from '../ui/Card'
+import { Input } from '../ui/Input'
+import { Select } from '../ui/Select'
+import { Tabs } from '../ui/Tabs'
 import { GameAddForm } from './GameAddForm'
 import { GameCard } from './GameCard'
 
@@ -28,15 +34,15 @@ interface GameListProps {
   onUpdate?: () => void
   editable?: boolean
   isOwner?: boolean
-  viewMode?: 'cards' | 'list'
 }
+
+type SortOption = 'default' | 'name' | 'rating' | 'playtime'
 
 export const GameList: FC<GameListProps> = ({
   games,
   onUpdate = () => {},
   editable,
   isOwner,
-  viewMode = 'cards',
 }) => {
   const { isAuthenticated, authInitialized } = useAuth()
   const {
@@ -48,19 +54,18 @@ export const GameList: FC<GameListProps> = ({
     updateSteamData,
   } = useGameManagement(onUpdate)
 
+  const [isFormVisible, setIsFormVisible] = useState(false)
+  const [statusFilter, setStatusFilter] = useState('all')
+  const [sortBy, setSortBy] = useState<SortOption>('default')
+  const [query, setQuery] = useState('')
+
+  const statusOptions: StatusOption[] = getStatusOptions()
+
   const handleUpdateSteam = (gameId: string) => {
     if (updateSteamData) {
       updateSteamData(gameId)
     }
   }
-
-  const [isFormVisible, setIsFormVisible] = useState(false)
-
-  const enableEditMode = () => {
-    setIsFormVisible(true)
-  }
-
-  const statusOptions: StatusOption[] = getStatusOptions()
 
   const handleAddGame = async (gameData: any) => {
     try {
@@ -71,41 +76,178 @@ export const GameList: FC<GameListProps> = ({
     }
   }
 
-  const groupedGames = useMemo(() => {
-    if (!Array.isArray(games) || games.length === 0) {
-      return statusOptions.reduce(
-        (acc, status) => {
-          acc[status.value] = []
-          return acc
-        },
-        {} as Record<string, Game[]>,
+  const statusCounts = useMemo(() => {
+    const counts: Record<string, number> = {}
+    statusOptions.forEach(status => {
+      counts[status.value] = 0
+    })
+
+    games.forEach(game => {
+      if (counts[game.status] !== undefined) {
+        counts[game.status] += 1
+      }
+    })
+
+    return counts
+  }, [games, statusOptions])
+
+  const getStatusIcon = (statusId: string) => {
+    switch (statusId) {
+      case 'playing':
+        return (
+          <svg
+            className='w-4 h-4'
+            viewBox='0 0 24 24'
+            fill='none'
+            stroke='currentColor'
+          >
+            <path
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              strokeWidth={2}
+              d='M14 5l7 7-7 7M3 5l7 7-7 7'
+            />
+          </svg>
+        )
+      case 'completed':
+        return (
+          <svg
+            className='w-4 h-4'
+            viewBox='0 0 24 24'
+            fill='none'
+            stroke='currentColor'
+          >
+            <path
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              strokeWidth={2}
+              d='M5 13l4 4L19 7'
+            />
+          </svg>
+        )
+      case 'plan_to_play':
+        return (
+          <svg
+            className='w-4 h-4'
+            viewBox='0 0 24 24'
+            fill='none'
+            stroke='currentColor'
+          >
+            <path
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              strokeWidth={2}
+              d='M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01'
+            />
+          </svg>
+        )
+      case 'dropped':
+        return (
+          <svg
+            className='w-4 h-4'
+            viewBox='0 0 24 24'
+            fill='none'
+            stroke='currentColor'
+          >
+            <path
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              strokeWidth={2}
+              d='M6 18L18 6M6 6l12 12'
+            />
+          </svg>
+        )
+      default:
+        return (
+          <svg
+            className='w-4 h-4'
+            viewBox='0 0 24 24'
+            fill='none'
+            stroke='currentColor'
+          >
+            <path
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              strokeWidth={2}
+              d='M4 6h16M4 12h16M4 18h16'
+            />
+          </svg>
+        )
+    }
+  }
+
+  const statusTabs = useMemo(
+    () => [
+      {
+        id: 'all',
+        label: 'Все',
+        badge: games.length,
+        icon: getStatusIcon('all'),
+      },
+      ...statusOptions.map(status => ({
+        id: status.value,
+        label: status.label,
+        badge: statusCounts[status.value] || 0,
+        icon: getStatusIcon(status.value),
+      })),
+    ],
+    [games.length, statusCounts, statusOptions]
+  )
+
+  const filteredGames = useMemo(() => {
+    let result = [...games]
+
+    if (statusFilter !== 'all') {
+      result = result.filter(game => game.status === statusFilter)
+    }
+
+    const normalizedQuery = query.trim().toLowerCase()
+    if (normalizedQuery) {
+      result = result.filter(game =>
+        game.name.toLowerCase().includes(normalizedQuery)
       )
     }
 
-    const grouped: Record<string, Game[]> = {}
-    statusOptions.forEach(status => {
-      grouped[status.value] = games.filter(game => game.status === status.value)
-    })
+    if (sortBy !== 'default') {
+      result.sort((a, b) => {
+        if (sortBy === 'name') {
+          return a.name.localeCompare(b.name)
+        }
+        if (sortBy === 'rating') {
+          return (b.rating ?? -1) - (a.rating ?? -1)
+        }
+        return (b.steamPlaytimeForever ?? 0) - (a.steamPlaytimeForever ?? 0)
+      })
+    }
 
-    return grouped
-  }, [games])
+    return result
+  }, [games, query, sortBy, statusFilter])
+
+  const hasFilters =
+    statusFilter !== 'all' || query.trim() !== '' || sortBy !== 'default'
+
+  const resetFilters = () => {
+    setStatusFilter('all')
+    setSortBy('default')
+    setQuery('')
+  }
 
   if (editable && !isAuthenticated && authInitialized) {
     return (
-      <div className='bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/20 rounded-xl p-6 text-center shadow-xl'>
-        <p className='text-orange-400 font-semibold mb-2'>
-          Требуется авторизация
-        </p>
-        <p className='text-[var(--text-secondary)] mb-4'>
-          Чтобы управлять своей коллекцией игр, необходимо войти в систему.
-        </p>
-        <button
-          onClick={() => (window.location.href = '/login')}
-          className='bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-2 rounded-lg hover:from-orange-600 hover:to-red-600 transition-all'
-        >
-          Войти через Steam
-        </button>
-      </div>
+      <Card variant='glass' className='text-center'>
+        <div className='flex flex-col items-center gap-3'>
+          <ArcadeGlyph className='w-12 h-12 text-[var(--accent-secondary)]' />
+          <p className='text-lg font-semibold text-[var(--text-primary)]'>
+            Требуется авторизация
+          </p>
+          <p className='text-[var(--text-secondary)]'>
+            Войдите в систему, чтобы управлять своей коллекцией игр.
+          </p>
+          <Button onClick={() => (window.location.href = '/login')}>
+            Войти через Steam
+          </Button>
+        </div>
+      </Card>
     )
   }
 
@@ -114,86 +256,64 @@ export const GameList: FC<GameListProps> = ({
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className='bg-[var(--card-bg)] border border-[var(--border-color)] rounded-xl p-6 text-center shadow-xl'
       >
-        <svg
-          className='w-16 h-16 mx-auto text-[var(--text-tertiary)] mb-4'
-          fill='none'
-          viewBox='0 0 24 24'
-          stroke='currentColor'
-        >
-          <path
-            strokeLinecap='round'
-            strokeLinejoin='round'
-            strokeWidth={1.5}
-            d='M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5'
-          />
-        </svg>
-        <p className='text-lg font-semibold text-[var(--text-primary)] mb-2'>
-          {isOwner
-            ? 'Ваша коллекция игр пуста'
-            : 'Коллекция игр пользователя пуста'}
-        </p>
-        <p className='text-[var(--text-secondary)] mb-4'>
-          {isOwner
-            ? 'Добавьте первую игру в коллекцию, чтобы начать отслеживать свой игровой прогресс.'
-            : 'Пользователь пока не добавил ни одной игры в свою коллекцию.'}
-        </p>
-
-        {isOwner && isAuthenticated && (
-          <motion.button
-            onClick={enableEditMode}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            className='mt-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-amber-500 hover:from-cyan-400 hover:to-amber-400 text-[#001015] rounded-lg shadow-lg hover:shadow-cyan-500/20 transition-all duration-300 text-sm font-medium'
-          >
-            Добавить первую игру
-          </motion.button>
-        )}
-
-        <AnimatePresence>
-          {isOwner && isAuthenticated && isFormVisible && (
-            <div className='mt-6'>
-              <GameAddForm
-                onSubmit={handleAddGame}
-                onCancel={() => setIsFormVisible(false)}
-                isSubmitting={isSubmitting}
-              />
-              {authError && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className='text-red-500 text-sm mt-4 text-center'
-                >
-                  {authError}
-                </motion.div>
-              )}
+        <Card variant='glass' className='text-center'>
+          <div className='flex flex-col items-center gap-4'>
+            <ArcadeGlyph className='w-16 h-16 text-[var(--text-tertiary)]' />
+            <div className='space-y-2'>
+              <p className='text-lg font-semibold text-[var(--text-primary)]'>
+                {isOwner
+                  ? 'Ваша коллекция игр пуста'
+                  : 'Коллекция игр пользователя пуста'}
+              </p>
+              <p className='text-[var(--text-secondary)]'>
+                {isOwner
+                  ? 'Добавьте первую игру, чтобы начать отслеживать прогресс и делиться достижениями.'
+                  : 'Пользователь пока не добавил ни одной игры.'}
+              </p>
             </div>
-          )}
-        </AnimatePresence>
+
+            {isOwner && isAuthenticated && (
+              <Button onClick={() => setIsFormVisible(true)}>
+                Добавить первую игру
+              </Button>
+            )}
+
+            <AnimatePresence>
+              {isOwner && isAuthenticated && isFormVisible && (
+                <div className='mt-4 w-full'>
+                  <GameAddForm
+                    onSubmit={handleAddGame}
+                    onCancel={() => setIsFormVisible(false)}
+                    isSubmitting={isSubmitting}
+                  />
+                </div>
+              )}
+            </AnimatePresence>
+          </div>
+        </Card>
       </motion.div>
     )
   }
 
   return (
-    <div className='space-y-8'>
-      {isOwner && isAuthenticated && (
-        <div className='flex justify-between items-center'>
-          <h2 className='text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-amber-400'>
-            Моя коллекция игр
+    <div className='space-y-6'>
+      <div className='flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4'>
+        <div>
+          <h2 className='text-2xl font-bold text-[var(--text-primary)]'>
+            Коллекция игр
           </h2>
-
-          <motion.button
-            onClick={enableEditMode}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            className='px-4 py-2 bg-gradient-to-r from-cyan-500 to-amber-500 hover:from-cyan-400 hover:to-amber-400 text-[#001015] rounded-lg shadow-lg hover:shadow-cyan-500/20 transition-all duration-300 text-sm font-medium'
-          >
-            Добавить игру
-          </motion.button>
+          <p className='text-sm text-[var(--text-secondary)]'>
+            Всего игр: {games.length}
+          </p>
         </div>
-      )}
+
+        {isOwner && isAuthenticated && (
+          <Button onClick={() => setIsFormVisible(true)} size='md'>
+            Добавить игру
+          </Button>
+        )}
+      </div>
 
       <AnimatePresence>
         {isOwner && isAuthenticated && isFormVisible && (
@@ -211,50 +331,69 @@ export const GameList: FC<GameListProps> = ({
         </div>
       )}
 
-      {statusOptions.map(status => {
-        const gamesInStatus = groupedGames[status.value] || []
-        if (gamesInStatus.length === 0) return null
+      <Card variant='glass' className='space-y-4'>
+        <Tabs
+          tabs={statusTabs}
+          activeTab={statusFilter}
+          onChange={setStatusFilter}
+          layoutId='progress-tabs'
+          size='md'
+          className='flex-wrap'
+        />
 
-        return (
-          <div key={status.value} className='space-y-4'>
-            <h3 className='text-lg font-semibold text-[var(--text-primary)]'>
-              {status.label}
-            </h3>
-            {viewMode === 'cards' ? (
-              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-                {gamesInStatus.map(game => (
-                  <GameCard
-                    key={game.id}
-                    game={game}
-                    onUpdate={updateGame}
-                    onDelete={deleteGame}
-                    onUpdateSteam={handleUpdateSteam}
-                    editable={editable}
-                    isOwner={isOwner}
-                    statusOptions={statusOptions}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className='space-y-3'>
-                {gamesInStatus.map(game => (
-                  <GameCard
-                    key={game.id}
-                    game={game}
-                    onUpdate={updateGame}
-                    onDelete={deleteGame}
-                    onUpdateSteam={handleUpdateSteam}
-                    editable={editable}
-                    isOwner={isOwner}
-                    statusOptions={statusOptions}
-                    listMode={true}
-                  />
-                ))}
-              </div>
+        <div className='flex flex-col sm:flex-row gap-3'>
+          <Input
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder='Поиск по названию'
+            className='h-12'
+          />
+          <Select
+            value={sortBy}
+            onChange={e => setSortBy(e.target.value as SortOption)}
+            wrapperClassName='min-w-[220px]'
+            className='h-12'
+          >
+            <option value='default'>Сортировка: по умолчанию</option>
+            <option value='name'>Сортировка: по названию</option>
+            <option value='rating'>Сортировка: по рейтингу</option>
+            <option value='playtime'>Сортировка: по времени</option>
+          </Select>
+        </div>
+      </Card>
+
+      {filteredGames.length === 0 ? (
+        <Card variant='glass' className='text-center'>
+          <div className='flex flex-col items-center gap-3'>
+            <ArcadeGlyph className='w-12 h-12 text-[var(--text-tertiary)]' />
+            <p className='text-lg font-semibold text-[var(--text-primary)]'>
+              Ничего не найдено
+            </p>
+            <p className='text-[var(--text-secondary)]'>
+              Попробуйте изменить фильтры или поисковый запрос.
+            </p>
+            {hasFilters && (
+              <Button variant='secondary' onClick={resetFilters}>
+                Сбросить фильтры
+              </Button>
             )}
           </div>
-        )
-      })}
+        </Card>
+      ) : (
+        <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4'>
+          {filteredGames.map(game => (
+            <GameCard
+              key={game.id}
+              game={game}
+              onUpdate={updateGame}
+              onDelete={deleteGame}
+              onUpdateSteam={handleUpdateSteam}
+              editable={editable}
+              statusOptions={statusOptions}
+            />
+          ))}
+        </div>
+      )}
     </div>
   )
 }

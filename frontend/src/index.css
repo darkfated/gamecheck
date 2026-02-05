@@ -47,32 +47,33 @@
   --error: #f87171;
   --error-hover: #ef4444;
   --focus-ring: rgba(34, 211, 238, 0.5);
+  --button-text-on-accent: #001015;
   --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.35);
   --shadow-card: 0 18px 45px rgba(0, 0, 0, 0.45);
 }
 
 .light-theme {
   --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-tertiary: #64748b;
-  --bg-primary: #f4f7fb;
+  --text-secondary: #526077;
+  --text-tertiary: #7a8799;
+  --bg-primary: #f6f8fb;
   --bg-secondary: #ffffff;
-  --bg-tertiary: #e9eff7;
-  --bg-primary-rgb: 244, 247, 251;
+  --bg-tertiary: #e7edf4;
+  --bg-primary-rgb: 246, 248, 251;
   --bg-secondary-rgb: 255, 255, 255;
-  --bg-tertiary-rgb: 233, 239, 247;
+  --bg-tertiary-rgb: 231, 237, 244;
   --accent-primary: #0891b2;
   --accent-secondary: #f59e0b;
   --accent-tertiary: #059669;
   --accent-primary-rgb: 8, 145, 178;
   --accent-secondary-rgb: 245, 158, 11;
-  --border-color: rgba(8, 145, 178, 0.12);
-  --border-color-hover: rgba(8, 145, 178, 0.2);
-  --divider-color: rgba(71, 85, 105, 0.16);
+  --border-color: rgba(8, 145, 178, 0.16);
+  --border-color-hover: rgba(8, 145, 178, 0.28);
+  --divider-color: rgba(15, 23, 42, 0.12);
   --card-bg: #ffffff;
-  --card-border: rgba(8, 145, 178, 0.12);
-  --card-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
-  --input-bg: #f1f5f9;
+  --card-border: rgba(8, 145, 178, 0.16);
+  --card-shadow: 0 16px 32px rgba(15, 23, 42, 0.08);
+  --input-bg: #f8fafc;
   --input-border: rgba(8, 145, 178, 0.18);
   --input-focus: rgba(8, 145, 178, 0.32);
   --bg-secondary-hover: #f1f5f9;
@@ -80,6 +81,7 @@
   --error: #dc2626;
   --error-hover: #b91c1c;
   --focus-ring: rgba(8, 145, 178, 0.4);
+  --button-text-on-accent: #ffffff;
   --shadow-soft: 0 10px 28px rgba(15, 23, 42, 0.12);
   --shadow-card: 0 18px 45px rgba(15, 23, 42, 0.14);
 }

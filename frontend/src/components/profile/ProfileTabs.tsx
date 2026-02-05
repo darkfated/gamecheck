@@ -140,7 +140,7 @@ export const ProfileTabs: FC<ProfileTabsProps> = ({
                         p-2 rounded-lg transition-all
                         ${
                           isActive
-                            ? 'bg-gradient-to-r from-cyan-500 to-amber-500 text-[#001015] shadow-lg shadow-cyan-500/20'
+                            ? 'bg-gradient-to-r from-cyan-500 to-amber-500 text-[var(--button-text-on-accent)] shadow-lg shadow-cyan-500/20'
                             : 'bg-[rgba(var(--bg-tertiary-rgb),0.8)]'
                         }
                       `}
