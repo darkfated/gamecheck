@@ -163,8 +163,9 @@ export default function QuizPage() {
                           right: 4,
                           borderRadius: 14,
                           background:
-                            'linear-gradient(90deg, rgba(99,102,241,0.18), rgba(168,85,247,0.18), rgba(217,70,239,0.18))',
-                          boxShadow: '0 10px 28px -12px rgba(99,102,241,0.12)',
+                            'linear-gradient(90deg, rgba(var(--accent-primary-rgb),0.18), rgba(var(--accent-secondary-rgb),0.18))',
+                          boxShadow:
+                            '0 10px 28px -12px rgba(var(--accent-primary-rgb),0.18)',
                         }}
                         transition={
                           {
@@ -204,9 +205,9 @@ export default function QuizPage() {
                             right: 4,
                             borderRadius: 14,
                             background:
-                              'linear-gradient(90deg, rgba(99,102,241,0.18), rgba(168,85,247,0.18), rgba(217,70,239,0.18))',
+                              'linear-gradient(90deg, rgba(var(--accent-primary-rgb),0.18), rgba(var(--accent-secondary-rgb),0.18))',
                             boxShadow:
-                              '0 10px 28px -12px rgba(99,102,241,0.12)',
+                              '0 10px 28px -12px rgba(var(--accent-primary-rgb),0.18)',
                           }}
                           transition={
                             {

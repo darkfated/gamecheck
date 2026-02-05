@@ -93,7 +93,7 @@ export const QuizPlayer: FC<QuizPlayerProps> = ({
           </div>
           <div className='w-full h-2 bg-[var(--bg-tertiary)] rounded-full overflow-hidden'>
             <motion.div
-              className='h-full bg-gradient-to-r from-indigo-500 to-purple-500'
+              className='h-full bg-gradient-to-r from-cyan-500 to-amber-500'
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
               transition={{ duration: 0.5 }}
@@ -200,7 +200,7 @@ export const QuizPlayer: FC<QuizPlayerProps> = ({
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
               onClick={handleNext}
-              className='w-full py-3 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white rounded-lg font-medium transition-all'
+              className='w-full py-3 bg-gradient-to-r from-cyan-500 to-amber-500 hover:from-cyan-400 hover:to-amber-400 text-[#001015] rounded-lg font-medium transition-all'
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >

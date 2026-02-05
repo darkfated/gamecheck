@@ -44,6 +44,7 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
       root.classList.remove('dark-theme')
     }
 
+    root.style.colorScheme = theme
     localStorage.setItem('theme', theme)
   }, [theme])
 

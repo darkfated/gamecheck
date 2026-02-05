@@ -22,16 +22,16 @@ func NewActivityService(
 	}
 }
 
-func (s *ActivityService) GetFeed(userID string, limit int) ([]*models.Activity, error) {
-	return s.activityRepository.GetFeed(userID, limit)
+func (s *ActivityService) GetFeed(userID string, limit, offset int) ([]*models.Activity, error) {
+	return s.activityRepository.GetFeed(userID, limit, offset)
 }
 
-func (s *ActivityService) GetAllActivities(limit int) ([]*models.Activity, error) {
-	return s.activityRepository.GetAllActivities(limit)
+func (s *ActivityService) GetAllActivities(limit, offset int) ([]*models.Activity, error) {
+	return s.activityRepository.GetAllActivities(limit, offset)
 }
 
-func (s *ActivityService) GetUserActivity(userID string, limit int) ([]*models.Activity, error) {
-	return s.activityRepository.GetByUserID(userID, limit)
+func (s *ActivityService) GetUserActivity(userID string, limit, offset int) ([]*models.Activity, error) {
+	return s.activityRepository.GetByUserID(userID, limit, offset)
 }
 
 func (s *ActivityService) Follow(followerID, followingID string) (*models.Activity, error) {

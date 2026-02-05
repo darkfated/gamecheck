@@ -18,6 +18,15 @@ const tailwindConfig = {
       fontSize: {
         xxs: '0.625rem',
       },
+      fontFamily: {
+        display: [
+          '"Space Grotesk"',
+          '"IBM Plex Sans"',
+          'system-ui',
+          'sans-serif',
+        ],
+        body: ['"IBM Plex Sans"', 'system-ui', 'sans-serif'],
+      },
       lineClamp: {
         7: '7',
         8: '8',

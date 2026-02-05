@@ -222,10 +222,14 @@ const usersApi = {
 }
 
 const activitiesApi = {
-  getAllActivities: () => axiosInstance.get<Activity[]>('/activity/all'),
-  getFeed: () => axiosInstance.get<Activity[]>('/activity/feed'),
-  getUserActivity: (userId: string) =>
-    axiosInstance.get<Activity[]>(`/activity/user/${userId}`),
+  getAllActivities: (limit = 10, offset = 0) =>
+    axiosInstance.get<Activity[]>('/activity/all', { params: { limit, offset } }),
+  getFeed: (limit = 10, offset = 0) =>
+    axiosInstance.get<Activity[]>('/activity/feed', { params: { limit, offset } }),
+  getUserActivity: (userId: string, limit = 10, offset = 0) =>
+    axiosInstance.get<Activity[]>(`/activity/user/${userId}`, {
+      params: { limit, offset },
+    }),
 }
 
 const subscriptionsApi = {

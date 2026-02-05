@@ -59,7 +59,7 @@ const GameProgressSection: FC<GameProgressSectionProps> = ({
   if (loading) {
     return (
       <div className='flex justify-center py-8'>
-        <div className='animate-spin rounded-full h-10 w-10 border-4 border-t-transparent border-b-transparent border-indigo-500'></div>
+        <div className='animate-spin rounded-full h-10 w-10 border-4 border-t-transparent border-b-transparent border-[var(--accent-primary)]'></div>
       </div>
     )
   }
@@ -91,7 +91,7 @@ const GameProgressSection: FC<GameProgressSectionProps> = ({
               <div
                 className={`flex items-center justify-center w-6 h-6 rounded-full transition-all duration-200 ${
                   viewMode === 'cards'
-                    ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white transform translate-x-0'
+                    ? 'bg-gradient-to-r from-cyan-500 to-amber-500 text-[#001015] transform translate-x-0'
                     : 'text-[var(--text-secondary)] transform translate-x-6'
                 }`}
               >
@@ -112,7 +112,7 @@ const GameProgressSection: FC<GameProgressSectionProps> = ({
               <div
                 className={`flex items-center justify-center w-6 h-6 rounded-full transition-all duration-200 ${
                   viewMode === 'list'
-                    ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white transform -translate-x-6'
+                    ? 'bg-gradient-to-r from-cyan-500 to-amber-500 text-[#001015] transform -translate-x-6'
                     : 'text-[var(--text-secondary)] transform translate-x-0'
                 }`}
               >

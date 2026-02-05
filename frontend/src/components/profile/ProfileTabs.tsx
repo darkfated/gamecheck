@@ -91,8 +91,8 @@ export const ProfileTabs: FC<ProfileTabsProps> = ({
   return (
     <div className='w-full mb-6 lg:mb-0'>
       <div className='bg-gradient-to-br from-[var(--card-bg)] to-[var(--bg-tertiary)] backdrop-blur-md rounded-2xl p-4 shadow-xl border border-[var(--border-color)] overflow-hidden relative'>
-        <div className='absolute top-0 right-0 w-40 h-40 bg-gradient-to-r from-indigo-600/5 to-purple-600/5 rounded-full -translate-y-1/2 translate-x-1/4 blur-xl' />
-        <div className='absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-r from-purple-600/5 to-pink-600/5 rounded-full translate-y-1/2 -translate-x-1/3 blur-xl' />
+        <div className='absolute top-0 right-0 w-40 h-40 bg-gradient-to-r from-cyan-500/10 to-amber-500/10 rounded-full -translate-y-1/2 translate-x-1/4 blur-xl' />
+        <div className='absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 rounded-full translate-y-1/2 -translate-x-1/3 blur-xl' />
 
         <h3 className='text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-4 px-2'>
           Навигация
@@ -115,7 +115,7 @@ export const ProfileTabs: FC<ProfileTabsProps> = ({
                   {isActive && (
                     <motion.div
                       layoutId='activeTabBg'
-                      className='absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-500/30 to-purple-500/30'
+                      className='absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-500/25 to-amber-500/25'
                       transition={{
                         type: 'spring',
                         stiffness: 400,
@@ -140,8 +140,8 @@ export const ProfileTabs: FC<ProfileTabsProps> = ({
                         p-2 rounded-lg transition-all
                         ${
                           isActive
-                            ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg shadow-indigo-500/20'
-                            : 'bg-[var(--bg-tertiary)]/80'
+                            ? 'bg-gradient-to-r from-cyan-500 to-amber-500 text-[#001015] shadow-lg shadow-cyan-500/20'
+                            : 'bg-[rgba(var(--bg-tertiary-rgb),0.8)]'
                         }
                       `}
                     >

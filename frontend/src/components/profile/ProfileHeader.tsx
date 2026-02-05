@@ -138,7 +138,7 @@ export const ProfileHeader: FC<ProfileHeaderProps> = ({
         variants={itemVariants}
       >
         <motion.div
-          className='absolute inset-0 bg-gradient-to-r from-indigo-800 via-purple-700 to-pink-600'
+          className='absolute inset-0 bg-gradient-to-r from-cyan-900 via-teal-800 to-amber-700'
           animate={{ opacity: [0.7, 0.85, 0.7] }}
           transition={{
             duration: 6,
@@ -159,17 +159,17 @@ export const ProfileHeader: FC<ProfileHeaderProps> = ({
 
         <motion.div className='absolute inset-0 overflow-hidden'>
           <motion.div
-            className='absolute top-1/3 left-20 w-72 h-72 bg-pink-600 opacity-15 rounded-full filter blur-3xl'
+            className='absolute top-1/3 left-20 w-72 h-72 bg-amber-400 opacity-15 rounded-full filter blur-3xl'
             animate={{ scale: [1, 1.05, 1], opacity: [0.15, 0.25, 0.15] }}
             transition={{ duration: 5, repeat: Infinity, repeatType: 'mirror' }}
           ></motion.div>
           <motion.div
-            className='absolute top-10 right-20 w-48 h-48 bg-indigo-700 opacity-15 rounded-full filter blur-3xl'
+            className='absolute top-10 right-20 w-48 h-48 bg-cyan-600 opacity-15 rounded-full filter blur-3xl'
             animate={{ scale: [1, 1.08, 1], opacity: [0.15, 0.28, 0.15] }}
             transition={{ duration: 6, repeat: Infinity, repeatType: 'mirror' }}
           ></motion.div>
           <motion.div
-            className='absolute bottom-10 right-1/3 w-64 h-64 bg-purple-600 opacity-15 rounded-full filter blur-3xl'
+            className='absolute bottom-10 right-1/3 w-64 h-64 bg-teal-500 opacity-15 rounded-full filter blur-3xl'
             animate={{ scale: [1, 1.07, 1], opacity: [0.15, 0.26, 0.15] }}
             transition={{ duration: 7, repeat: Infinity, repeatType: 'mirror' }}
           ></motion.div>
@@ -285,7 +285,7 @@ export const ProfileHeader: FC<ProfileHeaderProps> = ({
                   </div>
 
                   {isOwnProfile && (
-                    <span className='py-1 px-2 text-xs bg-[var(--accent-primary)]/20 rounded-full text-[var(--accent-tertiary)] select-none'>
+                    <span className='py-1 px-2 text-xs bg-[rgba(var(--accent-primary-rgb),0.2)] rounded-full text-[var(--accent-tertiary)] select-none'>
                       Это ваш профиль
                     </span>
                   )}
@@ -293,15 +293,15 @@ export const ProfileHeader: FC<ProfileHeaderProps> = ({
               </div>
 
               <div className='mt-2 sm:mt-0'>
-                {!user && !isOwnProfile && (
+                {user && !isOwnProfile && (
                   <motion.button
                     onClick={onFollow}
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
                     className={`px-4 py-2 rounded-lg transition-all duration-300 ${
                       profile.isFollowing
-                        ? 'bg-[var(--bg-tertiary)]/80 hover:bg-[var(--bg-tertiary)] text-[var(--text-secondary)]'
-                        : 'bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white shadow-lg hover:shadow-indigo-500/20'
+                        ? 'bg-[rgba(var(--bg-tertiary-rgb),0.8)] hover:bg-[var(--bg-tertiary)] text-[var(--text-secondary)]'
+                        : 'bg-gradient-to-r from-cyan-500 to-amber-500 hover:from-cyan-400 hover:to-amber-400 text-[#001015] shadow-lg hover:shadow-cyan-500/20'
                     }`}
                   >
                     {profile.isFollowing ? 'Отписаться' : 'Подписаться'}

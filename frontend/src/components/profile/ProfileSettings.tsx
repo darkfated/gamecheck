@@ -86,7 +86,7 @@ export const ProfileSettings: FC<ProfileSettingsProps> = ({
     >
       <motion.section
         variants={itemVariants}
-        className='relative bg-gradient-to-br from-[var(--card-bg)] to-[var(--bg-tertiary)]/80 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-[var(--border-color)]'
+        className='relative bg-gradient-to-br from-[var(--card-bg)] to-[rgba(var(--bg-tertiary-rgb),0.8)] backdrop-blur-md rounded-2xl p-6 shadow-xl border border-[var(--border-color)]'
       >
         <div className='flex items-center gap-3 mb-4'>
           <svg
@@ -107,7 +107,7 @@ export const ProfileSettings: FC<ProfileSettingsProps> = ({
         </div>
 
         <div className='space-y-5'>
-          <div className='p-4 bg-[var(--bg-tertiary)]/50 rounded-xl border border-[var(--border-color)]'>
+          <div className='p-4 bg-[rgba(var(--bg-tertiary-rgb),0.5)] rounded-xl border border-[var(--border-color)]'>
             <div className='flex items-center justify-between'>
               <div>
                 <h3 className='font-medium text-[var(--text-primary)]'>
@@ -125,7 +125,7 @@ export const ProfileSettings: FC<ProfileSettingsProps> = ({
 
       <motion.section
         variants={itemVariants}
-        className='bg-gradient-to-br from-[var(--card-bg)] to-[var(--bg-tertiary)]/80 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-[var(--border-color)]'
+        className='bg-gradient-to-br from-[var(--card-bg)] to-[rgba(var(--bg-tertiary-rgb),0.8)] backdrop-blur-md rounded-2xl p-6 shadow-xl border border-[var(--border-color)]'
       >
         <div className='flex items-center gap-3 mb-4'>
           <svg
@@ -146,7 +146,7 @@ export const ProfileSettings: FC<ProfileSettingsProps> = ({
         </div>
 
         <div className='space-y-5'>
-          <div className='p-4 bg-[var(--bg-tertiary)]/50 rounded-xl border border-[var(--border-color)]'>
+          <div className='p-4 bg-[rgba(var(--bg-tertiary-rgb),0.5)] rounded-xl border border-[var(--border-color)]'>
             <h3 className='font-medium text-[var(--text-primary)] mb-3'>
               Discord тег
             </h3>
@@ -166,7 +166,7 @@ export const ProfileSettings: FC<ProfileSettingsProps> = ({
                 <div className='flex gap-2 mt-3'>
                   <button
                     onClick={handleDiscordTagSave}
-                    className='px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg'
+                    className='px-4 py-2 bg-gradient-to-r from-cyan-500 to-amber-500 text-[#001015] rounded-lg'
                   >
                     Сохранить
                   </button>

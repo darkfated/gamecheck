@@ -34,7 +34,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = '' }) => {
           ${
             theme === 'dark'
               ? 'bg-[var(--bg-tertiary)] after:bg-[var(--accent-tertiary)]'
-              : 'bg-indigo-500/80 border border-indigo-600/20 after:bg-white'
+              : 'bg-[rgba(var(--accent-primary-rgb),0.8)] border border-[rgba(var(--accent-primary-rgb),0.3)] after:bg-white'
           }
         `}
         >

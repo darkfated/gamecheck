@@ -2,6 +2,7 @@ import { AnimatePresence, LayoutGroup, motion } from 'framer-motion'
 import React, { FC, useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { Button } from './ui/Button'
 
 const Navbar: FC = () => {
   const { user, login, logout } = useAuth()
@@ -52,10 +53,10 @@ const Navbar: FC = () => {
           <div className='flex items-center space-x-8'>
             <Link
               to='/'
-              className='text-xl md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-fuchsia-500 hover:from-indigo-400 hover:via-purple-400 hover:to-fuchsia-400 transition-all duration-300'
+              className='text-xl md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-300 to-amber-400 hover:from-cyan-300 hover:via-teal-300 hover:to-amber-300 transition-all duration-300'
             >
               <div className='flex items-center'>
-                <div className='w-8 h-8 mr-2 rounded-lg bg-gradient-to-br from-indigo-600 via-purple-600 to-fuchsia-600 flex items-center justify-center shadow-lg shadow-indigo-500/20'>
+                <div className='w-8 h-8 mr-2 rounded-lg bg-gradient-to-br from-cyan-500 via-teal-500 to-amber-500 flex items-center justify-center shadow-lg shadow-cyan-500/20'>
                   <svg
                     xmlns='http://www.w3.org/2000/svg'
                     className='h-5 w-5 text-white'
@@ -88,8 +89,9 @@ const Navbar: FC = () => {
                         className='absolute inset-0 rounded-xl'
                         style={{
                           background:
-                            'linear-gradient(to right, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2), rgba(217, 70, 239, 0.2))',
-                          boxShadow: '0 4px 10px -1px rgba(99, 102, 241, 0.2)',
+                            'linear-gradient(to right, rgba(var(--accent-primary-rgb), 0.22), rgba(var(--accent-secondary-rgb), 0.18))',
+                          boxShadow:
+                            '0 6px 14px -4px rgba(var(--accent-primary-rgb), 0.35)',
                         }}
                         transition={{
                           type: 'spring',
@@ -135,9 +137,9 @@ const Navbar: FC = () => {
                           className='absolute inset-0 rounded-xl'
                           style={{
                             background:
-                              'linear-gradient(to right, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2), rgba(217, 70, 239, 0.2))',
+                              'linear-gradient(to right, rgba(var(--accent-primary-rgb), 0.22), rgba(var(--accent-secondary-rgb), 0.18))',
                             boxShadow:
-                              '0 4px 10px -1px rgba(99, 102, 241, 0.2)',
+                              '0 6px 14px -4px rgba(var(--accent-primary-rgb), 0.35)',
                           }}
                           transition={{
                             type: 'spring',
@@ -183,8 +185,9 @@ const Navbar: FC = () => {
                         className='absolute inset-0 rounded-xl'
                         style={{
                           background:
-                            'linear-gradient(to right, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2), rgba(217, 70, 239, 0.2))',
-                          boxShadow: '0 4px 10px -1px rgba(99, 102, 241, 0.2)',
+                            'linear-gradient(to right, rgba(var(--accent-primary-rgb), 0.22), rgba(var(--accent-secondary-rgb), 0.18))',
+                          boxShadow:
+                            '0 6px 14px -4px rgba(var(--accent-primary-rgb), 0.35)',
                         }}
                         transition={{
                           type: 'spring',
@@ -229,8 +232,9 @@ const Navbar: FC = () => {
                         className='absolute inset-0 rounded-xl'
                         style={{
                           background:
-                            'linear-gradient(to right, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2), rgba(217, 70, 239, 0.2))',
-                          boxShadow: '0 4px 10px -1px rgba(99, 102, 241, 0.2)',
+                            'linear-gradient(to right, rgba(var(--accent-primary-rgb), 0.22), rgba(var(--accent-secondary-rgb), 0.18))',
+                          boxShadow:
+                            '0 6px 14px -4px rgba(var(--accent-primary-rgb), 0.35)',
                         }}
                         transition={{
                           type: 'spring',
@@ -309,24 +313,23 @@ const Navbar: FC = () => {
                     {user.displayName}
                   </span>
                 </div>
-                <motion.button
-                  onClick={logout}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className='px-4 py-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-all duration-200 text-sm font-medium'
-                >
-                  Выход
-                </motion.button>
+                <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+                  <Button
+                    onClick={logout}
+                    variant='outline'
+                    size='sm'
+                    className='text-red-400 border-red-500/30 hover:border-red-400/60'
+                  >
+                    Выход
+                  </Button>
+                </motion.div>
               </>
             ) : (
-              <motion.button
-                onClick={login}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className='px-4 py-2 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white transition-all duration-200 text-sm font-medium'
-              >
-                Вход
-              </motion.button>
+              <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+                <Button onClick={login} variant='primary' size='sm'>
+                  Вход
+                </Button>
+              </motion.div>
             )}
 
             {/* Мобильное меню кнопка */}
@@ -371,7 +374,7 @@ const Navbar: FC = () => {
                   onClick={() => setIsMenuOpen(false)}
                   className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                     isActive('/')
-                      ? 'bg-gradient-to-r from-indigo-500/20 to-purple-500/20 text-[var(--text-primary)]'
+                      ? 'bg-gradient-to-r from-cyan-500/20 to-amber-500/20 text-[var(--text-primary)]'
                       : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                   }`}
                 >
@@ -397,7 +400,7 @@ const Navbar: FC = () => {
                     onClick={() => setIsMenuOpen(false)}
                     className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                       isActive(`/profile/${user.id}`)
-                        ? 'bg-gradient-to-r from-indigo-500/20 to-purple-500/20 text-[var(--text-primary)]'
+                        ? 'bg-gradient-to-r from-cyan-500/20 to-amber-500/20 text-[var(--text-primary)]'
                         : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                     }`}
                   >
@@ -423,7 +426,7 @@ const Navbar: FC = () => {
                   onClick={() => setIsMenuOpen(false)}
                   className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                     isActive('/users')
-                      ? 'bg-gradient-to-r from-indigo-500/20 to-purple-500/20 text-[var(--text-primary)]'
+                      ? 'bg-gradient-to-r from-cyan-500/20 to-amber-500/20 text-[var(--text-primary)]'
                       : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                   }`}
                 >
@@ -448,7 +451,7 @@ const Navbar: FC = () => {
                   onClick={() => setIsMenuOpen(false)}
                   className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                     isActive('/quizzes')
-                      ? 'bg-gradient-to-r from-indigo-500/20 to-purple-500/20 text-[var(--text-primary)]'
+                      ? 'bg-gradient-to-r from-cyan-500/20 to-amber-500/20 text-[var(--text-primary)]'
                       : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                   }`}
                 >

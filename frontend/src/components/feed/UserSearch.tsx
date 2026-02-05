@@ -37,7 +37,7 @@ export const UserSearch: FC = () => {
     <div className='modern-card animate-on-load opacity-0'>
       <h2 className='text-lg font-semibold mb-4 flex items-center gap-2 text-[var(--text-primary)]'>
         <svg
-          className='w-5 h-5 text-indigo-400'
+          className='w-5 h-5 text-[var(--accent-primary)]'
           fill='none'
           stroke='currentColor'
           viewBox='0 0 24 24'
@@ -110,7 +110,7 @@ export const UserSearch: FC = () => {
               <Link
                 key={user.id}
                 to={`/profile/${user.id}`}
-                className='flex items-center p-2 hover:bg-[var(--bg-secondary)]/50 rounded-lg transition-colors'
+                className='flex items-center p-2 hover:bg-[rgba(var(--bg-secondary-rgb),0.5)] rounded-lg transition-colors'
               >
                 <img
                   src={user.avatarUrl}

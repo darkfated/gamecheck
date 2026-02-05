@@ -9,7 +9,7 @@ type UserRepository interface {
 	Update(user *models.User) error
 	Delete(id string) error
 	Search(query string, limit int) ([]*models.User, error)
-	List(limit, offset int) ([]*models.User, error)
+	List(limit, offset int, sortBy, order string) ([]*models.User, error)
 }
 
 type ProgressRepository interface {
@@ -24,8 +24,8 @@ type ProgressRepository interface {
 type ActivityRepository interface {
 	Create(activity *models.Activity) error
 	GetByID(id string) (*models.Activity, error)
-	GetByUserID(userID string, limit int) ([]*models.Activity, error)
-	GetFeed(userID string, limit int) ([]*models.Activity, error)
+	GetByUserID(userID string, limit, offset int) ([]*models.Activity, error)
+	GetFeed(userID string, limit, offset int) ([]*models.Activity, error)
 	Delete(id string) error
 	DeleteByProgressID(progressID string) error
 }

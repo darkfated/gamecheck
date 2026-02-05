@@ -206,7 +206,7 @@ const Profile: FC = () => {
   if (loading) {
     return (
       <div className='flex flex-col items-center justify-center min-h-screen gap-4'>
-        <div className='animate-spin rounded-full h-16 w-16 border-4 border-t-transparent border-b-transparent border-indigo-500'></div>
+        <div className='animate-spin rounded-full h-16 w-16 border-4 border-t-transparent border-b-transparent border-[var(--accent-primary)]'></div>
         <p className='text-[var(--text-secondary)]'>Загрузка профиля...</p>
       </div>
     )
@@ -225,7 +225,7 @@ const Profile: FC = () => {
           <div className='mt-4 text-center'>
             <button
               onClick={() => navigate('/')}
-              className='text-[var(--accent-primary)] hover:underline px-6 py-2 rounded-lg bg-[var(--accent-primary)]/10 hover:bg-[var(--accent-primary)]/20 transition-all duration-300'
+              className='text-[var(--accent-primary)] hover:underline px-6 py-2 rounded-lg bg-[rgba(var(--accent-primary-rgb),0.1)] hover:bg-[rgba(var(--accent-primary-rgb),0.2)] transition-all duration-300'
             >
               Вернуться на главную
             </button>
@@ -248,7 +248,7 @@ const Profile: FC = () => {
           <div className='mt-4 text-center'>
             <button
               onClick={() => navigate('/')}
-              className='text-[var(--accent-primary)] hover:underline px-6 py-2 rounded-lg bg-[var(--accent-primary)]/10 hover:bg-[var(--accent-primary)]/20 transition-all duration-300'
+              className='text-[var(--accent-primary)] hover:underline px-6 py-2 rounded-lg bg-[rgba(var(--accent-primary-rgb),0.1)] hover:bg-[rgba(var(--accent-primary-rgb),0.2)] transition-all duration-300'
             >
               Вернуться на главную
             </button>
@@ -328,11 +328,11 @@ const Profile: FC = () => {
         <div className='space-y-3'>
           {!listsLoaded ? (
             <div className='flex items-center justify-center py-8'>
-              <div className='animate-spin rounded-full h-10 w-10 border-4 border-t-transparent border-b-transparent border-indigo-500' />
+              <div className='animate-spin rounded-full h-10 w-10 border-4 border-t-transparent border-b-transparent border-[var(--accent-primary)]' />
             </div>
           ) : followers.length === 0 ? (
             <div className='flex flex-col items-center justify-center py-12 text-center'>
-              <div className='w-20 h-20 mb-6 rounded-2xl bg-gradient-to-br from-[var(--accent-primary)]/20 to-[var(--accent-secondary)]/20 backdrop-blur-sm flex items-center justify-center'>
+              <div className='w-20 h-20 mb-6 rounded-2xl bg-gradient-to-br from-[rgba(var(--accent-primary-rgb),0.2)] to-[rgba(var(--accent-secondary-rgb),0.2)] backdrop-blur-sm flex items-center justify-center'>
                 <svg
                   className='w-10 h-10 text-[var(--accent-primary)]'
                   fill='none'
@@ -350,7 +350,7 @@ const Profile: FC = () => {
               <p className='text-[var(--text-primary)] text-xl font-medium bg-gradient-to-r from-[var(--text-primary)] to-[var(--text-secondary)] bg-clip-text text-transparent'>
                 Нет подписчиков
               </p>
-              <p className='text-[var(--text-secondary)]/70 mt-2 max-w-sm'>
+              <p className='text-[var(--text-secondary)] opacity-80 mt-2 max-w-sm'>
                 Когда у вас появятся подписчики, они будут отображаться здесь
               </p>
             </div>
@@ -358,14 +358,14 @@ const Profile: FC = () => {
             followers.map(follower => (
               <div
                 key={follower.id}
-                className='group relative flex items-center gap-4 p-4 rounded-xl hover:bg-gradient-to-r from-[var(--accent-primary)]/5 to-[var(--accent-secondary)]/5 transition-all duration-300'
+                className='group relative flex items-center gap-4 p-4 rounded-xl hover:bg-gradient-to-r from-[rgba(var(--accent-primary-rgb),0.05)] to-[rgba(var(--accent-secondary-rgb),0.05)] transition-all duration-300'
               >
                 <div className='relative'>
-                  <div className='absolute inset-0 rounded-full bg-gradient-to-br from-[var(--accent-primary)]/20 to-[var(--accent-secondary)]/20 blur-sm'></div>
+                  <div className='absolute inset-0 rounded-full bg-gradient-to-br from-[rgba(var(--accent-primary-rgb),0.2)] to-[rgba(var(--accent-secondary-rgb),0.2)] blur-sm'></div>
                   <img
                     src={follower.avatarUrl}
                     alt={follower.displayName}
-                    className='relative w-12 h-12 rounded-full ring-2 ring-[var(--border-color)] group-hover:ring-[var(--accent-primary)]/30 transition-all duration-300'
+                    className='relative w-12 h-12 rounded-full ring-2 ring-[var(--border-color)] group-hover:ring-[rgba(var(--accent-primary-rgb),0.3)] transition-all duration-300'
                   />
                   <div className='absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full border-2 border-[var(--card-bg)]'></div>
                 </div>
@@ -392,11 +392,11 @@ const Profile: FC = () => {
         <div className='space-y-3'>
           {!listsLoaded ? (
             <div className='flex items-center justify-center py-8'>
-              <div className='animate-spin rounded-full h-10 w-10 border-4 border-t-transparent border-b-transparent border-indigo-500' />
+              <div className='animate-spin rounded-full h-10 w-10 border-4 border-t-transparent border-b-transparent border-[var(--accent-primary)]' />
             </div>
           ) : following.length === 0 ? (
             <div className='flex flex-col items-center justify-center py-12 text-center'>
-              <div className='w-20 h-20 mb-6 rounded-2xl bg-gradient-to-br from-[var(--accent-primary)]/20 to-[var(--accent-secondary)]/20 backdrop-blur-sm flex items-center justify-center'>
+              <div className='w-20 h-20 mb-6 rounded-2xl bg-gradient-to-br from-[rgba(var(--accent-primary-rgb),0.2)] to-[rgba(var(--accent-secondary-rgb),0.2)] backdrop-blur-sm flex items-center justify-center'>
                 <svg
                   className='w-10 h-10 text-[var(--accent-primary)]'
                   fill='none'
@@ -414,7 +414,7 @@ const Profile: FC = () => {
               <p className='text-[var(--text-primary)] text-xl font-medium bg-gradient-to-r from-[var(--text-primary)] to-[var(--text-secondary)] bg-clip-text text-transparent'>
                 Нет подписок
               </p>
-              <p className='text-[var(--text-secondary)]/70 mt-2 max-w-sm'>
+              <p className='text-[var(--text-secondary)] opacity-80 mt-2 max-w-sm'>
                 Начните следить за другими пользователями, чтобы видеть их
                 активность
               </p>
@@ -423,14 +423,14 @@ const Profile: FC = () => {
             following.map(followedUser => (
               <div
                 key={followedUser.id}
-                className='group relative flex items-center gap-4 p-4 rounded-xl hover:bg-gradient-to-r from-[var(--accent-primary)]/5 to-[var(--accent-secondary)]/5 transition-all duration-300'
+                className='group relative flex items-center gap-4 p-4 rounded-xl hover:bg-gradient-to-r from-[rgba(var(--accent-primary-rgb),0.05)] to-[rgba(var(--accent-secondary-rgb),0.05)] transition-all duration-300'
               >
                 <div className='relative'>
-                  <div className='absolute inset-0 rounded-full bg-gradient-to-br from-[var(--accent-primary)]/20 to-[var(--accent-secondary)]/20 blur-sm'></div>
+                  <div className='absolute inset-0 rounded-full bg-gradient-to-br from-[rgba(var(--accent-primary-rgb),0.2)] to-[rgba(var(--accent-secondary-rgb),0.2)] blur-sm'></div>
                   <img
                     src={followedUser.avatarUrl}
                     alt={followedUser.displayName}
-                    className='relative w-12 h-12 rounded-full ring-2 ring-[var(--border-color)] group-hover:ring-[var(--accent-primary)]/30 transition-all duration-300'
+                    className='relative w-12 h-12 rounded-full ring-2 ring-[var(--border-color)] group-hover:ring-[rgba(var(--accent-primary-rgb),0.3)] transition-all duration-300'
                   />
                   <div className='absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full border-2 border-[var(--card-bg)]'></div>
                 </div>

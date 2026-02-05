@@ -1,8 +1,9 @@
 import { motion } from 'framer-motion'
-import { FC, useEffect, useState } from 'react'
+import { FC, useEffect, useRef, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import api from '../../services/api'
 import { ActivityItem } from './ActivityItem'
+import { Button } from '../ui/Button'
 
 interface ActivityData {
   id: string
@@ -29,63 +30,143 @@ interface ActivityData {
 interface ActivityFeedProps {
   userId?: string | null
   showFollowingOnly?: boolean
+  onCountChange?: (count: number) => void
 }
 
 export const ActivityFeed: FC<ActivityFeedProps> = ({
   userId = null,
   showFollowingOnly = false,
+  onCountChange,
 }) => {
   const [activities, setActivities] = useState<ActivityData[]>([])
   const [loading, setLoading] = useState(true)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [hasMore, setHasMore] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { user } = useAuth()
+  const requestRef = useRef(0)
+  const limit = 10
 
   useEffect(() => {
-    const fetchActivities = async () => {
+    const fetchActivities = async (reset = false) => {
+      const currentReq = ++requestRef.current
       try {
-        setLoading(true)
+        if (reset) {
+          setLoading(true)
+          setHasMore(true)
+        } else {
+          setIsLoadingMore(true)
+        }
         setError(null)
 
+        const offset = reset ? 0 : activities.length
         let response
 
         if (userId) {
-          response = await api.activities.getUserActivity(userId)
+          response = await api.activities.getUserActivity(userId, limit, offset)
         } else if (showFollowingOnly) {
-          response = await api.activities.getFeed()
+          response = await api.activities.getFeed(limit, offset)
         } else {
-          response = await api.activities.getAllActivities()
+          response = await api.activities.getAllActivities(limit, offset)
         }
+
+        if (requestRef.current !== currentReq) return
 
         if (!Array.isArray(response.data)) {
           setError('Получены некорректные данные активностей')
           setActivities([])
+          setHasMore(false)
+          onCountChange?.(0)
         } else {
-          setActivities(response.data as unknown as ActivityData[])
+          setActivities(prev => {
+            const next = reset
+              ? (response.data as ActivityData[])
+              : [...prev, ...(response.data as ActivityData[])]
+            onCountChange?.(next.length)
+            return next
+          })
+          setHasMore(response.data.length === limit)
         }
       } catch (err: any) {
+        if (requestRef.current !== currentReq) return
         setError(
           err.response?.data?.error ||
             err.response?.data?.message ||
             err.message ||
             'Ошибка загрузки активностей'
         )
+        setHasMore(false)
       } finally {
-        setLoading(false)
+        if (requestRef.current === currentReq) {
+          setLoading(false)
+          setIsLoadingMore(false)
+        }
       }
     }
 
     if (user || userId) {
-      fetchActivities()
+      fetchActivities(true)
     } else {
       setLoading(false)
     }
-  }, [userId, user, showFollowingOnly])
+  }, [userId, user, showFollowingOnly, onCountChange])
+
+  const handleLoadMore = () => {
+    if (!isLoadingMore && hasMore) {
+      const fetchNext = async () => {
+        const offset = activities.length
+        const req = ++requestRef.current
+        try {
+          setIsLoadingMore(true)
+          let response
+          if (userId) {
+            response = await api.activities.getUserActivity(
+              userId,
+              limit,
+              offset
+            )
+          } else if (showFollowingOnly) {
+            response = await api.activities.getFeed(limit, offset)
+          } else {
+            response = await api.activities.getAllActivities(limit, offset)
+          }
+
+          if (requestRef.current !== req) return
+
+          if (Array.isArray(response.data)) {
+            setActivities(prev => {
+              const next = [...prev, ...(response.data as ActivityData[])]
+              onCountChange?.(next.length)
+              return next
+            })
+            setHasMore(response.data.length === limit)
+          } else {
+            setHasMore(false)
+          }
+        } catch (err: any) {
+          if (requestRef.current !== req) return
+          setError(
+            err.response?.data?.error ||
+              err.response?.data?.message ||
+              err.message ||
+              'Ошибка загрузки активностей'
+          )
+          setHasMore(false)
+        } finally {
+          if (requestRef.current === req) {
+            setIsLoadingMore(false)
+          }
+        }
+      }
+      fetchNext()
+    }
+  }
 
   if (loading) {
     return (
       <div className='flex flex-col justify-center items-center py-16'>
         <motion.div
-          className='w-12 h-12 rounded-full border-4 border-[var(--accent-primary)]/20 border-t-[var(--accent-primary)]'
+          className='w-12 h-12 rounded-full border-4 border-[rgba(var(--accent-primary-rgb),0.2)] border-t-[var(--accent-primary)]'
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
         />
@@ -146,7 +227,7 @@ export const ActivityFeed: FC<ActivityFeedProps> = ({
   return (
     <div className='space-y-5'>
       <div className='flex items-center gap-3 mb-6'>
-        <div className='p-2 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20'>
+        <div className='p-2 rounded-xl bg-gradient-to-br from-cyan-500/20 to-amber-500/20'>
           <svg
             className='w-5 h-5 text-[var(--accent-secondary)]'
             fill='none'
@@ -161,19 +242,19 @@ export const ActivityFeed: FC<ActivityFeedProps> = ({
             />
           </svg>
         </div>
-        <h2 className='text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-500'>
+        <h2 className='text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-amber-400'>
           {getTitle()}
         </h2>
       </div>
 
       {activities.length === 0 ? (
         <motion.div
-          className='bg-gradient-to-br from-[var(--card-bg)] to-[var(--bg-tertiary)]/50 backdrop-blur-md rounded-xl p-6 border border-[var(--border-color)] text-center shadow-md'
+          className='bg-gradient-to-br from-[var(--card-bg)] to-[rgba(var(--bg-tertiary-rgb),0.5)] backdrop-blur-md rounded-xl p-6 border border-[var(--border-color)] text-center shadow-md'
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
         >
           <div className='flex flex-col items-center gap-4 p-6'>
-            <div className='p-3 bg-[var(--bg-tertiary)]/30 rounded-full'>
+            <div className='p-3 bg-[rgba(var(--bg-tertiary-rgb),0.3)] rounded-full'>
               <svg
                 className='w-8 h-8 text-[var(--text-secondary)]'
                 fill='none'
@@ -215,6 +296,20 @@ export const ActivityFeed: FC<ActivityFeedProps> = ({
           {activities.map(activity => (
             <ActivityItem key={activity.id} activity={activity} />
           ))}
+
+          {hasMore && !error && (
+            <div className='flex justify-center pt-2'>
+              <Button
+                onClick={handleLoadMore}
+                variant='secondary'
+                size='md'
+                disabled={isLoadingMore}
+                className='min-w-[180px]'
+              >
+                {isLoadingMore ? 'Загрузка...' : 'Показать ещё'}
+              </Button>
+            </div>
+          )}
         </motion.div>
       )}
     </div>

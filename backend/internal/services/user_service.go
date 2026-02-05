@@ -81,7 +81,7 @@ func (s *UserService) GetUserProfile(userID, currentUserID string) (*models.User
 }
 
 func (s *UserService) ListUsers(limit, offset int, sortBy, order string) ([]*models.User, int64, error) {
-	users, err := s.userRepository.List(limit, offset)
+	users, err := s.userRepository.List(limit, offset, sortBy, order)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -89,15 +89,6 @@ func (s *UserService) ListUsers(limit, offset int, sortBy, order string) ([]*mod
 	total, err := s.userRepository.Count()
 	if err != nil {
 		return nil, 0, err
-	}
-
-	for _, user := range users {
-		stats, _ := s.userRepository.GetWithStats(user.ID)
-		if stats != nil {
-			user.GamesCount = stats.GamesCount
-			user.TotalPlaytime = stats.TotalPlaytime
-			user.AverageRating = stats.AverageRating
-		}
 	}
 
 	return users, total, nil

@@ -145,7 +145,7 @@ export const GameList: FC<GameListProps> = ({
             onClick={enableEditMode}
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            className='mt-2 px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white rounded-lg shadow-lg hover:shadow-indigo-500/20 transition-all duration-300 text-sm font-medium'
+            className='mt-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-amber-500 hover:from-cyan-400 hover:to-amber-400 text-[#001015] rounded-lg shadow-lg hover:shadow-cyan-500/20 transition-all duration-300 text-sm font-medium'
           >
             Добавить первую игру
           </motion.button>
@@ -180,7 +180,7 @@ export const GameList: FC<GameListProps> = ({
     <div className='space-y-8'>
       {isOwner && isAuthenticated && (
         <div className='flex justify-between items-center'>
-          <h2 className='text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-500'>
+          <h2 className='text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-amber-400'>
             Моя коллекция игр
           </h2>
 
@@ -188,7 +188,7 @@ export const GameList: FC<GameListProps> = ({
             onClick={enableEditMode}
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            className='px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white rounded-lg shadow-lg hover:shadow-indigo-500/20 transition-all duration-300 text-sm font-medium'
+            className='px-4 py-2 bg-gradient-to-r from-cyan-500 to-amber-500 hover:from-cyan-400 hover:to-amber-400 text-[#001015] rounded-lg shadow-lg hover:shadow-cyan-500/20 transition-all duration-300 text-sm font-medium'
           >
             Добавить игру
           </motion.button>

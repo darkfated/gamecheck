@@ -29,36 +29,39 @@ func (r *ActivityRepository) GetByID(id string) (*models.Activity, error) {
 	return &activity, nil
 }
 
-func (r *ActivityRepository) GetByUserID(userID string, limit int) ([]*models.Activity, error) {
+func (r *ActivityRepository) GetByUserID(userID string, limit, offset int) ([]*models.Activity, error) {
 	var activities []*models.Activity
 	err := r.db.
 		Preload("User").
 		Preload("TargetUser").
 		Where("user_id = ?", userID).
 		Order("created_at DESC").
+		Offset(offset).
 		Limit(limit).
 		Find(&activities).Error
 	return activities, err
 }
 
-func (r *ActivityRepository) GetFeed(userID string, limit int) ([]*models.Activity, error) {
+func (r *ActivityRepository) GetFeed(userID string, limit, offset int) ([]*models.Activity, error) {
 	var activities []*models.Activity
 	err := r.db.
 		Preload("User").
 		Preload("TargetUser").
 		Where("user_id IN (SELECT following_id FROM subscriptions WHERE follower_id = ?) OR user_id = ?", userID, userID).
 		Order("created_at DESC").
+		Offset(offset).
 		Limit(limit).
 		Find(&activities).Error
 	return activities, err
 }
 
-func (r *ActivityRepository) GetAllActivities(limit int) ([]*models.Activity, error) {
+func (r *ActivityRepository) GetAllActivities(limit, offset int) ([]*models.Activity, error) {
 	var activities []*models.Activity
 	err := r.db.
 		Preload("User").
 		Preload("TargetUser").
 		Order("created_at DESC").
+		Offset(offset).
 		Limit(limit).
 		Find(&activities).Error
 	return activities, err

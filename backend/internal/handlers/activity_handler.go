@@ -35,7 +35,8 @@ func (h *ActivityHandler) RegisterRoutes(router *gin.RouterGroup) {
 }
 
 func (h *ActivityHandler) GetAllActivities(ctx *gin.Context) {
-	activities, err := h.activityService.GetAllActivities(10)
+	limit, offset := getPagination(ctx)
+	activities, err := h.activityService.GetAllActivities(limit, offset)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch activities"})
 		return
@@ -55,7 +56,8 @@ func (h *ActivityHandler) GetFeed(ctx *gin.Context) {
 		return
 	}
 
-	activities, err := h.activityService.GetFeed(userID, 10)
+	limit, offset := getPagination(ctx)
+	activities, err := h.activityService.GetFeed(userID, limit, offset)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch feed"})
 		return
@@ -75,7 +77,8 @@ func (h *ActivityHandler) GetUserActivity(ctx *gin.Context) {
 		return
 	}
 
-	activities, err := h.activityService.GetUserActivity(userID, 50)
+	limit, offset := getPagination(ctx)
+	activities, err := h.activityService.GetUserActivity(userID, limit, offset)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch activity"})
 		return
@@ -86,4 +89,27 @@ func (h *ActivityHandler) GetUserActivity(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, activities)
+}
+
+func getPagination(ctx *gin.Context) (int, int) {
+	var req struct {
+		Limit  int `form:"limit,default=10"`
+		Offset int `form:"offset,default=0"`
+	}
+
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		return 10, 0
+	}
+
+	if req.Limit > 50 {
+		req.Limit = 50
+	}
+	if req.Limit < 1 {
+		req.Limit = 10
+	}
+	if req.Offset < 0 {
+		req.Offset = 0
+	}
+
+	return req.Limit, req.Offset
 }

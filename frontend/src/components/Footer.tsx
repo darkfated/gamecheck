@@ -21,7 +21,7 @@ export const Footer: React.FC = () => {
             transition={{ duration: 0.5, delay: 0.3 }}
           >
             <h3 className='font-semibold text-[var(--text-primary)] mb-3 flex items-center gap-2'>
-              <div className='w-6 h-6 rounded-lg bg-gradient-to-br from-indigo-600 via-purple-600 to-fuchsia-600 flex items-center justify-center shadow-lg shadow-indigo-500/20'>
+              <div className='w-6 h-6 rounded-lg bg-gradient-to-br from-cyan-500 via-teal-500 to-amber-500 flex items-center justify-center shadow-lg shadow-cyan-500/20'>
                 <svg
                   xmlns='http://www.w3.org/2000/svg'
                   className='h-4 w-4 text-white'
@@ -40,7 +40,7 @@ export const Footer: React.FC = () => {
               GameCheck
             </h3>
             <p className='text-sm text-[var(--text-secondary)] leading-relaxed'>
-              Открытая платформа по отслеживания игровой активности с
+              Открытая платформа по отслеживанию игровой активности с
               социальными функциями.
             </p>
 

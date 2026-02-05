@@ -33,7 +33,7 @@ function AuthCallback() {
 
   return (
     <div className='h-screen flex items-center justify-center'>
-      <div className='animate-spin rounded-full h-16 w-16 border-4 border-t-transparent border-b-transparent border-indigo-500'></div>
+      <div className='animate-spin rounded-full h-16 w-16 border-4 border-t-transparent border-b-transparent border-[var(--accent-primary)]'></div>
     </div>
   )
 }

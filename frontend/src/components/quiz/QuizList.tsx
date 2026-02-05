@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion'
 import { FC } from 'react'
+import { Badge } from '../ui/Badge'
+import { Card } from '../ui/Card'
 import { Quiz } from '../../config/quizzes'
 
 interface QuizListProps {
@@ -8,16 +10,16 @@ interface QuizListProps {
 }
 
 export const QuizList: FC<QuizListProps> = ({ quizzes, onSelectQuiz }) => {
-  const getDifficultyColor = (difficulty: string) => {
+  const getDifficultyVariant = (difficulty: string) => {
     switch (difficulty) {
       case 'easy':
-        return 'bg-green-500/10 text-green-400 border-green-500/20'
+        return 'success'
       case 'medium':
-        return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
+        return 'warning'
       case 'hard':
-        return 'bg-red-500/10 text-red-400 border-red-500/20'
+        return 'danger'
       default:
-        return 'bg-gray-500/10 text-gray-400'
+        return 'default'
     }
   }
 
@@ -42,16 +44,17 @@ export const QuizList: FC<QuizListProps> = ({ quizzes, onSelectQuiz }) => {
           onClick={() => onSelectQuiz(quiz.id)}
           className='group cursor-pointer'
         >
-          <div className='bg-[var(--card-bg)] border border-[var(--border-color)] rounded-xl p-6 hover:border-[var(--accent-primary)] transition-all duration-300'>
+          <Card
+            variant='surface'
+            className='border border-[var(--border-color)] hover:border-[var(--border-color-hover)] transition-all duration-300'
+          >
             <div className='flex items-start justify-between mb-3'>
               <h3 className='text-lg font-semibold text-[var(--text-primary)] group-hover:text-[var(--accent-primary)] transition-colors'>
                 {quiz.title}
               </h3>
-              <span
-                className={`px-3 py-1 rounded-full text-xs font-medium border ${getDifficultyColor(quiz.difficulty)}`}
-              >
+              <Badge variant={getDifficultyVariant(quiz.difficulty)}>
                 {getDifficultyLabel(quiz.difficulty)}
-              </span>
+              </Badge>
             </div>
 
             <p className='text-sm text-[var(--text-secondary)] mb-4'>
@@ -112,7 +115,7 @@ export const QuizList: FC<QuizListProps> = ({ quizzes, onSelectQuiz }) => {
                 </svg>
               </motion.div>
             </div>
-          </div>
+          </Card>
         </motion.div>
       ))}
     </div>

@@ -64,7 +64,7 @@ export const FeedTabs: FC<FeedTabsProps> = ({ activeTab, setActiveTab }) => {
             className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-2
               ${
                 activeTab === tab.id
-                  ? 'bg-gradient-to-r from-indigo-500/20 to-purple-500/20 text-[var(--text-primary)]'
+                  ? 'bg-gradient-to-r from-cyan-500/20 to-amber-500/20 text-[var(--text-primary)]'
                   : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             whileHover={{

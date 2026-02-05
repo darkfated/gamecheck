@@ -135,7 +135,7 @@ export const ActivityItem: FC<ActivityItemProps> = ({ activity }) => {
 
   return (
     <motion.div
-      className='flex items-start p-3 md:p-5 bg-gradient-to-br from-[var(--card-bg)] to-[var(--bg-tertiary)]/50 backdrop-blur-md rounded-lg md:rounded-xl shadow-md border border-[var(--border-color)] overflow-hidden relative'
+      className='glass flex items-start p-3 md:p-5 rounded-2xl overflow-hidden relative'
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{
@@ -149,8 +149,8 @@ export const ActivityItem: FC<ActivityItemProps> = ({ activity }) => {
         borderColor: 'rgba(var(--accent-primary-rgb), 0.3)',
       }}
     >
-      <div className='absolute top-0 right-0 w-32 h-32 bg-gradient-to-r from-indigo-600/5 to-purple-600/5 rounded-full -translate-y-1/2 translate-x-1/3 blur-xl'></div>
-      <div className='absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-r from-purple-600/5 to-pink-600/5 rounded-full translate-y-1/2 -translate-x-1/3 blur-xl'></div>
+      <div className='absolute top-0 right-0 w-32 h-32 bg-gradient-to-r from-cyan-500/10 to-amber-500/10 rounded-full -translate-y-1/2 translate-x-1/3 blur-xl'></div>
+      <div className='absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 rounded-full translate-y-1/2 -translate-x-1/3 blur-xl'></div>
 
       <motion.div whileHover={{ scale: 1.05 }} className='flex-shrink-0 z-10'>
         <Link to={`/profile/${activity.user.id}`} className='block'>
@@ -158,7 +158,7 @@ export const ActivityItem: FC<ActivityItemProps> = ({ activity }) => {
             <img
               src={activity.user.avatarUrl}
               alt={activity.user.displayName}
-              className='w-10 md:w-12 h-10 md:h-12 rounded-lg md:rounded-xl object-cover ring-2 ring-[var(--accent-primary)]/20'
+              className='w-10 md:w-12 h-10 md:h-12 rounded-lg md:rounded-xl object-cover ring-2 ring-[rgba(var(--accent-primary-rgb),0.2)]'
             />
             <div className='absolute -bottom-1 -right-1 w-2.5 md:w-3 h-2.5 md:h-3 bg-green-500 rounded-full border border-[var(--bg-primary)]'></div>
           </div>

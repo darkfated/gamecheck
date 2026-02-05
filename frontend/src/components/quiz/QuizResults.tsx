@@ -26,7 +26,7 @@ export const QuizResults: FC<QuizResultsProps> = ({
 
   const getColor = () => {
     if (percentage >= 80) return 'from-green-500 to-emerald-500'
-    if (percentage >= 60) return 'from-blue-500 to-indigo-500'
+    if (percentage >= 60) return 'from-cyan-500 to-teal-500'
     if (percentage >= 40) return 'from-yellow-500 to-orange-500'
     return 'from-red-500 to-pink-500'
   }
@@ -56,7 +56,7 @@ export const QuizResults: FC<QuizResultsProps> = ({
           >
             <div className='w-full h-full rounded-full bg-[var(--bg-secondary)] flex items-center justify-center'>
               <div className='text-center'>
-                <div className='text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500'>
+                <div className='text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-amber-400'>
                   {percentage}%
                 </div>
                 <div className='text-sm text-[var(--text-secondary)]'>
@@ -93,7 +93,7 @@ export const QuizResults: FC<QuizResultsProps> = ({
         >
           <motion.button
             onClick={onPlayAgain}
-            className='flex-1 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white rounded-lg font-medium transition-all'
+            className='flex-1 py-3 bg-gradient-to-r from-cyan-500 to-amber-500 hover:from-cyan-400 hover:to-amber-400 text-[#001015] rounded-lg font-medium transition-all'
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >

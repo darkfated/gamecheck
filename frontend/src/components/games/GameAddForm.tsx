@@ -81,7 +81,7 @@ export const GameAddForm: FC<GameAddFormProps> = ({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.3, ease: 'easeInOut' }}
-      className='bg-gradient-to-br from-[var(--card-bg)] to-[var(--bg-tertiary)]/50 backdrop-blur-md p-4 md:p-6 rounded-xl border border-[var(--border-color)] shadow-xl space-y-4 md:space-y-6 max-w-2xl mx-auto'
+      className='bg-gradient-to-br from-[var(--card-bg)] to-[rgba(var(--bg-tertiary-rgb),0.5)] backdrop-blur-md p-4 md:p-6 rounded-xl border border-[var(--border-color)] shadow-xl space-y-4 md:space-y-6 max-w-2xl mx-auto'
     >
       <h3 className='text-lg md:text-xl font-semibold text-[var(--text-primary)]'>
         Добавить новую игру
@@ -126,7 +126,7 @@ export const GameAddForm: FC<GameAddFormProps> = ({
                   className={`px-2.5 md:px-4 py-1.5 md:py-2 text-sm md:text-base rounded-lg font-medium transition-all ${
                     isSelected
                       ? `${statusConfig.bgClass} ${statusConfig.textClass} ring-2 ring-[var(--accent-primary)]`
-                      : `${statusConfig.bgClass} ${statusConfig.textClass} hover:ring-1 hover:ring-[var(--accent-primary)]/50`
+                      : `${statusConfig.bgClass} ${statusConfig.textClass} hover:ring-1 hover:ring-[rgba(var(--accent-primary-rgb),0.5)]`
                   }`}
                 >
                   {option.label}
@@ -168,7 +168,7 @@ export const GameAddForm: FC<GameAddFormProps> = ({
           </div>
         </div>
 
-        <div className='flex flex-col-reverse md:flex-row justify-end gap-2 md:gap-3 pt-4 md:pt-6 border-t border-[var(--border-color)]/30'>
+        <div className='flex flex-col-reverse md:flex-row justify-end gap-2 md:gap-3 pt-4 md:pt-6 border-t border-[var(--divider-color)]'>
           <motion.button
             type='button'
             onClick={onCancel}
@@ -185,7 +185,7 @@ export const GameAddForm: FC<GameAddFormProps> = ({
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             animate={isSubmitting ? { opacity: 0.8 } : { opacity: 1 }}
-            className='w-full md:w-auto px-3 md:px-4 py-2.5 md:py-2 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white rounded-lg font-medium shadow-lg hover:shadow-indigo-500/20 transition-all disabled:opacity-50 text-sm md:text-base flex items-center justify-center gap-2'
+            className='w-full md:w-auto px-3 md:px-4 py-2.5 md:py-2 bg-gradient-to-r from-cyan-500 to-amber-500 hover:from-cyan-400 hover:to-amber-400 text-[#001015] rounded-lg font-medium shadow-lg hover:shadow-cyan-500/20 transition-all disabled:opacity-50 text-sm md:text-base flex items-center justify-center gap-2'
           >
             {isSubmitting ? (
               <>

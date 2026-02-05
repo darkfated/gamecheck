@@ -31,7 +31,7 @@ const getStatusColor = (status: string): string => {
     case 'completed':
       return 'bg-blue-500'
     case 'plan_to_play':
-      return 'bg-purple-500'
+      return 'bg-amber-500'
     case 'dropped':
       return 'bg-red-500'
     default:
@@ -46,7 +46,7 @@ const getProgressColor = (status: string): string => {
     case 'completed':
       return 'bg-blue-500'
     case 'plan_to_play':
-      return 'bg-purple-500'
+      return 'bg-amber-500'
     case 'dropped':
       return 'bg-red-500'
     default:
@@ -143,10 +143,10 @@ export const GameStats: FC<GameStatsProps> = ({
           color = '#10b981'
           break
         case 'completed':
-          color = '#3b82f6'
+          color = '#22d3ee'
           break
         case 'plan_to_play':
-          color = '#8b5cf6'
+          color = '#f59e0b'
           break
         case 'dropped':
           color = '#ef4444'
@@ -182,12 +182,12 @@ export const GameStats: FC<GameStatsProps> = ({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className='mt-6 bg-gradient-to-br from-[var(--card-bg)] to-[var(--bg-tertiary)]/80 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-[var(--border-color)] overflow-hidden relative'
+        className='mt-6 bg-gradient-to-br from-[var(--card-bg)] to-[rgba(var(--bg-tertiary-rgb),0.8)] backdrop-blur-md rounded-2xl p-6 shadow-xl border border-[var(--border-color)] overflow-hidden relative'
       >
-        <div className='absolute top-0 right-0 w-40 h-40 bg-gradient-to-r from-indigo-600/5 to-purple-600/5 rounded-full -translate-y-1/2 translate-x-1/4 blur-xl'></div>
-        <div className='absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-r from-purple-600/5 to-pink-600/5 rounded-full translate-y-1/2 -translate-x-1/3 blur-xl'></div>
+        <div className='absolute top-0 right-0 w-40 h-40 bg-gradient-to-r from-cyan-500/10 to-amber-500/10 rounded-full -translate-y-1/2 translate-x-1/4 blur-xl'></div>
+        <div className='absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 rounded-full translate-y-1/2 -translate-x-1/3 blur-xl'></div>
 
-        <h2 className='text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-500 mb-6'>
+        <h2 className='text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-amber-400 mb-6'>
           Статистика игр
         </h2>
         <p className='text-[var(--text-secondary)] italic text-center py-4'>
@@ -218,14 +218,14 @@ export const GameStats: FC<GameStatsProps> = ({
       initial='hidden'
       animate='visible'
       variants={containerVariants}
-      className='mt-6 bg-gradient-to-br from-[var(--card-bg)] to-[var(--bg-tertiary)]/80 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-[var(--border-color)] overflow-hidden relative'
+      className='mt-6 bg-gradient-to-br from-[var(--card-bg)] to-[rgba(var(--bg-tertiary-rgb),0.8)] backdrop-blur-md rounded-2xl p-6 shadow-xl border border-[var(--border-color)] overflow-hidden relative'
     >
-      <div className='absolute top-0 right-0 w-40 h-40 bg-gradient-to-r from-indigo-600/5 to-purple-600/5 rounded-full -translate-y-1/2 translate-x-1/4 blur-xl'></div>
-      <div className='absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-r from-purple-600/5 to-pink-600/5 rounded-full translate-y-1/2 -translate-x-1/3 blur-xl'></div>
+      <div className='absolute top-0 right-0 w-40 h-40 bg-gradient-to-r from-cyan-500/10 to-amber-500/10 rounded-full -translate-y-1/2 translate-x-1/4 blur-xl'></div>
+      <div className='absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 rounded-full translate-y-1/2 -translate-x-1/3 blur-xl'></div>
 
       <motion.h2
         variants={itemVariants}
-        className='text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-500 mb-6'
+        className='text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-amber-400 mb-6'
       >
         Статистика игр
       </motion.h2>
@@ -292,7 +292,7 @@ export const GameStats: FC<GameStatsProps> = ({
               <h4 className='text-sm font-medium text-[var(--text-secondary)] mb-4'>
                 Общая статистика
               </h4>
-              <div className='bg-gradient-to-br from-[var(--accent-primary)]/5 to-[var(--accent-secondary)]/5 rounded-lg p-4 space-y-4 border border-[var(--border-color)]/30'>
+              <div className='bg-gradient-to-br from-[rgba(var(--accent-primary-rgb),0.05)] to-[rgba(var(--accent-secondary-rgb),0.05)] rounded-lg p-4 space-y-4 border border-[var(--divider-color)]'>
                 <div className='flex justify-between items-center'>
                   <span className='text-sm text-[var(--text-primary)]'>
                     Всего игр

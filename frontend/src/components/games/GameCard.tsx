@@ -246,7 +246,7 @@ export const GameCard: FC<GameCardProps> = ({
                   {!isEditing && (
                     <button
                       onClick={toggleEdit}
-                      className='text-[var(--text-secondary)] hover:text-[var(--accent-primary)] p-1 md:p-1.5 rounded-lg hover:bg-[var(--accent-primary)]/10 transition-all duration-200'
+                      className='text-[var(--text-secondary)] hover:text-[var(--accent-primary)] p-1 md:p-1.5 rounded-lg hover:bg-[rgba(var(--accent-primary-rgb),0.1)] transition-all duration-200'
                       title='Редактировать'
                     >
                       <svg
@@ -266,7 +266,7 @@ export const GameCard: FC<GameCardProps> = ({
                   )}
                   <button
                     onClick={() => onDelete && onDelete(game.id)}
-                    className='text-[var(--error)] hover:text-[var(--error-hover)] p-1 md:p-1.5 rounded-lg hover:bg-[var(--error)]/10 transition-all duration-200'
+                    className='text-[var(--error)] hover:text-[var(--error-hover)] p-1 md:p-1.5 rounded-lg hover:bg-red-500/10 transition-all duration-200'
                     title='Удалить игру'
                   >
                     <svg
@@ -368,7 +368,7 @@ export const GameCard: FC<GameCardProps> = ({
           )}
 
           {game.review && !isEditing && (
-            <div className='mt-3 pt-3 border-t border-[var(--border-color)]/30'>
+            <div className='mt-3 pt-3 border-t border-[var(--divider-color)]'>
               <p className='text-sm text-[var(--text-secondary)] italic line-clamp-2'>
                 {game.review}
               </p>
@@ -402,7 +402,7 @@ export const GameCard: FC<GameCardProps> = ({
               {!isEditing && (
                 <button
                   onClick={toggleEdit}
-                  className='text-[var(--text-secondary)] hover:text-[var(--accent-primary)] p-1 md:p-1.5 rounded-lg hover:bg-[var(--accent-primary)]/10 transition-all duration-200'
+                  className='text-[var(--text-secondary)] hover:text-[var(--accent-primary)] p-1 md:p-1.5 rounded-lg hover:bg-[rgba(var(--accent-primary-rgb),0.1)] transition-all duration-200'
                   title='Редактировать'
                 >
                   <svg
@@ -422,7 +422,7 @@ export const GameCard: FC<GameCardProps> = ({
               )}
               <button
                 onClick={() => onDelete && onDelete(game.id)}
-                className='text-[var(--error)] hover:text-[var(--error-hover)] p-1 md:p-1.5 rounded-lg hover:bg-[var(--error)]/10 transition-all duration-200'
+                className='text-[var(--error)] hover:text-[var(--error-hover)] p-1 md:p-1.5 rounded-lg hover:bg-red-500/10 transition-all duration-200'
                 title='Удалить игру'
               >
                 <svg
@@ -539,7 +539,7 @@ export const GameCard: FC<GameCardProps> = ({
                   </div>
                 </div>
 
-                <div className='flex justify-end gap-2 mt-4 pt-4 border-t border-[var(--border-color)]/30'>
+                <div className='flex justify-end gap-2 mt-4 pt-4 border-t border-[var(--divider-color)]'>
                   <button
                     onClick={() => setIsEditing(false)}
                     className='px-4 py-2 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-lg text-sm font-medium hover:bg-[var(--bg-secondary-hover)] transition-all duration-200'

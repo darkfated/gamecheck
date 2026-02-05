@@ -53,19 +53,19 @@ export const ProfileInfo: FC<ProfileInfoProps> = ({
     <motion.div initial='hidden' animate='visible' variants={containerVariants}>
       <motion.div
         variants={itemVariants}
-        className='bg-gradient-to-br from-[var(--card-bg)] to-[var(--bg-tertiary)]/80 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-[var(--border-color)] overflow-hidden mb-6 relative'
+        className='bg-gradient-to-br from-[var(--card-bg)] to-[rgba(var(--bg-tertiary-rgb),0.8)] backdrop-blur-md rounded-2xl p-6 shadow-xl border border-[var(--border-color)] overflow-hidden mb-6 relative'
         whileHover={{ boxShadow: '0 8px 30px rgba(0, 0, 0, 0.15)' }}
       >
-        <div className='absolute top-0 right-0 w-40 h-40 bg-gradient-to-r from-indigo-600/5 to-purple-600/5 rounded-full -translate-y-1/2 translate-x-1/4 blur-xl'></div>
-        <div className='absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-r from-purple-600/5 to-pink-600/5 rounded-full translate-y-1/2 -translate-x-1/3 blur-xl'></div>
+        <div className='absolute top-0 right-0 w-40 h-40 bg-gradient-to-r from-cyan-500/10 to-amber-500/10 rounded-full -translate-y-1/2 translate-x-1/4 blur-xl'></div>
+        <div className='absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 rounded-full translate-y-1/2 -translate-x-1/3 blur-xl'></div>
 
-        <h2 className='text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-500 mb-6'>
+        <h2 className='text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-amber-400 mb-6'>
           Профиль
         </h2>
 
         <div className='space-y-6'>
           <div className='flex flex-wrap md:flex-nowrap gap-4 items-start'>
-            <div className='w-16 h-16 md:w-14 md:h-14 rounded-xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 flex items-center justify-center text-[var(--accent-tertiary)]'>
+            <div className='w-16 h-16 md:w-14 md:h-14 rounded-xl bg-gradient-to-br from-cyan-500/15 to-amber-500/10 flex items-center justify-center text-[var(--accent-tertiary)]'>
               <svg
                 className='w-8 h-8 md:w-7 md:h-7'
                 viewBox='0 0 24 24'
@@ -110,7 +110,7 @@ export const ProfileInfo: FC<ProfileInfoProps> = ({
 
           {profile.discordTag && (
             <div className='flex flex-wrap md:flex-nowrap gap-4 items-start'>
-              <div className='w-16 h-16 md:w-14 md:h-14 rounded-xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 flex items-center justify-center text-[var(--accent-tertiary)]'>
+            <div className='w-16 h-16 md:w-14 md:h-14 rounded-xl bg-gradient-to-br from-cyan-500/15 to-amber-500/10 flex items-center justify-center text-[var(--accent-tertiary)]'>
                 <svg
                   className='w-8 h-8 md:w-7 md:h-7'
                   viewBox='0 0 24 24'
@@ -149,7 +149,7 @@ export const ProfileInfo: FC<ProfileInfoProps> = ({
 
           {profile.lastLoginAt && !isOwnProfile && (
             <div className='flex flex-wrap md:flex-nowrap gap-4 items-start'>
-              <div className='w-16 h-16 md:w-14 md:h-14 rounded-xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 flex items-center justify-center text-[var(--accent-tertiary)]'>
+            <div className='w-16 h-16 md:w-14 md:h-14 rounded-xl bg-gradient-to-br from-cyan-500/15 to-amber-500/10 flex items-center justify-center text-[var(--accent-tertiary)]'>
                 <svg
                   className='w-8 h-8 md:w-7 md:h-7'
                   fill='none'
@@ -187,7 +187,7 @@ export const ProfileInfo: FC<ProfileInfoProps> = ({
 
           {profile.memberSince && (
             <div className='flex flex-wrap md:flex-nowrap gap-4 items-start'>
-              <div className='w-16 h-16 md:w-14 md:h-14 rounded-xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 flex items-center justify-center text-[var(--accent-tertiary)]'>
+            <div className='w-16 h-16 md:w-14 md:h-14 rounded-xl bg-gradient-to-br from-cyan-500/15 to-amber-500/10 flex items-center justify-center text-[var(--accent-tertiary)]'>
                 <svg
                   className='w-8 h-8 md:w-7 md:h-7'
                   fill='none'

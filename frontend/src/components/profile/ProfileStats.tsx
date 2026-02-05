@@ -35,7 +35,7 @@ export const ProfileStats: FC<ProfileStatsProps> = ({
         whileHover={{ y: -2 }}
         className='group flex items-center gap-3'
       >
-        <div className='h-10 w-10 flex items-center backdrop-blur-sm justify-center rounded-xl bg-gradient-to-br from-blue-600/20 to-indigo-600/20 group-hover:from-blue-600/30 group-hover:to-indigo-600/30 transition-all duration-300'>
+        <div className='h-10 w-10 flex items-center backdrop-blur-sm justify-center rounded-xl bg-gradient-to-br from-cyan-500/20 to-amber-500/20 group-hover:from-cyan-500/30 group-hover:to-amber-500/30 transition-all duration-300'>
           <svg
             className='w-5 h-5 text-blue-400'
             fill='none'
@@ -65,9 +65,9 @@ export const ProfileStats: FC<ProfileStatsProps> = ({
         whileHover={{ y: -2 }}
         className='group flex items-center gap-3'
       >
-        <div className='h-10 w-10 flex items-center backdrop-blur-sm justify-center rounded-xl bg-gradient-to-br from-indigo-600/20 to-purple-600/20 group-hover:from-indigo-600/30 group-hover:to-purple-600/30 transition-all duration-300'>
+        <div className='h-10 w-10 flex items-center backdrop-blur-sm justify-center rounded-xl bg-gradient-to-br from-teal-500/20 to-cyan-500/20 group-hover:from-teal-500/30 group-hover:to-cyan-500/30 transition-all duration-300'>
           <svg
-            className='w-5 h-5 text-purple-400'
+            className='w-5 h-5 text-cyan-400'
             fill='none'
             stroke='currentColor'
             viewBox='0 0 24 24'

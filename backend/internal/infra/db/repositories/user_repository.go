@@ -1,6 +1,9 @@
 package repositories
 
 import (
+	"fmt"
+	"strings"
+
 	"gamecheck/internal/domain/models"
 
 	"gorm.io/gorm"
@@ -50,10 +53,58 @@ func (r *UserRepository) Search(query string, limit int) ([]*models.User, error)
 	return users, err
 }
 
-func (r *UserRepository) List(limit, offset int) ([]*models.User, error) {
-	var users []*models.User
-	err := r.db.Offset(offset).Limit(limit).Find(&users).Error
-	return users, err
+func (r *UserRepository) List(limit, offset int, sortBy, order string) ([]*models.User, error) {
+	sortColumn := "users.created_at"
+	switch sortBy {
+	case "totalPlaytime":
+		sortColumn = "total_playtime"
+	case "averageRating":
+		sortColumn = "average_rating"
+	case "createdAt":
+		sortColumn = "users.created_at"
+	default:
+		sortColumn = "users.created_at"
+	}
+
+	order = strings.ToLower(order)
+	if order != "asc" {
+		order = "desc"
+	}
+
+	type userRow struct {
+		models.User
+		GamesCount     int     `gorm:"column:games_count"`
+		TotalPlaytime  int     `gorm:"column:total_playtime"`
+		AverageRating  float64 `gorm:"column:average_rating"`
+	}
+
+	var rows []userRow
+	err := r.db.
+		Table("users").
+		Select(`users.*,
+			COALESCE(COUNT(progresses.id), 0) AS games_count,
+			COALESCE(SUM(progresses.steam_playtime_forever), 0) AS total_playtime,
+			COALESCE(AVG(progresses.rating), 0) AS average_rating`).
+		Joins("LEFT JOIN progresses ON progresses.user_id = users.id").
+		Group("users.id").
+		Order(fmt.Sprintf("%s %s", sortColumn, order)).
+		Limit(limit).
+		Offset(offset).
+		Scan(&rows).Error
+	if err != nil {
+		return nil, err
+	}
+
+	users := make([]*models.User, 0, len(rows))
+	for _, row := range rows {
+		u := row.User
+		u.GamesCount = row.GamesCount
+		u.TotalPlaytime = row.TotalPlaytime
+		u.AverageRating = row.AverageRating
+		users = append(users, &u)
+	}
+
+	return users, nil
 }
 
 func (r *UserRepository) Count() (int64, error) {

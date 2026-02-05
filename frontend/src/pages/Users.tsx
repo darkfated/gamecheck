@@ -1,6 +1,10 @@
 import { AnimatePresence, LayoutGroup, motion } from 'framer-motion'
 import { FC, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Button } from '../components/ui/Button'
+import { Card } from '../components/ui/Card'
+import { Input } from '../components/ui/Input'
+import { SectionHeader } from '../components/ui/SectionHeader'
 import { useAuth } from '../contexts/AuthContext'
 import api from '../services/api'
 
@@ -51,6 +55,10 @@ const Users: FC = () => {
   const [debouncedQuery, setDebouncedQuery] = useState('')
 
   const requestRef = useRef(0)
+
+  const [topPlaytime, setTopPlaytime] = useState<User[]>([])
+  const [topRating, setTopRating] = useState<User[]>([])
+  const [loadingTop, setLoadingTop] = useState(false)
 
   const totalPages = Math.max(1, Math.ceil(total / limit))
 
@@ -113,6 +121,33 @@ const Users: FC = () => {
     }
   }, [currentUser])
 
+  useEffect(() => {
+    let mounted = true
+    const loadTopUsers = async () => {
+      setLoadingTop(true)
+      try {
+        const [playtimeRes, ratingRes] = await Promise.all([
+          api.users.listUsers(5, 0, 'totalPlaytime', 'desc'),
+          api.users.listUsers(5, 0, 'averageRating', 'desc'),
+        ])
+        if (!mounted) return
+        setTopPlaytime(playtimeRes.data.data || [])
+        setTopRating(ratingRes.data.data || [])
+      } catch (err) {
+        if (!mounted) return
+        setTopPlaytime([])
+        setTopRating([])
+      } finally {
+        if (mounted) setLoadingTop(false)
+      }
+    }
+
+    loadTopUsers()
+    return () => {
+      mounted = false
+    }
+  }, [])
+
   const handleSortChange = (newSort: typeof sortBy) => {
     if (newSort === sortBy) {
       setOrder(prev => (prev === 'asc' ? 'desc' : 'asc'))
@@ -139,29 +174,10 @@ const Users: FC = () => {
     )
   }, [baseList, debouncedQuery])
 
-  const sortedUsers = useMemo(() => {
-    const list = [...filteredUsers]
-    const getTime = (val?: string | number) => {
-      if (!val) return 0
-      const n = typeof val === 'number' ? val : Date.parse(String(val))
-      return Number.isNaN(n) ? 0 : n
-    }
-    const cmp = (a: User, b: User) => {
-      if (sortBy === 'averageRating') {
-        return (a.averageRating ?? 0) - (b.averageRating ?? 0)
-      }
-      if (sortBy === 'totalPlaytime') {
-        return (a.totalPlaytime ?? 0) - (b.totalPlaytime ?? 0)
-      }
-      return getTime(a.createdAt) - getTime(b.createdAt)
-    }
-    list.sort((a, b) => (order === 'asc' ? cmp(a, b) : -cmp(a, b)))
-    return list
-  }, [filteredUsers, sortBy, order])
-
   const rankedUsers = useMemo(
-    () => sortedUsers.map((u, idx) => ({ ...u, rank: page * limit + idx + 1 })),
-    [sortedUsers, page, limit]
+    () =>
+      filteredUsers.map((u, idx) => ({ ...u, rank: page * limit + idx + 1 })),
+    [filteredUsers, page, limit]
   )
 
   const containerVariants = {
@@ -189,26 +205,25 @@ const Users: FC = () => {
     >
       <div className='container mx-auto px-4 py-8 relative'>
         <motion.div className='mb-6' variants={itemVariants}>
-          <h1 className='text-3xl sm:text-4xl font-bold text-[var(--text-primary)]'>
-            Игроки
-          </h1>
-          <div className='mt-2 flex items-center gap-3'>
-            <p className='text-sm text-[var(--text-secondary)]'>
-              Всего пользователей: <span className='font-medium'>{total}</span>
-            </p>
-            {isFetching && (
-              <span className='text-xs text-[var(--text-secondary)]'>
-                Обновление...
-              </span>
-            )}
-          </div>
+          <SectionHeader
+            title='Игроки'
+            subtitle={`Всего пользователей: ${total}`}
+            action={
+              isFetching ? (
+                <span className='text-xs text-[var(--text-secondary)]'>
+                  Обновление...
+                </span>
+              ) : null
+            }
+          />
         </motion.div>
 
-        <motion.div
-          className='flex flex-col md:flex-row md:items-center gap-4 md:gap-6 justify-between mb-6'
-          variants={itemVariants}
-        >
-          <div style={{ overflowX: 'visible' }}>
+        <motion.div variants={itemVariants} className='mb-6'>
+          <Card
+            variant='glass'
+            className='flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-6 justify-between'
+          >
+            <div style={{ overflowX: 'visible' }}>
             <LayoutGroup>
               <div className='flex gap-3 items-center relative'>
                 <div className='relative'>
@@ -223,8 +238,9 @@ const Users: FC = () => {
                         right: 4,
                         borderRadius: 14,
                         background:
-                          'linear-gradient(to right, rgba(99, 102, 241, 0.18), rgba(168, 85, 247, 0.18), rgba(217, 70, 239, 0.18))',
-                        boxShadow: '0 8px 20px -10px rgba(99, 102, 241, 0.12)',
+                          'linear-gradient(to right, rgba(var(--accent-primary-rgb), 0.18), rgba(var(--accent-secondary-rgb), 0.18))',
+                        boxShadow:
+                          '0 8px 20px -10px rgba(var(--accent-primary-rgb), 0.2)',
                       }}
                       transition={{
                         type: 'spring',
@@ -271,8 +287,9 @@ const Users: FC = () => {
                         right: 4,
                         borderRadius: 14,
                         background:
-                          'linear-gradient(to right, rgba(99, 102, 241, 0.18), rgba(168, 85, 247, 0.18), rgba(217, 70, 239, 0.18))',
-                        boxShadow: '0 8px 20px -10px rgba(99, 102, 241, 0.12)',
+                          'linear-gradient(to right, rgba(var(--accent-primary-rgb), 0.18), rgba(var(--accent-secondary-rgb), 0.18))',
+                        boxShadow:
+                          '0 8px 20px -10px rgba(var(--accent-primary-rgb), 0.2)',
                       }}
                       transition={{
                         type: 'spring',
@@ -308,239 +325,335 @@ const Users: FC = () => {
                 </div>
               </div>
             </LayoutGroup>
-          </div>
-
-          <motion.div
-            className='w-full md:w-auto flex flex-col sm:flex-row items-stretch gap-3'
-            variants={itemVariants}
-          >
-            <div className='flex-1'>
-              <input
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                placeholder='Поиск по имени или тегу'
-                className='w-full md:w-[260px] lg:w-[290px] h-12 px-4 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] placeholder-[var(--text-secondary)] shadow-inner transition'
-              />
             </div>
 
-            <div className='flex items-center gap-2'>
-              <div className='h-12 flex items-center gap-2 bg-transparent'>
-                <button
-                  onClick={() => handleSortChange('createdAt')}
-                  className={`h-10 px-4 rounded-md text-sm border ${sortBy === 'createdAt' ? 'border-[var(--accent-primary)] bg-[var(--bg-tertiary)]' : 'border-[var(--border-color)] bg-[var(--bg-secondary)]'}`}
-                >
-                  Дата
-                </button>
-                <button
-                  onClick={() => handleSortChange('totalPlaytime')}
-                  className={`h-10 px-4 rounded-md text-sm border ${sortBy === 'totalPlaytime' ? 'border-[var(--accent-primary)] bg-[var(--bg-tertiary)]' : 'border-[var(--border-color)] bg-[var(--bg-secondary)]'}`}
-                >
-                  Время
-                </button>
-                <button
-                  onClick={() => handleSortChange('averageRating')}
-                  className={`h-10 px-4 rounded-md text-sm border ${sortBy === 'averageRating' ? 'border-[var(--accent-primary)] bg-[var(--bg-tertiary)]' : 'border-[var(--border-color)] bg-[var(--bg-secondary)]'}`}
-                >
-                  Рейтинг
-                </button>
+            <motion.div
+              className='w-full lg:w-auto flex flex-col sm:flex-row items-stretch gap-3'
+              variants={itemVariants}
+            >
+              <div className='flex-1'>
+                <Input
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder='Поиск по имени или тегу'
+                  className='h-12 md:w-[260px] lg:w-[290px]'
+                />
               </div>
 
-              <select
-                value={limit}
-                onChange={e => {
-                  setLimit(Number(e.target.value))
-                  setPage(0)
-                }}
-                className='h-10 px-4 rounded-md text-sm border border-[var(--border-color)] bg-[var(--bg-secondary)]'
-              >
-                <option value={8}>8</option>
-                <option value={12}>12</option>
-                <option value={24}>24</option>
-              </select>
-            </div>
-          </motion.div>
+              <div className='flex items-center gap-2'>
+                <div className='h-12 flex items-center gap-2 bg-transparent'>
+                  <button
+                    onClick={() => handleSortChange('createdAt')}
+                    className={`h-10 px-4 rounded-md text-sm border ${sortBy === 'createdAt' ? 'border-[var(--accent-primary)] bg-[var(--bg-tertiary)] text-[var(--text-primary)]' : 'border-[var(--border-color)] bg-[var(--bg-secondary)] text-[var(--text-secondary)]'}`}
+                  >
+                    Дата
+                  </button>
+                  <button
+                    onClick={() => handleSortChange('totalPlaytime')}
+                    className={`h-10 px-4 rounded-md text-sm border ${sortBy === 'totalPlaytime' ? 'border-[var(--accent-primary)] bg-[var(--bg-tertiary)] text-[var(--text-primary)]' : 'border-[var(--border-color)] bg-[var(--bg-secondary)] text-[var(--text-secondary)]'}`}
+                  >
+                    Время
+                  </button>
+                  <button
+                    onClick={() => handleSortChange('averageRating')}
+                    className={`h-10 px-4 rounded-md text-sm border ${sortBy === 'averageRating' ? 'border-[var(--accent-primary)] bg-[var(--bg-tertiary)] text-[var(--text-primary)]' : 'border-[var(--border-color)] bg-[var(--bg-secondary)] text-[var(--text-secondary)]'}`}
+                  >
+                    Рейтинг
+                  </button>
+                </div>
+
+                <select
+                  value={limit}
+                  onChange={e => {
+                    setLimit(Number(e.target.value))
+                    setPage(0)
+                  }}
+                  className='h-10 px-4 rounded-md text-sm border border-[var(--border-color)] bg-[var(--bg-secondary)] text-[var(--text-secondary)]'
+                >
+                  <option value={8}>8</option>
+                  <option value={12}>12</option>
+                  <option value={24}>24</option>
+                </select>
+              </div>
+            </motion.div>
+          </Card>
         </motion.div>
 
-        <AnimatePresence mode='wait'>
-          <motion.div
-            key={
-              activeTab + '-' + page + '-' + limit + '-' + sortBy + '-' + order
-            }
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.22 }}
-          >
-            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
-              {loading && page === 0 ? (
-                Array.from({ length: Math.max(3, limit / 3) }).map((_, i) => (
-                  <div
-                    key={i}
-                    className='animate-pulse bg-[var(--bg-secondary)] rounded-xl p-4 border border-[var(--border-color)]'
-                  >
-                    <div className='flex items-center gap-4'>
-                      <div className='w-12 h-12 rounded-full bg-[var(--bg-tertiary)]' />
-                      <div className='flex-1 space-y-2'>
-                        <div className='h-4 bg-[var(--bg-tertiary)] rounded w-3/4' />
-                        <div className='h-3 bg-[var(--bg-tertiary)] rounded w-1/2' />
+        <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
+          <div className='lg:col-span-2'>
+            <AnimatePresence mode='wait'>
+              <motion.div
+                key={
+                  activeTab + '-' + page + '-' + limit + '-' + sortBy + '-' + order
+                }
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.22 }}
+              >
+                <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
+                  {loading && page === 0 ? (
+                    Array.from({ length: Math.max(3, limit / 3) }).map((_, i) => (
+                      <div
+                        key={i}
+                        className='animate-pulse bg-[var(--bg-secondary)] rounded-xl p-4 border border-[var(--border-color)]'
+                      >
+                        <div className='flex items-center gap-4'>
+                          <div className='w-12 h-12 rounded-full bg-[var(--bg-tertiary)]' />
+                          <div className='flex-1 space-y-2'>
+                            <div className='h-4 bg-[var(--bg-tertiary)] rounded w-3/4' />
+                            <div className='h-3 bg-[var(--bg-tertiary)] rounded w-1/2' />
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : error ? (
+                    <div className='col-span-full bg-gradient-to-r from-red-500/10 to-pink-500/10 border border-red-500/20 rounded-xl p-6 shadow'>
+                      <p className='text-red-400 font-semibold mb-3'>Ошибка</p>
+                      <p className='text-[var(--text-secondary)] mb-5'>{error}</p>
+                      <div>
+                        <Button
+                          onClick={() => fetchUsers(page * limit)}
+                          variant='secondary'
+                          size='sm'
+                        >
+                          Повторить
+                        </Button>
                       </div>
                     </div>
-                  </div>
-                ))
-              ) : error ? (
-                <div className='col-span-full bg-gradient-to-r from-red-500/10 to-pink-500/10 border border-red-500/20 rounded-xl p-6 shadow'>
-                  <p className='text-red-400 font-semibold mb-3'>Ошибка</p>
-                  <p className='text-[var(--text-secondary)] mb-5'>{error}</p>
-                  <div>
-                    <button
-                      onClick={() => fetchUsers(page * limit)}
-                      className='px-5 py-2 rounded-md bg-[var(--accent-primary)]/10 hover:bg-[var(--accent-primary)]/20'
-                    >
-                      Повторить
-                    </button>
-                  </div>
+                  ) : rankedUsers.length === 0 ? (
+                    <div className='col-span-full bg-[var(--bg-secondary)] rounded-xl p-6 border border-[var(--border-color)]'>
+                      <p className='text-[var(--text-secondary)]'>
+                        Пользователей не найдено.
+                      </p>
+                    </div>
+                  ) : (
+                    rankedUsers.map(u => (
+                      <motion.div
+                        key={u.id}
+                        layout
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: 0.22 }}
+                        whileHover={{ scale: 1.01 }}
+                        className='group bg-[var(--bg-secondary)] rounded-xl p-4 border border-[var(--border-color)] flex items-center gap-4'
+                      >
+                        <div className='relative flex-shrink-0'>
+                          <div className='absolute -left-3 -top-3 w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold bg-gradient-to-br from-[var(--accent-primary)] to-[var(--accent-secondary)] text-[#001015]'>
+                            {u.rank}
+                          </div>
+                          <img
+                            src={u.avatarUrl}
+                            alt={u.displayName}
+                            className='w-12 h-12 sm:w-14 sm:h-14 rounded-full ring-1 ring-[var(--border-color)] object-cover'
+                          />
+                          {u.isOnline && (
+                            <span className='absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-[var(--bg-primary)] bg-green-400' />
+                          )}
+                        </div>
+
+                        <div className='flex-1 min-w-0'>
+                          <div className='flex items-center justify-between gap-3'>
+                            <div className='min-w-0'>
+                              <Link
+                                to={`/profile/${u.id}`}
+                                className='font-semibold text-[var(--text-primary)] truncate'
+                              >
+                                {u.displayName}
+                              </Link>
+                              <div className='text-xs text-[var(--text-secondary)] mt-1 truncate'>
+                                {u.discordTag ??
+                                  `${u.followersCount ?? 0} подписчиков`}
+                              </div>
+                            </div>
+
+                            <div className='hidden sm:flex sm:flex-col sm:items-end sm:gap-1'>
+                              <div className='text-xs text-[var(--text-secondary)]'>
+                                Игры
+                              </div>
+                              <div className='font-semibold text-[var(--accent-primary)] text-sm'>
+                                {u.gamesCount ?? 0}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className='mt-2 flex items-center justify-between gap-3'>
+                            <div className='text-xs text-[var(--text-secondary)]'>
+                              Рейтинг{' '}
+                              <span className='font-semibold text-[var(--text-primary)] ml-1'>
+                                {(u.averageRating ?? 0).toFixed(1)}
+                              </span>
+                            </div>
+                            <div className='flex items-center gap-2'>
+                              <div className='text-xs text-[var(--text-secondary)]'>
+                                {formatHours(u.totalPlaytime)}
+                              </div>
+                              <Link
+                                to={`/profile/${u.id}`}
+                                className='px-3 py-1 rounded-md text-sm bg-[var(--bg-tertiary)] border border-[var(--border-color)] hover:bg-[var(--bg-secondary)]'
+                              >
+                                Открыть
+                              </Link>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))
+                  )}
                 </div>
-              ) : rankedUsers.length === 0 ? (
-                <div className='col-span-full bg-[var(--bg-secondary)] rounded-xl p-6 border border-[var(--border-color)]'>
-                  <p className='text-[var(--text-secondary)]'>
-                    Пользователей не найдено.
-                  </p>
+              </motion.div>
+            </AnimatePresence>
+
+            <div className='mt-8 flex flex-col sm:flex-row items-center justify-between gap-4'>
+              <div className='text-sm text-[var(--text-secondary)]'>
+                Страница <span className='font-medium'>{page + 1}</span> из{' '}
+                <span className='font-medium'>{totalPages}</span>
+              </div>
+
+              <div className='flex items-center gap-3'>
+                <button
+                  onClick={() => setPage(0)}
+                  disabled={page === 0}
+                  className='px-3 py-2 rounded-md bg-[var(--bg-secondary)] border border-[var(--border-color)] disabled:opacity-50'
+                >
+                  ⏮
+                </button>
+                <button
+                  onClick={() => setPage(p => Math.max(0, p - 1))}
+                  disabled={page === 0}
+                  className='px-3 py-2 rounded-md bg-[var(--bg-secondary)] border border-[var(--border-color)] disabled:opacity-50'
+                >
+                  ←
+                </button>
+
+                <div className='hidden sm:flex items-center gap-1'>
+                  {Array.from({ length: Math.min(5, totalPages) }).map((_, i) => {
+                    let pageNum = 0
+                    if (totalPages <= 5) pageNum = i
+                    else {
+                      const start = Math.max(0, Math.min(page - 2, totalPages - 5))
+                      pageNum = start + i
+                    }
+                    if (pageNum >= totalPages) return null
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setPage(pageNum)}
+                        className={`w-9 h-9 rounded-md ${pageNum === page ? 'bg-[var(--accent-primary)] text-[#001015]' : 'bg-[var(--bg-secondary)] border border-[var(--border-color)]'}`}
+                      >
+                        {pageNum + 1}
+                      </button>
+                    )
+                  })}
                 </div>
-              ) : (
-                rankedUsers.map(u => (
-                  <motion.div
-                    key={u.id}
-                    layout
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -6 }}
-                    transition={{ duration: 0.22 }}
-                    whileHover={{ scale: 1.01 }}
-                    className='group bg-[var(--bg-secondary)] rounded-xl p-4 border border-[var(--border-color)] flex items-center gap-4'
-                  >
-                    <div className='relative flex-shrink-0'>
-                      <div className='absolute -left-3 -top-3 w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold bg-gradient-to-br from-[var(--accent-primary)] to-[var(--accent-secondary)] text-white'>
-                        {u.rank}
-                      </div>
-                      <img
-                        src={u.avatarUrl}
-                        alt={u.displayName}
-                        className='w-12 h-12 sm:w-14 sm:h-14 rounded-full ring-1 ring-[var(--border-color)] object-cover'
-                      />
-                      {u.isOnline && (
-                        <span className='absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-[var(--bg-primary)] bg-green-400' />
-                      )}
-                    </div>
 
-                    <div className='flex-1 min-w-0'>
-                      <div className='flex items-center justify-between gap-3'>
-                        <div className='min-w-0'>
-                          <Link
-                            to={`/profile/${u.id}`}
-                            className='font-semibold text-[var(--text-primary)] truncate'
-                          >
-                            {u.displayName}
-                          </Link>
-                          <div className='text-xs text-[var(--text-secondary)] mt-1 truncate'>
-                            {u.discordTag ??
-                              `${u.followersCount ?? 0} подписчиков`}
-                          </div>
-                        </div>
-
-                        <div className='hidden sm:flex sm:flex-col sm:items-end sm:gap-1'>
-                          <div className='text-xs text-[var(--text-secondary)]'>
-                            Игры
-                          </div>
-                          <div className='font-semibold text-[var(--accent-primary)] text-sm'>
-                            {u.gamesCount ?? 0}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className='mt-2 flex items-center justify-between gap-3'>
-                        <div className='text-xs text-[var(--text-secondary)]'>
-                          Рейтинг{' '}
-                          <span className='font-semibold text-[var(--text-primary)] ml-1'>
-                            {(u.averageRating ?? 0).toFixed(1)}
-                          </span>
-                        </div>
-                        <div className='flex items-center gap-2'>
-                          <div className='text-xs text-[var(--text-secondary)]'>
-                            {formatHours(u.totalPlaytime)}
-                          </div>
-                          <Link
-                            to={`/profile/${u.id}`}
-                            className='px-3 py-1 rounded-md text-sm bg-[var(--bg-tertiary)] border border-[var(--border-color)] hover:bg-[var(--bg-secondary)]'
-                          >
-                            Открыть
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))
-              )}
+                <button
+                  onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+                  disabled={page >= totalPages - 1}
+                  className='px-3 py-2 rounded-md bg-[var(--bg-secondary)] border border-[var(--border-color)] disabled:opacity-50'
+                >
+                  →
+                </button>
+                <button
+                  onClick={() => setPage(totalPages - 1)}
+                  disabled={page >= totalPages - 1}
+                  className='px-3 py-2 rounded-md bg-[var(--bg-secondary)] border border-[var(--border-color)] disabled:opacity-50'
+                >
+                  ⏭
+                </button>
+              </div>
             </div>
-          </motion.div>
-        </AnimatePresence>
-
-        <div className='mt-8 flex flex-col sm:flex-row items-center justify-between gap-4'>
-          <div className='text-sm text-[var(--text-secondary)]'>
-            Страница <span className='font-medium'>{page + 1}</span> из{' '}
-            <span className='font-medium'>{totalPages}</span>
           </div>
 
-          <div className='flex items-center gap-3'>
-            <button
-              onClick={() => setPage(0)}
-              disabled={page === 0}
-              className='px-3 py-2 rounded-md bg-[var(--bg-secondary)] border border-[var(--border-color)] disabled:opacity-50'
-            >
-              ⏮
-            </button>
-            <button
-              onClick={() => setPage(p => Math.max(0, p - 1))}
-              disabled={page === 0}
-              className='px-3 py-2 rounded-md bg-[var(--bg-secondary)] border border-[var(--border-color)] disabled:opacity-50'
-            >
-              ←
-            </button>
+          <div className='space-y-6'>
+            <Card variant='surface'>
+              <h3 className='text-lg font-semibold text-[var(--text-primary)] mb-4'>
+                Топ по времени
+              </h3>
+              {loadingTop ? (
+                <div className='flex items-center justify-center py-6'>
+                  <div className='animate-spin rounded-full h-6 w-6 border-2 border-t-transparent border-[var(--accent-primary)]'></div>
+                </div>
+              ) : topPlaytime.length === 0 ? (
+                <p className='text-sm text-[var(--text-secondary)]'>
+                  Пока нет данных.
+                </p>
+              ) : (
+                <div className='space-y-3'>
+                  {topPlaytime.map((player, index) => (
+                    <Link
+                      key={player.id}
+                      to={`/profile/${player.id}`}
+                      className='flex items-center gap-3 rounded-xl border border-[var(--border-color)] bg-[rgba(var(--bg-secondary-rgb),0.6)] px-3 py-2 hover:border-[var(--border-color-hover)] transition-all'
+                    >
+                      <div className='w-8 h-8 rounded-full overflow-hidden ring-2 ring-[rgba(var(--accent-primary-rgb),0.2)]'>
+                        <img
+                          src={player.avatarUrl}
+                          alt={player.displayName}
+                          className='w-full h-full object-cover'
+                        />
+                      </div>
+                      <div className='flex-1 min-w-0'>
+                        <div className='text-sm font-medium text-[var(--text-primary)] truncate'>
+                          {player.displayName}
+                        </div>
+                        <div className='text-xs text-[var(--text-tertiary)]'>
+                          #{index + 1}
+                        </div>
+                      </div>
+                      <div className='text-xs text-[var(--accent-secondary)] font-semibold'>
+                        {formatHours(player.totalPlaytime)}
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </Card>
 
-            <div className='hidden sm:flex items-center gap-1'>
-              {Array.from({ length: Math.min(5, totalPages) }).map((_, i) => {
-                let pageNum = 0
-                if (totalPages <= 5) pageNum = i
-                else {
-                  const start = Math.max(0, Math.min(page - 2, totalPages - 5))
-                  pageNum = start + i
-                }
-                if (pageNum >= totalPages) return null
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => setPage(pageNum)}
-                    className={`w-9 h-9 rounded-md ${pageNum === page ? 'bg-[var(--accent-primary)] text-white' : 'bg-[var(--bg-secondary)] border border-[var(--border-color)]'}`}
-                  >
-                    {pageNum + 1}
-                  </button>
-                )
-              })}
-            </div>
-
-            <button
-              onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
-              disabled={page >= totalPages - 1}
-              className='px-3 py-2 rounded-md bg-[var(--bg-secondary)] border border-[var(--border-color)] disabled:opacity-50'
-            >
-              →
-            </button>
-            <button
-              onClick={() => setPage(totalPages - 1)}
-              disabled={page >= totalPages - 1}
-              className='px-3 py-2 rounded-md bg-[var(--bg-secondary)] border border-[var(--border-color)] disabled:opacity-50'
-            >
-              ⏭
-            </button>
+            <Card variant='surface'>
+              <h3 className='text-lg font-semibold text-[var(--text-primary)] mb-4'>
+                Топ по рейтингу
+              </h3>
+              {loadingTop ? (
+                <div className='flex items-center justify-center py-6'>
+                  <div className='animate-spin rounded-full h-6 w-6 border-2 border-t-transparent border-[var(--accent-primary)]'></div>
+                </div>
+              ) : topRating.length === 0 ? (
+                <p className='text-sm text-[var(--text-secondary)]'>
+                  Пока нет данных.
+                </p>
+              ) : (
+                <div className='space-y-3'>
+                  {topRating.map((player, index) => (
+                    <Link
+                      key={player.id}
+                      to={`/profile/${player.id}`}
+                      className='flex items-center gap-3 rounded-xl border border-[var(--border-color)] bg-[rgba(var(--bg-secondary-rgb),0.6)] px-3 py-2 hover:border-[var(--border-color-hover)] transition-all'
+                    >
+                      <div className='w-8 h-8 rounded-full overflow-hidden ring-2 ring-[rgba(var(--accent-primary-rgb),0.2)]'>
+                        <img
+                          src={player.avatarUrl}
+                          alt={player.displayName}
+                          className='w-full h-full object-cover'
+                        />
+                      </div>
+                      <div className='flex-1 min-w-0'>
+                        <div className='text-sm font-medium text-[var(--text-primary)] truncate'>
+                          {player.displayName}
+                        </div>
+                        <div className='text-xs text-[var(--text-tertiary)]'>
+                          #{index + 1}
+                        </div>
+                      </div>
+                      <div className='text-xs text-[var(--accent-secondary)] font-semibold'>
+                        {(player.averageRating ?? 0).toFixed(1)}
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </Card>
           </div>
         </div>
       </div>
