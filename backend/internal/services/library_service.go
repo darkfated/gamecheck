@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"gamecheck/internal/domain/models"
@@ -23,6 +24,15 @@ type LibraryGameResponse struct {
 type LibraryGameDetailResponse struct {
 	LibraryGameResponse
 	Comments []repositories.LibraryComment `json:"comments"`
+}
+
+type GameSuggestion struct {
+	Source     string `json:"source"`
+	ID         string `json:"id,omitempty"`
+	SteamAppID int    `json:"steamAppId,omitempty"`
+	Name       string `json:"name"`
+	Icon       string `json:"icon,omitempty"`
+	StoreURL   string `json:"storeUrl,omitempty"`
 }
 
 type LibraryService struct {
@@ -109,6 +119,69 @@ func (s *LibraryService) ListGames(limit, offset int, search, genre, sort, order
 	}
 
 	return results, total, nil
+}
+
+func (s *LibraryService) SuggestGames(query string, limit int) ([]GameSuggestion, string, error) {
+	trimmed := strings.TrimSpace(query)
+	if trimmed == "" {
+		return []GameSuggestion{}, "none", nil
+	}
+
+	if limit <= 0 {
+		limit = 6
+	}
+	if limit > 10 {
+		limit = 10
+	}
+
+	games, _, err := s.ListGames(limit, 0, trimmed, "", "progress", "desc")
+	if err != nil {
+		return nil, "none", err
+	}
+
+	if len(games) > 0 {
+		suggestions := make([]GameSuggestion, 0, len(games))
+		for _, game := range games {
+			icon := game.CapsuleImage
+			if icon == "" {
+				icon = game.HeaderImage
+			}
+			if icon == "" {
+				icon = game.BackgroundImage
+			}
+			suggestions = append(suggestions, GameSuggestion{
+				Source:     "library",
+				ID:         game.ID,
+				SteamAppID: game.SteamAppID,
+				Name:       game.Name,
+				Icon:       icon,
+				StoreURL:   game.StoreURL,
+			})
+		}
+		return suggestions, "library", nil
+	}
+
+	if s.steamService == nil {
+		return []GameSuggestion{}, "steam", nil
+	}
+
+	steamResults, err := s.steamService.SearchApps(trimmed, limit)
+	if err != nil {
+		return []GameSuggestion{}, "steam", nil
+	}
+
+	suggestions := make([]GameSuggestion, 0, len(steamResults))
+	for _, game := range steamResults {
+		suggestions = append(suggestions, GameSuggestion{
+			Source:     "steam",
+			SteamAppID: game.AppID,
+			Name:       game.Name,
+			Icon:       game.Icon,
+			StoreURL:   "https://store.steampowered.com/app/" + strconv.Itoa(game.AppID) + "/",
+		})
+	}
+
+	return suggestions, "steam", nil
 }
 
 func (s *LibraryService) GetGameByID(id string, commentsLimit, commentsOffset int) (*LibraryGameDetailResponse, error) {

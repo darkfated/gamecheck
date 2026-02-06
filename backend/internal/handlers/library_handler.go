@@ -4,7 +4,10 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
+	"unicode/utf8"
 
+	"gamecheck/internal/middleware"
 	"gamecheck/internal/services"
 
 	"github.com/gin-gonic/gin"
@@ -25,6 +28,7 @@ func (h *LibraryHandler) RegisterRoutes(router *gin.RouterGroup) {
 	library := router.Group("/library")
 	{
 		library.GET("", h.ListGames)
+		library.GET("/suggest", middleware.RateLimitByUserOrIPFromContext("readLimiter"), h.SuggestGames)
 		library.GET("/app/:appId", h.GetGameByAppID)
 		library.GET("/:id", h.GetGame)
 	}
@@ -137,4 +141,43 @@ func (h *LibraryHandler) GetGameByAppID(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, game)
+}
+
+func (h *LibraryHandler) SuggestGames(ctx *gin.Context) {
+	var req struct {
+		Query string `form:"query"`
+		Limit int    `form:"limit,default=6"`
+	}
+
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid query parameters"})
+		return
+	}
+
+	query := strings.TrimSpace(req.Query)
+	if utf8.RuneCountInString(query) < 2 {
+		ctx.JSON(http.StatusOK, gin.H{
+			"source": "none",
+			"items":  []services.GameSuggestion{},
+		})
+		return
+	}
+
+	if req.Limit < 1 {
+		req.Limit = 6
+	}
+	if req.Limit > 10 {
+		req.Limit = 10
+	}
+
+	items, source, err := h.libraryService.SuggestGames(query, req.Limit)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch suggestions"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"source": source,
+		"items":  items,
+	})
 }

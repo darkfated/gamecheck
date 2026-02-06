@@ -1,6 +1,8 @@
-﻿import { motion } from 'framer-motion'
-import { FC, FormEvent, useState } from 'react'
+import { motion } from 'framer-motion'
+import { FC, FormEvent, useEffect, useRef, useState } from 'react'
 import { GAME_STATUS_CONFIG, getStatusOptions } from '../../constants'
+import api from '../../services/api'
+import { ArcadeGlyph } from '../icons/ArcadeGlyph'
 import { Button } from '../ui/Button'
 import { Card } from '../ui/Card'
 import { Input } from '../ui/Input'
@@ -10,6 +12,24 @@ interface GameAddFormProps {
   onCancel: () => void
   isSubmitting?: boolean
 }
+
+type SuggestionSource = 'library' | 'steam' | 'none'
+
+interface GameSuggestion {
+  source: 'library' | 'steam'
+  id?: string
+  steamAppId?: number
+  name: string
+  icon?: string
+  storeUrl?: string
+}
+
+interface SuggestionResponse {
+  source: SuggestionSource
+  items: GameSuggestion[]
+}
+
+const SUGGESTIONS_LIMIT = 6
 
 export const GameAddForm: FC<GameAddFormProps> = ({
   onSubmit,
@@ -21,8 +41,87 @@ export const GameAddForm: FC<GameAddFormProps> = ({
   const [selectedRating, setSelectedRating] = useState<number | null>(null)
   const [review, setReview] = useState('')
 
+  const [suggestions, setSuggestions] = useState<GameSuggestion[]>([])
+  const [selectedSuggestion, setSelectedSuggestion] =
+    useState<GameSuggestion | null>(null)
+  const [suggestionSource, setSuggestionSource] =
+    useState<SuggestionSource>('none')
+  const [isSuggestionsLoading, setIsSuggestionsLoading] = useState(false)
+  const [debouncedQuery, setDebouncedQuery] = useState('')
+  const suggestionCache = useRef(new Map<string, SuggestionResponse>())
   const statusOptions = getStatusOptions()
 
+  useEffect(() => {
+    const trimmed = gameName.trim()
+    if (trimmed.length < 2) {
+      setDebouncedQuery('')
+      setSuggestions([])
+      setSuggestionSource('none')
+      setIsSuggestionsLoading(false)
+      return
+    }
+    const handle = setTimeout(() => {
+      setDebouncedQuery(trimmed)
+    }, 350)
+    return () => clearTimeout(handle)
+  }, [gameName])
+  useEffect(() => {
+    if (!debouncedQuery) {
+      return
+    }
+    const cacheKey = debouncedQuery.toLowerCase()
+    const cached = suggestionCache.current.get(cacheKey)
+    if (cached) {
+      setSuggestions(cached.items)
+      setSuggestionSource(cached.source)
+      setIsSuggestionsLoading(false)
+      return
+    }
+    let active = true
+    const controller = new AbortController()
+    setIsSuggestionsLoading(true)
+    setSuggestions([])
+    setSuggestionSource('none')
+    api.library
+      .suggest(debouncedQuery, SUGGESTIONS_LIMIT, controller.signal)
+      .then(response => {
+        if (!active) return
+        const payload = response.data
+        suggestionCache.current.set(cacheKey, payload)
+        setSuggestions(payload.items || [])
+        setSuggestionSource(payload.source || 'none')
+      })
+      .catch(err => {
+        if (!active) return
+        if (err?.name === 'CanceledError' || err?.code === 'ERR_CANCELED') {
+          return
+        }
+        console.error('Error fetching suggestions:', err)
+        setSuggestions([])
+        setSuggestionSource('none')
+      })
+      .finally(() => {
+        if (active) setIsSuggestionsLoading(false)
+      })
+    return () => {
+      active = false
+      controller.abort()
+    }
+  }, [debouncedQuery])
+
+  useEffect(() => {
+    if (!selectedSuggestion) {
+      return
+    }
+    const current = gameName.trim().toLowerCase()
+    const selected = selectedSuggestion.name.trim().toLowerCase()
+    if (current !== selected) {
+      setSelectedSuggestion(null)
+    }
+  }, [gameName, selectedSuggestion])
+
+  const trimmedGameName = gameName.trim()
+  const showSuggestions = trimmedGameName.length >= 2 && !selectedSuggestion
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     await onSubmit({
@@ -30,14 +129,32 @@ export const GameAddForm: FC<GameAddFormProps> = ({
       status: selectedStatus,
       rating: selectedRating,
       review: review || '',
+      steamAppId: selectedSuggestion?.steamAppId,
+      steamIconUrl: selectedSuggestion?.icon,
+      steamStoreUrl: selectedSuggestion?.storeUrl,
     })
 
     setGameName('')
     setSelectedStatus('playing')
     setSelectedRating(null)
     setReview('')
+    setSelectedSuggestion(null)
   }
 
+  const handleSuggestionSelect = (suggestion: GameSuggestion) => {
+    setGameName(suggestion.name)
+    setSelectedSuggestion(suggestion)
+  }
+
+  const handleClearSuggestion = () => {
+    setSelectedSuggestion(null)
+  }
+  const handleCustomSuggestion = () => {
+    const trimmed = gameName.trim()
+    if (!trimmed) return
+    setGameName(trimmed)
+    setSelectedSuggestion(null)
+  }
   const StarRating: FC<{ max?: number }> = ({ max = 10 }) => {
     return (
       <div className='flex flex-wrap gap-1 sm:gap-1.5'>
@@ -111,6 +228,118 @@ export const GameAddForm: FC<GameAddFormProps> = ({
                 placeholder='Введите название игры'
                 disabled={isSubmitting}
               />
+
+              {selectedSuggestion && (
+                <div className='mt-3 rounded-2xl border border-[var(--border-color)] bg-[rgba(var(--bg-secondary-rgb),0.65)] p-3'>
+                  <div className='flex flex-wrap items-center gap-3'>
+                    <div className='h-12 w-12 rounded-xl overflow-hidden bg-[rgba(var(--bg-tertiary-rgb),0.6)] flex items-center justify-center'>
+                      {selectedSuggestion.icon ? (
+                        <img
+                          src={selectedSuggestion.icon}
+                          alt={selectedSuggestion.name}
+                          className='h-full w-full object-cover'
+                        />
+                      ) : (
+                        <ArcadeGlyph className='w-6 h-6 text-[var(--accent-primary)]' />
+                      )}
+                    </div>
+                    <div className='min-w-0 flex-1'>
+                      <p className='text-sm font-semibold text-[var(--text-primary)] truncate'>
+                        {selectedSuggestion.name}
+                      </p>
+                      <p className='text-xs text-[var(--text-tertiary)]'>
+                        {selectedSuggestion.source === 'library'
+                          ? 'Выбрана из библиотеки'
+                          : 'Выбрана из Steam'}
+                      </p>
+                    </div>
+                    <Button
+                      type='button'
+                      variant='ghost'
+                      size='sm'
+                      onClick={handleClearSuggestion}
+                      disabled={isSubmitting}
+                      className='ml-auto'
+                    >
+                      Сменить
+                    </Button>
+                  </div>
+                </div>
+              )}
+              {showSuggestions && (
+                <div className='mt-3 rounded-xl border border-[var(--border-color)] bg-[rgba(var(--bg-secondary-rgb),0.55)] p-3'>
+                  <div className='flex items-center justify-between text-xs text-[var(--text-tertiary)]'>
+                    <span className='uppercase tracking-wide'>Подсказки</span>
+                    {isSuggestionsLoading ? (
+                      <span>Поиск...</span>
+                    ) : suggestionSource !== 'none' ? (
+                      <span>
+                        {suggestionSource === 'library'
+                          ? 'Библиотека'
+                          : 'Steam'}
+                      </span>
+                    ) : null}
+                  </div>
+                  <div className='mt-2 space-y-2'>
+                    {isSuggestionsLoading && suggestions.length === 0 ? (
+                      <div className='text-xs text-[var(--text-tertiary)]'>
+                        Ищем игры...
+                      </div>
+                    ) : suggestions.length > 0 ? (
+                      suggestions.map(suggestion => (
+                        <button
+                          key={`${suggestion.source}-${suggestion.steamAppId || suggestion.id || suggestion.name}`}
+                          type='button'
+                          onClick={() => handleSuggestionSelect(suggestion)}
+                          disabled={isSubmitting}
+                          className='w-full flex items-center gap-3 rounded-xl border border-[var(--border-color)] bg-[rgba(var(--bg-tertiary-rgb),0.55)] px-3 py-2 text-left transition hover:border-[rgba(var(--accent-primary-rgb),0.4)] disabled:opacity-60 disabled:cursor-not-allowed'
+                        >
+                          <div className='h-10 w-10 rounded-lg overflow-hidden bg-[rgba(var(--bg-secondary-rgb),0.6)] flex items-center justify-center'>
+                            {suggestion.icon ? (
+                              <img
+                                src={suggestion.icon}
+                                alt={suggestion.name}
+                                className='h-full w-full object-cover'
+                              />
+                            ) : (
+                              <ArcadeGlyph className='w-5 h-5 text-[var(--accent-primary)]' />
+                            )}
+                          </div>
+                          <div className='min-w-0 flex-1'>
+                            <p className='text-sm font-medium text-[var(--text-primary)] truncate'>
+                              {suggestion.name}
+                            </p>
+                            <p className='text-xs text-[var(--text-tertiary)]'>
+                              {suggestion.source === 'library'
+                                ? 'В библиотеке'
+                                : 'Steam'}
+                            </p>
+                          </div>
+                        </button>
+                      ))
+                    ) : (
+                      <button
+                        type='button'
+                        onClick={handleCustomSuggestion}
+                        disabled={isSubmitting}
+                        className='w-full flex items-center gap-3 rounded-xl border border-dashed border-[var(--border-color)] bg-[rgba(var(--bg-tertiary-rgb),0.4)] px-3 py-2 text-left transition hover:border-[rgba(var(--accent-primary-rgb),0.4)] disabled:opacity-60 disabled:cursor-not-allowed'
+                      >
+                        <div className='h-10 w-10 rounded-lg bg-[rgba(var(--bg-secondary-rgb),0.6)] flex items-center justify-center'>
+                          <ArcadeGlyph className='w-5 h-5 text-[var(--accent-secondary)]' />
+                        </div>
+                        <div className='min-w-0 flex-1'>
+                          <p className='text-sm font-medium text-[var(--text-primary)]'>
+                            Своя игра
+                          </p>
+                          <p className='text-xs text-[var(--text-tertiary)] truncate'>
+                            Добавить как "{trimmedGameName}"
+                          </p>
+                        </div>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div>

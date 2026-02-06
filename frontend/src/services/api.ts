@@ -22,6 +22,9 @@ interface GameData {
   status: string
   rating?: number | null
   review?: string
+  steamAppId?: number | null
+  steamIconUrl?: string
+  steamStoreUrl?: string
 }
 
 interface Game extends GameData {
@@ -90,6 +93,20 @@ interface LibraryComment {
 
 interface LibraryGameDetail extends LibraryGame {
   comments: LibraryComment[]
+}
+
+interface LibrarySuggestion {
+  source: 'library' | 'steam'
+  id?: string
+  steamAppId?: number
+  name: string
+  icon?: string
+  storeUrl?: string
+}
+
+interface LibrarySuggestResponse {
+  source: 'library' | 'steam' | 'none'
+  items: LibrarySuggestion[]
 }
 
 interface AuthCheckResponse {
@@ -295,6 +312,11 @@ const libraryApi = {
   getGameByAppId: (appId: number | string, limit = 10, offset = 0) =>
     axiosInstance.get<LibraryGameDetail>(`/library/app/${appId}`, {
       params: { limit, offset },
+    }),
+  suggest: (query: string, limit = 6, signal?: AbortSignal) =>
+    axiosInstance.get<LibrarySuggestResponse>('/library/suggest', {
+      params: { query, limit },
+      signal,
     }),
 }
 

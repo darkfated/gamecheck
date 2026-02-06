@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -91,10 +92,13 @@ func (h *ProgressHandler) AddGame(ctx *gin.Context) {
 	}
 
 	var req struct {
-		Name   string `json:"name" binding:"required"`
-		Status string `json:"status" binding:"required"`
-		Rating *int   `json:"rating"`
-		Review string `json:"review"`
+		Name          string  `json:"name" binding:"required"`
+		Status        string  `json:"status" binding:"required"`
+		Rating        *int    `json:"rating"`
+		Review        string  `json:"review"`
+		SteamAppID    *int    `json:"steamAppId"`
+		SteamIconURL  *string `json:"steamIconUrl"`
+		SteamStoreURL *string `json:"steamStoreUrl"`
 	}
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -126,26 +130,44 @@ func (h *ProgressHandler) AddGame(ctx *gin.Context) {
 	var steamStoreURL string
 	var playtimeForever *int
 
-	steamGame, err := h.steamService.SearchGameByName(normalizedName)
-	if err == nil && steamGame != nil {
-		steamAppID = &steamGame.AppID
-		steamIconURL = steamGame.Icon
-		steamStoreURL = steamGame.StoreURL
-		if strings.TrimSpace(steamGame.Name) != "" {
-			normalizedName = strings.TrimSpace(steamGame.Name)
+	if req.SteamAppID != nil {
+		if *req.SteamAppID <= 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid steam app id"})
+			return
 		}
+		steamAppID = req.SteamAppID
+		if req.SteamIconURL != nil {
+			steamIconURL = strings.TrimSpace(*req.SteamIconURL)
+		}
+		if req.SteamStoreURL != nil && strings.TrimSpace(*req.SteamStoreURL) != "" {
+			steamStoreURL = strings.TrimSpace(*req.SteamStoreURL)
+		} else {
+			steamStoreURL = fmt.Sprintf("https://store.steampowered.com/app/%d/", *req.SteamAppID)
+		}
+	} else {
+		steamGame, err := h.steamService.SearchGameByName(normalizedName)
+		if err == nil && steamGame != nil {
+			steamAppID = &steamGame.AppID
+			steamIconURL = steamGame.Icon
+			steamStoreURL = steamGame.StoreURL
+			if strings.TrimSpace(steamGame.Name) != "" {
+				normalizedName = strings.TrimSpace(steamGame.Name)
+			}
+		} else if err != nil {
+			log.Printf("steam lookup failed for %q: %v", req.Name, err)
+		}
+	}
 
+	if steamAppID != nil {
 		user, err := h.authService.GetUserByID(userID)
-		if err == nil && user != nil {
-			playtime, err := h.steamService.GetGamePlaytime(user.SteamID, steamGame.AppID)
+		if err == nil && user != nil && user.SteamID != "" {
+			playtime, err := h.steamService.GetGamePlaytime(user.SteamID, *steamAppID)
 			if err == nil {
 				playtimeForever = &playtime
 			} else {
-				log.Printf("failed to fetch playtime for app %d: %v", steamGame.AppID, err)
+				log.Printf("failed to fetch playtime for app %d: %v", *steamAppID, err)
 			}
 		}
-	} else if err != nil {
-		log.Printf("steam lookup failed for %q: %v", req.Name, err)
 	}
 
 	existingGames, err := h.progressService.GetUserGames(userID)

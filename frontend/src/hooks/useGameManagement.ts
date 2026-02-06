@@ -7,6 +7,9 @@ interface GameData {
   status: string
   rating?: number | null
   review?: string
+  steamAppId?: number | null
+  steamIconUrl?: string
+  steamStoreUrl?: string
 }
 
 interface GameManagementHook {
@@ -83,11 +86,16 @@ export const useGameManagement = (
       const gamesResponse = await api.progress.getUserGames()
       const existingGames = gamesResponse.data
 
-      const duplicateGame = existingGames.find(
+      const duplicateGameByName = existingGames.find(
         g => g.name.toLowerCase() === gameData.name.toLowerCase()
       )
 
-      if (duplicateGame) {
+      const duplicateGameByAppId =
+        gameData.steamAppId != null
+          ? existingGames.find(g => g.steamAppId === gameData.steamAppId)
+          : null
+
+      if (duplicateGameByAppId || duplicateGameByName) {
         alert(`Игра "${gameData.name}" уже добавлена в вашу библиотеку`)
         return false
       }

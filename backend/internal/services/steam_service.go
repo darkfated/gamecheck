@@ -8,12 +8,16 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"sync"
+	"time"
 
 	"gamecheck/internal/config"
 )
 
 type SteamService struct {
-	config *config.Config
+	config      *config.Config
+	searchCache map[string]steamSearchCacheEntry
+	cacheMu     sync.RWMutex
 }
 
 type SteamGameResponse struct {
@@ -29,6 +33,16 @@ type steamSearchResult struct {
 	Name  string
 	Icon  string
 }
+
+type steamSearchCacheEntry struct {
+	results   []steamSearchResult
+	expiresAt time.Time
+}
+
+const (
+	steamSearchCacheTTL        = 10 * time.Minute
+	steamSearchCacheMaxEntries = 400
+)
 
 type SteamPlayerGamesResponse struct {
 	Response struct {
@@ -55,7 +69,10 @@ type SteamStoreDetails struct {
 }
 
 func NewSteamService(cfg *config.Config) *SteamService {
-	return &SteamService{config: cfg}
+	return &SteamService{
+		config:      cfg,
+		searchCache: make(map[string]steamSearchCacheEntry),
+	}
 }
 
 func (s *SteamService) SearchGameByName(gameName string) (*SteamGameResponse, error) {
@@ -118,9 +135,49 @@ func (s *SteamService) FindIconForApp(gameName string, appID int) (string, error
 	return "", fmt.Errorf("icon not found")
 }
 
+type SteamSearchResult struct {
+	AppID int    `json:"steamAppId"`
+	Name  string `json:"name"`
+	Icon  string `json:"icon"`
+}
+
+func (s *SteamService) SearchApps(gameName string, limit int) ([]SteamSearchResult, error) {
+	results, err := s.searchApps(gameName)
+	if err != nil {
+		return nil, err
+	}
+
+	if limit > 0 && len(results) > limit {
+		results = results[:limit]
+	}
+
+	out := make([]SteamSearchResult, 0, len(results))
+	for _, result := range results {
+		out = append(out, SteamSearchResult{
+			AppID: result.AppID,
+			Name:  result.Name,
+			Icon:  result.Icon,
+		})
+	}
+
+	return out, nil
+}
+
 func (s *SteamService) searchApps(gameName string) ([]steamSearchResult, error) {
-	gameName = strings.ReplaceAll(strings.TrimSpace(gameName), "’", "'")
-	escaped := url.PathEscape(gameName)
+	normalized := normalizeSearchQuery(gameName)
+	if normalized == "" {
+		return nil, fmt.Errorf("game name is empty")
+	}
+
+	cacheKey := strings.ToLower(normalized)
+	if cached, ok := s.getCachedSearch(cacheKey); ok {
+		if len(cached) == 0 {
+			return nil, fmt.Errorf("game not found on steam")
+		}
+		return cached, nil
+	}
+
+	escaped := url.PathEscape(normalized)
 	reqURL := "https://steamcommunity.com/actions/SearchApps/" + escaped
 
 	req, err := http.NewRequest("GET", reqURL, nil)
@@ -158,6 +215,7 @@ func (s *SteamService) searchApps(gameName string) ([]steamSearchResult, error) 
 	}
 
 	if len(rawResults) == 0 {
+		s.setCachedSearch(cacheKey, []steamSearchResult{})
 		return nil, fmt.Errorf("game not found on steam")
 	}
 
@@ -175,10 +233,71 @@ func (s *SteamService) searchApps(gameName string) ([]steamSearchResult, error) 
 	}
 
 	if len(results) == 0 {
+		s.setCachedSearch(cacheKey, []steamSearchResult{})
 		return nil, fmt.Errorf("game not found on steam")
 	}
 
+	s.setCachedSearch(cacheKey, results)
 	return results, nil
+}
+
+func normalizeSearchQuery(value string) string {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return value
+	}
+
+	replacer := strings.NewReplacer(
+		"\u2019", "'",
+		"\u2018", "'",
+		"\u0432\u0402\u2122", "'",
+		"\u0432\u0402\u02dc", "'",
+		"\u00e2\u20ac\u2122", "'",
+		"\u00e2\u20ac\u02dc", "'",
+	)
+
+	return replacer.Replace(value)
+}
+
+func (s *SteamService) getCachedSearch(key string) ([]steamSearchResult, bool) {
+	s.cacheMu.RLock()
+	entry, exists := s.searchCache[key]
+	s.cacheMu.RUnlock()
+
+	if !exists {
+		return nil, false
+	}
+
+	if time.Now().After(entry.expiresAt) {
+		s.cacheMu.Lock()
+		delete(s.searchCache, key)
+		s.cacheMu.Unlock()
+		return nil, false
+	}
+
+	return entry.results, true
+}
+
+func (s *SteamService) setCachedSearch(key string, results []steamSearchResult) {
+	s.cacheMu.Lock()
+	defer s.cacheMu.Unlock()
+
+	if len(s.searchCache) >= steamSearchCacheMaxEntries {
+		now := time.Now()
+		for cacheKey, entry := range s.searchCache {
+			if now.After(entry.expiresAt) {
+				delete(s.searchCache, cacheKey)
+			}
+		}
+		if len(s.searchCache) >= steamSearchCacheMaxEntries {
+			s.searchCache = make(map[string]steamSearchCacheEntry)
+		}
+	}
+
+	s.searchCache[key] = steamSearchCacheEntry{
+		results:   results,
+		expiresAt: time.Now().Add(steamSearchCacheTTL),
+	}
 }
 
 func (s *SteamService) SearchGameBySteamID(steamID string, gameName string) (*SteamGameResponse, error) {
