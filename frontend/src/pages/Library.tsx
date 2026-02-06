@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { FC, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { RatingBadge } from '../components/games/RatingBadge'
@@ -225,7 +225,15 @@ const Library: FC = () => {
           </div>
         </Card>
       </div>
-      <div className='mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4'>
+      <AnimatePresence mode='wait'>
+        <motion.div
+          key={`${page}-${limit}-${sort}-${order}-${search}-${genre}`}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.22 }}
+          className='mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4'
+        >
         {isLoading && games.length === 0 ? (
           Array.from({ length: 6 }).map((_, index) => (
             <Card key={`skeleton-${index}`} className='h-[160px] animate-pulse'>
@@ -258,7 +266,16 @@ const Library: FC = () => {
                 key={game.id}
                 className='block h-full'
               >
-                <Card className='group relative h-[160px] p-0 overflow-hidden flex items-center cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-card)] hover:border-[var(--border-color-hover)]'>
+                <motion.div
+                  layout
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.22 }}
+                  whileHover={{ scale: 1.01 }}
+                  className='h-full'
+                >
+                  <Card className='group relative h-[160px] p-0 overflow-hidden flex items-center cursor-pointer transition-all duration-300 hover:shadow-[var(--shadow-card)] hover:border-[var(--border-color-hover)]'>
                   <div className='absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-[rgba(var(--accent-primary-rgb),0.08)] via-transparent to-[rgba(var(--accent-secondary-rgb),0.08)]' />
 
                   <div className='relative flex items-center gap-4 p-4 w-full'>
@@ -284,12 +301,14 @@ const Library: FC = () => {
                       </div>
                     </div>
                   </div>
-                </Card>
+                  </Card>
+                </motion.div>
               </Link>
             )
           })
         )}
-      </div>
+        </motion.div>
+      </AnimatePresence>
 
       <div className='mt-8 flex flex-col sm:flex-row items-center justify-between gap-4'>
         <div className='text-sm text-[var(--text-secondary)]'>
