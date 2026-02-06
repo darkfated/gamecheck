@@ -1,113 +1,125 @@
-﻿import { FC, useEffect, useState } from 'react'
+﻿import { FC } from 'react'
 import { Link } from 'react-router-dom'
-import api from '../../services/api'
 import { RatingBadge } from '../games/RatingBadge'
 import { ArcadeGlyph } from '../icons/ArcadeGlyph'
 import { Card } from '../ui/Card'
 
-interface LibraryGame {
+export interface FeedGame {
   id: string
   name: string
   headerImage?: string
   capsuleImage?: string
   primaryGenre?: string
   genres?: string[]
+  categories?: string[]
+  tags?: string[]
   averageRating?: number
   ratingsCount?: number
   reviewsCount?: number
+  progressCount?: number
+  matchCount?: number
   storeUrl?: string
 }
 
-interface FeedRecentGamesProps {
-  userId: string
+interface FeedGamesProps {
+  title: string
+  subtitle?: string
+  linkTo?: string
+  linkLabel?: string
+  items: FeedGame[]
+  isLoading?: boolean
+  emptyTitle?: string
+  emptyDescription?: string
+  getMetaLabel?: (game: FeedGame) => string | undefined
+  getHref?: (game: FeedGame) => string
+  getImageSrc?: (game: FeedGame) => string | undefined
+  getGenreLabel?: (game: FeedGame) => string
+  showRating?: boolean
 }
 
-export const FeedRecentGames: FC<FeedRecentGamesProps> = ({ userId }) => {
-  const [recentGames, setRecentGames] = useState<LibraryGame[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-
-  useEffect(() => {
-    if (!userId) return
-
-    const loadLibraryHighlights = async () => {
-      setIsLoading(true)
-      try {
-        const recentRes = await api.library.list(
-          20,
-          0,
-          'createdAt',
-          'desc',
-          '',
-          ''
-        )
-        setRecentGames((recentRes.data.data || []).slice(0, 20))
-      } catch (error) {
-        console.error('Error loading library highlights:', error)
-        setRecentGames([])
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    loadLibraryHighlights()
-  }, [userId])
+export const FeedGames: FC<FeedGamesProps> = ({
+  title,
+  subtitle,
+  linkTo,
+  linkLabel = 'Вся библиотека →',
+  items,
+  isLoading = false,
+  emptyTitle = 'Пока нет новинок',
+  emptyDescription = 'Добавьте игру в прогресс и библиотека обновится.',
+  getMetaLabel,
+  getHref,
+  getImageSrc,
+  getGenreLabel,
+  showRating = true,
+}) => {
+  const resolveHref = getHref || ((game: FeedGame) => `/library/${game.id}`)
+  const resolveImageSrc =
+    getImageSrc || ((game: FeedGame) => game.headerImage || game.capsuleImage)
+  const resolveGenreLabel =
+    getGenreLabel ||
+    ((game: FeedGame) => game.primaryGenre || game.genres?.[0] || 'Без жанра')
+  const showLink = linkTo && linkLabel
 
   return (
     <Card variant='glass' className='p-5'>
       <div className='flex flex-wrap items-center justify-between gap-4 mb-4'>
         <div>
           <h3 className='text-lg font-semibold text-[var(--text-primary)]'>
-            Недавно добавленные игры
+            {title}
           </h3>
-          <p className='text-sm text-[var(--text-secondary)]'>
-            Пополнения библиотеки за последние дни.
-          </p>
+          {subtitle ? (
+            <p className='text-sm text-[var(--text-secondary)]'>{subtitle}</p>
+          ) : null}
         </div>
-        <Link
-          to='/library'
-          className='text-sm text-[var(--accent-primary)] hover:text-[var(--accent-secondary)]'
-        >
-          Вся библиотека →
-        </Link>
+        {showLink ? (
+          <Link
+            to={linkTo as string}
+            className='text-sm text-[var(--accent-primary)] hover:text-[var(--accent-secondary)]'
+          >
+            {linkLabel}
+          </Link>
+        ) : null}
       </div>
 
       <div className='flex gap-4 overflow-x-auto pb-2 -mx-1 px-1 snap-x snap-mandatory'>
-        {isLoading && recentGames.length === 0 ? (
+        {isLoading && items.length === 0 ? (
           Array.from({ length: 4 }).map((_, index) => (
             <div
-              key={`recent-skel-${index}`}
+              key={`games-skel-${index}`}
               className='min-w-[280px] h-[200px] rounded-2xl bg-[rgba(var(--bg-tertiary-rgb),0.6)] animate-pulse'
             />
           ))
-        ) : recentGames.length === 0 ? (
+        ) : items.length === 0 ? (
           <div className='min-w-[280px] rounded-2xl border border-[var(--border-color)] bg-[rgba(var(--bg-secondary-rgb),0.6)] p-4 flex items-center gap-3'>
             <ArcadeGlyph className='w-8 h-8 text-[var(--accent-primary)]' />
             <div>
               <p className='text-sm font-medium text-[var(--text-primary)]'>
-                Пока нет новинок
+                {emptyTitle}
               </p>
               <p className='text-xs text-[var(--text-secondary)]'>
-                Добавьте игру в прогресс и библиотека обновится.
+                {emptyDescription}
               </p>
             </div>
           </div>
         ) : (
-          recentGames.map(game => {
+          items.map(game => {
             const ratingValue =
               game.averageRating && game.averageRating > 0
                 ? Math.round(game.averageRating * 10) / 10
                 : undefined
+            const metaLabel = getMetaLabel ? getMetaLabel(game) : undefined
+            const showMeta = (showRating && ratingValue) || metaLabel
             return (
               <div
                 key={game.id}
                 className='min-w-[280px] max-w-[280px] snap-start'
               >
-                <Link to={`/library/${game.id}`}>
+                <Link to={resolveHref(game)}>
                   <Card className='p-0 overflow-hidden group h-full'>
                     <div className='relative h-28'>
-                      {game.headerImage || game.capsuleImage ? (
+                      {resolveImageSrc(game) ? (
                         <img
-                          src={game.headerImage || game.capsuleImage}
+                          src={resolveImageSrc(game)}
                           alt={game.name}
                           className='h-full w-full object-cover'
                         />
@@ -123,14 +135,20 @@ export const FeedRecentGames: FC<FeedRecentGamesProps> = ({ userId }) => {
                         {game.name}
                       </h4>
                       <p className='text-xs text-[var(--text-tertiary)]'>
-                        {game.primaryGenre || game.genres?.[0] || 'Без жанра'}
+                        {resolveGenreLabel(game)}
                       </p>
-                      <div className='flex items-center gap-2'>
-                        <RatingBadge rating={ratingValue} />
-                        <span className='text-[0.65rem] text-[var(--text-tertiary)]'>
-                          {game.reviewsCount || 0} комментариев
-                        </span>
-                      </div>
+                      {showMeta ? (
+                        <div className='flex items-center gap-2'>
+                          {showRating ? (
+                            <RatingBadge rating={ratingValue} />
+                          ) : null}
+                          {metaLabel ? (
+                            <span className='text-[0.65rem] text-[var(--text-tertiary)]'>
+                              {metaLabel}
+                            </span>
+                          ) : null}
+                        </div>
+                      ) : null}
                     </div>
                   </Card>
                 </Link>

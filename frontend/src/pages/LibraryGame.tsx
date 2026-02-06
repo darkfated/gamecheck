@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { FC, useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { FeedGame, FeedGames } from '../components/feed/FeedGames'
 import { RatingBadge } from '../components/games/RatingBadge'
 import { ArcadeGlyph } from '../components/icons/ArcadeGlyph'
 import { Badge } from '../components/ui/Badge'
@@ -44,6 +45,8 @@ interface LibraryComment {
 }
 
 const COMMENTS_LIMIT = 10
+const SIMILAR_LIMIT = 20
+const SIMILAR_SOURCE_LIMIT = 80
 
 const LibraryGame: FC = () => {
   const params = useParams<{ id?: string; appId?: string }>()
@@ -54,6 +57,8 @@ const LibraryGame: FC = () => {
   const [hasMoreComments, setHasMoreComments] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
   const [activeTab, setActiveTab] = useState<'info' | 'comments'>('info')
+  const [similarGames, setSimilarGames] = useState<FeedGame[]>([])
+  const [isSimilarLoading, setIsSimilarLoading] = useState(false)
 
   const activeId = params.id
   const activeAppId = params.appId
@@ -164,6 +169,92 @@ const LibraryGame: FC = () => {
     ],
     [game?.reviewsCount]
   )
+
+  const normalizedTags = useMemo(
+    () => tags.map(tag => tag.trim().toLowerCase()).filter(Boolean),
+    [tags]
+  )
+  const tagKey = useMemo(() => normalizedTags.join('|'), [normalizedTags])
+
+  useEffect(() => {
+    if (!game) return
+    const baseTags = new Set(normalizedTags)
+    if (game.primaryGenre) {
+      baseTags.add(game.primaryGenre.trim().toLowerCase())
+    }
+    if (baseTags.size === 0) {
+      setSimilarGames([])
+      setIsSimilarLoading(false)
+      return
+    }
+
+    let active = true
+
+    const loadSimilarGames = async () => {
+      setIsSimilarLoading(true)
+      try {
+        const [progressRes, ratingRes] = await Promise.all([
+          api.library.list(SIMILAR_SOURCE_LIMIT, 0, 'progress', 'desc', '', ''),
+          api.library.list(SIMILAR_SOURCE_LIMIT, 0, 'rating', 'desc', '', ''),
+        ])
+
+        const progressList = progressRes.data.data || []
+        const ratingList = ratingRes.data.data || []
+
+        const combinedMap = new Map<string, FeedGame>()
+        progressList.forEach(item => combinedMap.set(item.id, item))
+        ratingList.forEach(item => combinedMap.set(item.id, item))
+
+        const candidates = Array.from(combinedMap.values()).filter(
+          item => item.id !== game.id
+        )
+
+        const scored = candidates
+          .map(item => {
+            const tagSet = new Set(
+              [
+                ...(item.genres || []),
+                ...(item.categories || []),
+                ...(item.tags || []),
+                item.primaryGenre,
+              ]
+                .filter((tag): tag is string => Boolean(tag))
+                .map(tag => tag.trim().toLowerCase())
+            )
+            let matchCount = 0
+            tagSet.forEach(tag => {
+              if (baseTags.has(tag)) matchCount += 1
+            })
+            return { ...item, matchCount }
+          })
+          .filter(item => (item.matchCount || 0) > 0)
+          .sort((a, b) => {
+            if ((b.matchCount || 0) !== (a.matchCount || 0)) {
+              return (b.matchCount || 0) - (a.matchCount || 0)
+            }
+            if ((b.averageRating || 0) !== (a.averageRating || 0)) {
+              return (b.averageRating || 0) - (a.averageRating || 0)
+            }
+            return (b.progressCount || 0) - (a.progressCount || 0)
+          })
+
+        if (!active) return
+        setSimilarGames(scored.slice(0, SIMILAR_LIMIT))
+      } catch (error) {
+        if (!active) return
+        console.error('Error loading similar games:', error)
+        setSimilarGames([])
+      } finally {
+        if (active) setIsSimilarLoading(false)
+      }
+    }
+
+    loadSimilarGames()
+
+    return () => {
+      active = false
+    }
+  }, [game?.id, game?.primaryGenre, tagKey])
 
   if (isLoading) {
     return (
@@ -319,9 +410,9 @@ const LibraryGame: FC = () => {
                       Жанры и теги
                     </h3>
                     <div className='mt-2 flex flex-wrap gap-2'>
-                      {tags.map(tag => (
+                      {tags.filter(Boolean).map(tag => (
                         <Badge
-                          key={`${game.id}-${tag}`}
+                          key={`${game.id}-${tag as string}`}
                           className='px-2 py-1 text-[0.65rem]'
                         >
                           {tag}
@@ -450,6 +541,19 @@ const LibraryGame: FC = () => {
           )}
         </div>
       </Card>
+
+      <div className='mt-8'>
+        <FeedGames
+          title='Похожие игры'
+          subtitle='Подборка по совпадению тегов.'
+          items={similarGames}
+          isLoading={isSimilarLoading}
+          emptyTitle='Пока нет похожих игр'
+          emptyDescription='Мы покажем рекомендации, когда появятся подходящие теги.'
+          getMetaLabel={item => `${item.matchCount || 0} общих тегов`}
+          showRating
+        />
+      </div>
     </motion.div>
   )
 }
