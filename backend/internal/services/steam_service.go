@@ -24,6 +24,12 @@ type SteamGameResponse struct {
 	StoreURL string `json:"store_url"`
 }
 
+type steamSearchResult struct {
+	AppID int
+	Name  string
+	Icon  string
+}
+
 type SteamPlayerGamesResponse struct {
 	Response struct {
 		GameCount int `json:"game_count"`
@@ -35,11 +41,84 @@ type SteamPlayerGamesResponse struct {
 	} `json:"response"`
 }
 
+type SteamStoreDetails struct {
+	AppID            int
+	Name             string
+	ShortDescription string
+	Description      string
+	HeaderImage      string
+	CapsuleImage     string
+	BackgroundImage  string
+	StoreURL         string
+	Genres           []string
+	Categories       []string
+}
+
 func NewSteamService(cfg *config.Config) *SteamService {
 	return &SteamService{config: cfg}
 }
 
 func (s *SteamService) SearchGameByName(gameName string) (*SteamGameResponse, error) {
+	results, err := s.searchApps(gameName)
+	if err != nil {
+		return nil, err
+	}
+
+	choice := results[0]
+	storeInfo, err := s.fetchStoreInfo(choice.AppID)
+	if err != nil {
+		return &SteamGameResponse{
+			AppID:    choice.AppID,
+			Name:     choice.Name,
+			Icon:     choice.Icon,
+			StoreURL: fmt.Sprintf("https://store.steampowered.com/app/%d/", choice.AppID),
+		}, nil
+	}
+
+	name := storeInfo.Data.Name
+	if name == "" {
+		name = choice.Name
+	}
+
+	iconURL := choice.Icon
+	if iconURL == "" {
+		if storeInfo.Data.CapsuleImageV5 != "" {
+			iconURL = storeInfo.Data.CapsuleImageV5
+		} else if storeInfo.Data.CapsuleImage != "" {
+			iconURL = storeInfo.Data.CapsuleImage
+		} else {
+			iconURL = storeInfo.Data.HeaderImage
+		}
+	}
+
+	return &SteamGameResponse{
+		AppID:    choice.AppID,
+		Name:     name,
+		Icon:     iconURL,
+		StoreURL: fmt.Sprintf("https://store.steampowered.com/app/%d/", choice.AppID),
+	}, nil
+}
+
+func (s *SteamService) FindIconForApp(gameName string, appID int) (string, error) {
+	results, err := s.searchApps(gameName)
+	if err != nil {
+		return "", err
+	}
+
+	for _, result := range results {
+		if result.AppID == appID {
+			return result.Icon, nil
+		}
+	}
+
+	if len(results) > 0 {
+		return results[0].Icon, nil
+	}
+
+	return "", fmt.Errorf("icon not found")
+}
+
+func (s *SteamService) searchApps(gameName string) ([]steamSearchResult, error) {
 	gameName = strings.ReplaceAll(strings.TrimSpace(gameName), "’", "'")
 	escaped := url.PathEscape(gameName)
 	reqURL := "https://steamcommunity.com/actions/SearchApps/" + escaped
@@ -50,6 +129,7 @@ func (s *SteamService) SearchGameByName(gameName string) (*SteamGameResponse, er
 	}
 	req.Header.Set("User-Agent", "gamecheck-backend/1.0")
 	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Accept-Language", "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7")
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -81,12 +161,24 @@ func (s *SteamService) SearchGameByName(gameName string) (*SteamGameResponse, er
 		return nil, fmt.Errorf("game not found on steam")
 	}
 
-	appIDInt, err := strconv.Atoi(rawResults[0].AppID)
-	if err != nil {
-		return nil, fmt.Errorf("invalid appid format: %w", err)
+	results := make([]steamSearchResult, 0, len(rawResults))
+	for _, raw := range rawResults {
+		appIDInt, err := strconv.Atoi(raw.AppID)
+		if err != nil {
+			continue
+		}
+		results = append(results, steamSearchResult{
+			AppID: appIDInt,
+			Name:  raw.Name,
+			Icon:  raw.Icon,
+		})
 	}
 
-	return s.GetGameInfo(appIDInt)
+	if len(results) == 0 {
+		return nil, fmt.Errorf("game not found on steam")
+	}
+
+	return results, nil
 }
 
 func (s *SteamService) SearchGameBySteamID(steamID string, gameName string) (*SteamGameResponse, error) {
@@ -94,41 +186,12 @@ func (s *SteamService) SearchGameBySteamID(steamID string, gameName string) (*St
 }
 
 func (s *SteamService) GetGameInfo(appID int) (*SteamGameResponse, error) {
-	url := fmt.Sprintf("https://store.steampowered.com/api/appdetails?appids=%d", appID)
-
-	resp, err := http.Get(url)
+	storeInfo, err := s.fetchStoreInfo(appID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch game info: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("store api returned status %d", resp.StatusCode)
-	}
-
-	var storeData map[string]struct {
-		Success bool `json:"success"`
-		Data    struct {
-			Name           string `json:"name"`
-			SteamAppid     int    `json:"steam_appid"`
-			HeaderImage    string `json:"header_image"`
-			CapsuleImage   string `json:"capsule_image"`
-			CapsuleImageV5 string `json:"capsule_imagev5"`
-		} `json:"data"`
-	}
-
-	if err := json.NewDecoder(resp.Body).Decode(&storeData); err != nil {
-		return nil, fmt.Errorf("failed to decode store data: %w", err)
-	}
-
-	appIDStr := strconv.Itoa(appID)
-	storeInfo, exists := storeData[appIDStr]
-	if !exists || !storeInfo.Success {
-		return nil, fmt.Errorf("game not found in store api")
+		return nil, err
 	}
 
 	iconURL := ""
-
 	if storeInfo.Data.CapsuleImageV5 != "" {
 		iconURL = storeInfo.Data.CapsuleImageV5
 	} else if storeInfo.Data.CapsuleImage != "" {
@@ -143,6 +206,155 @@ func (s *SteamService) GetGameInfo(appID int) (*SteamGameResponse, error) {
 		Icon:     iconURL,
 		StoreURL: fmt.Sprintf("https://store.steampowered.com/app/%d/", appID),
 	}, nil
+}
+
+func (s *SteamService) GetStoreDetails(appID int) (*SteamStoreDetails, error) {
+	storeInfo, err := s.fetchStoreInfo(appID)
+	if err != nil {
+		return nil, err
+	}
+
+	capsule := storeInfo.Data.CapsuleImageV5
+	if capsule == "" {
+		capsule = storeInfo.Data.CapsuleImage
+	}
+	if capsule == "" {
+		capsule = storeInfo.Data.HeaderImage
+	}
+
+	background := storeInfo.Data.BackgroundRaw
+	if background == "" {
+		background = storeInfo.Data.Background
+	}
+
+	genres := make([]string, 0, len(storeInfo.Data.Genres))
+	for _, g := range storeInfo.Data.Genres {
+		if g.Description != "" {
+			genres = append(genres, g.Description)
+		}
+	}
+
+	categories := make([]string, 0, len(storeInfo.Data.Categories))
+	for _, c := range storeInfo.Data.Categories {
+		if c.Description != "" {
+			categories = append(categories, c.Description)
+		}
+	}
+
+	return &SteamStoreDetails{
+		AppID:            appID,
+		Name:             storeInfo.Data.Name,
+		ShortDescription: storeInfo.Data.ShortDescription,
+		Description:      storeInfo.Data.AboutTheGame,
+		HeaderImage:      storeInfo.Data.HeaderImage,
+		CapsuleImage:     capsule,
+		BackgroundImage:  background,
+		StoreURL:         fmt.Sprintf("https://store.steampowered.com/app/%d/", appID),
+		Genres:           genres,
+		Categories:       categories,
+	}, nil
+}
+
+type storeInfoResponse struct {
+	Success bool `json:"success"`
+	Data    struct {
+		Name             string `json:"name"`
+		SteamAppid       int    `json:"steam_appid"`
+		HeaderImage      string `json:"header_image"`
+		CapsuleImage     string `json:"capsule_image"`
+		CapsuleImageV5   string `json:"capsule_imagev5"`
+		Background       string `json:"background"`
+		BackgroundRaw    string `json:"background_raw"`
+		ShortDescription string `json:"short_description"`
+		AboutTheGame     string `json:"about_the_game"`
+		Genres           []struct {
+			Description string `json:"description"`
+		} `json:"genres"`
+		Categories []struct {
+			Description string `json:"description"`
+		} `json:"categories"`
+	} `json:"data"`
+}
+
+func (s *SteamService) fetchStoreInfo(appID int) (*storeInfoResponse, error) {
+	appIDStr := strconv.Itoa(appID)
+	urls := []string{
+		fmt.Sprintf("https://store.steampowered.com/api/appdetails?appids=%d&cc=ru&l=ru&agecheck=1", appID),
+		fmt.Sprintf("https://store.steampowered.com/api/appdetails?appids=%d&cc=ru&l=ru", appID),
+		fmt.Sprintf("https://store.steampowered.com/api/appdetails?appids=%d&cc=us&l=en&agecheck=1", appID),
+		fmt.Sprintf("https://store.steampowered.com/api/appdetails?appids=%d&cc=us&l=en", appID),
+	}
+
+	var lastErr error
+	for _, reqURL := range urls {
+		req, err := http.NewRequest("GET", reqURL, nil)
+		if err != nil {
+			lastErr = err
+			continue
+		}
+		req.Header.Set("User-Agent", "gamecheck-backend/1.0")
+		req.Header.Set("Accept", "application/json")
+		req.Header.Set("Accept-Language", "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7")
+		addAgeCheckCookies(req)
+
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			lastErr = err
+			continue
+		}
+		body, err := io.ReadAll(resp.Body)
+		resp.Body.Close()
+		if err != nil {
+			lastErr = err
+			continue
+		}
+		if resp.StatusCode != http.StatusOK {
+			lastErr = fmt.Errorf("store api returned status %d", resp.StatusCode)
+			continue
+		}
+
+		var storeData map[string]storeInfoResponse
+		if err := json.Unmarshal(body, &storeData); err != nil {
+			lastErr = fmt.Errorf("failed to decode store data: %w", err)
+			continue
+		}
+
+		storeInfo, exists := storeData[appIDStr]
+		if !exists || !storeInfo.Success {
+			lastErr = fmt.Errorf("game not found in store api")
+			continue
+		}
+
+		return &storeInfo, nil
+	}
+
+	if lastErr == nil {
+		lastErr = fmt.Errorf("game not found in store api")
+	}
+	return nil, lastErr
+}
+
+func addAgeCheckCookies(req *http.Request) {
+	req.AddCookie(&http.Cookie{
+		Name:  "birthtime",
+		Value: "568022401",
+		Path:  "/",
+	})
+	req.AddCookie(&http.Cookie{
+		Name:  "lastagecheckage",
+		Value: "1-January-1988",
+		Path:  "/",
+	})
+	req.AddCookie(&http.Cookie{
+		Name:  "mature_content",
+		Value: "1",
+		Path:  "/",
+	})
+	req.AddCookie(&http.Cookie{
+		Name:  "wants_mature_content",
+		Value: "1",
+		Path:  "/",
+	})
 }
 
 func (s *SteamService) GetUserGames(steamID string) ([]map[string]interface{}, error) {
@@ -230,8 +442,17 @@ func (s *SteamService) GetGamePlaytime(steamID string, appID int) (int, error) {
 }
 
 func (s *SteamService) GetAppInfoByID(appID int) (map[string]interface{}, error) {
-	url := fmt.Sprintf("https://store.steampowered.com/api/appdetails?appids=%d", appID)
-	resp, err := http.Get(url)
+	reqURL := fmt.Sprintf("https://store.steampowered.com/api/appdetails?appids=%d&cc=us&l=ru&agecheck=1", appID)
+	req, err := http.NewRequest("GET", reqURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("User-Agent", "gamecheck-backend/1.0")
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Accept-Language", "ru-RU,ru;q=0.9")
+	addAgeCheckCookies(req)
+
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
 	}

@@ -11,17 +11,20 @@ type ProgressService struct {
 	progressRepository *repositories.ProgressRepository
 	activityRepository *repositories.ActivityRepository
 	steamService       *SteamService
+	libraryService     *LibraryService
 }
 
 func NewProgressService(
 	progressRepo *repositories.ProgressRepository,
 	activityRepo *repositories.ActivityRepository,
 	steamService *SteamService,
+	libraryService *LibraryService,
 ) *ProgressService {
 	return &ProgressService{
 		progressRepository: progressRepo,
 		activityRepository: activityRepo,
 		steamService:       steamService,
+		libraryService:     libraryService,
 	}
 }
 
@@ -94,6 +97,10 @@ func (s *ProgressService) AddGameWithSteamData(
 	}
 	s.activityRepository.Create(activity)
 
+	if steamAppID != nil && s.libraryService != nil {
+		s.libraryService.WarmLibraryFromProgress(*steamAppID)
+	}
+
 	return progress, nil
 }
 
@@ -131,6 +138,10 @@ func (s *ProgressService) UpdateGame(id string, name, status *string, rating *in
 
 	if err := s.progressRepository.Update(progress); err != nil {
 		return nil, err
+	}
+
+	if steamAppID != nil && s.libraryService != nil {
+		s.libraryService.WarmLibraryFromProgress(*steamAppID)
 	}
 
 	if status != nil && oldStatus != progress.Status {
@@ -182,8 +193,27 @@ func (s *ProgressService) UpdateSteamData(id string, steamAppID *int, steamIconU
 	progress.SteamPlaytimeForever = steamPlaytimeForever
 	progress.SteamStoreURL = steamStoreURL
 
+	if steamAppID != nil {
+		if iconURL, err := s.steamService.FindIconForApp(progress.Name, *steamAppID); err == nil && iconURL != "" {
+			progress.SteamIconURL = iconURL
+		}
+
+		if details, err := s.steamService.GetStoreDetails(*steamAppID); err == nil {
+			if details.Name != "" {
+				progress.Name = details.Name
+			}
+			if details.StoreURL != "" {
+				progress.SteamStoreURL = details.StoreURL
+			}
+		}
+	}
+
 	if err := s.progressRepository.Update(progress); err != nil {
 		return nil, err
+	}
+
+	if steamAppID != nil && s.libraryService != nil {
+		s.libraryService.WarmLibraryFromProgress(*steamAppID)
 	}
 
 	return progress, nil

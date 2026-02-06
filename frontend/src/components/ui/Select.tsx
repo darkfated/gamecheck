@@ -15,11 +15,11 @@ export function Select({
     <div className={`relative ${wrapperClassName}`}>
       <select
         {...props}
-        className={`w-full appearance-none rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] px-4 py-2.5 pr-10 text-sm text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--input-focus)] ${className}`}
+        className={`w-full appearance-none rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] px-4 py-2.5 pr-12 text-sm text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--input-focus)] ${className}`}
       >
         {children}
       </select>
-      <div className='pointer-events-none absolute inset-y-0 right-3 flex items-center text-[var(--text-tertiary)]'>
+      <div className='pointer-events-none absolute inset-y-0 right-4 flex items-center text-[var(--text-tertiary)]'>
         <svg className='w-4 h-4' viewBox='0 0 20 20' fill='currentColor'>
           <path
             fillRule='evenodd'

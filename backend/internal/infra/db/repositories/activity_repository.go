@@ -23,6 +23,7 @@ func (r *ActivityRepository) GetByID(id string) (*models.Activity, error) {
 	if err := r.db.
 		Preload("User").
 		Preload("TargetUser").
+		Preload("Progress").
 		First(&activity, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
@@ -34,6 +35,7 @@ func (r *ActivityRepository) GetByUserID(userID string, limit, offset int) ([]*m
 	err := r.db.
 		Preload("User").
 		Preload("TargetUser").
+		Preload("Progress").
 		Where("user_id = ?", userID).
 		Order("created_at DESC").
 		Offset(offset).
@@ -47,6 +49,7 @@ func (r *ActivityRepository) GetFeed(userID string, limit, offset int) ([]*model
 	err := r.db.
 		Preload("User").
 		Preload("TargetUser").
+		Preload("Progress").
 		Where("user_id IN (SELECT following_id FROM subscriptions WHERE follower_id = ?) OR user_id = ?", userID, userID).
 		Order("created_at DESC").
 		Offset(offset).
@@ -60,6 +63,7 @@ func (r *ActivityRepository) GetAllActivities(limit, offset int) ([]*models.Acti
 	err := r.db.
 		Preload("User").
 		Preload("TargetUser").
+		Preload("Progress").
 		Order("created_at DESC").
 		Offset(offset).
 		Limit(limit).

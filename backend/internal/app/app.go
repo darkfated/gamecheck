@@ -52,10 +52,16 @@ func New(cfg *config.Config) (*App, error) {
 
 	steamService := services.NewSteamService(cfg)
 
+	libraryService := services.NewLibraryService(
+		repos.Library,
+		steamService,
+	)
+
 	progressService := services.NewProgressService(
 		repos.Progress,
 		repos.Activity,
 		steamService,
+		libraryService,
 	)
 
 	activityService := services.NewActivityService(
@@ -68,6 +74,7 @@ func New(cfg *config.Config) (*App, error) {
 		userService,
 		progressService,
 		activityService,
+		libraryService,
 		steamService,
 	)
 

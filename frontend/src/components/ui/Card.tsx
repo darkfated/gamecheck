@@ -1,9 +1,9 @@
-import { ReactNode } from 'react'
+import { HTMLAttributes, ReactNode } from 'react'
 
 type CardVariant = 'surface' | 'glass' | 'outline'
 type CardPadding = 'sm' | 'md' | 'lg'
 
-interface CardProps {
+interface CardProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode
   className?: string
   variant?: CardVariant
@@ -29,9 +29,11 @@ export function Card({
   className = '',
   variant = 'surface',
   padding = 'md',
+  ...props
 }: CardProps) {
   return (
     <div
+      {...props}
       className={`rounded-2xl transition-all duration-300 ${variantClasses[variant]} ${paddingClasses[padding]} ${className}`}
     >
       {children}

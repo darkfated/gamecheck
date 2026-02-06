@@ -1,8 +1,10 @@
 ﻿import { AnimatePresence, motion } from 'framer-motion'
 import React, { FC, useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { ArcadeGlyph } from '../icons/ArcadeGlyph'
 import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
+import { Select } from '../ui/Select'
 import { RatingBadge } from './RatingBadge'
 import { StatusBadge } from './StatusBadge'
 
@@ -282,16 +284,26 @@ export const GameCard: FC<GameCardProps> = ({
               exit={{ opacity: 0 }}
               className='flex flex-col gap-3 flex-1'
             >
-              <div className='flex items-center justify-between gap-2 text-sm text-[var(--text-secondary)]'>
+              <div className='flex flex-wrap items-center justify-between gap-2 text-sm text-[var(--text-secondary)]'>
                 <SteamInfo game={game} />
-                {editable && onUpdateSteam && game.steamAppId && (
-                  <button
-                    onClick={handleUpdateSteam}
-                    className='text-xs text-[var(--text-tertiary)] hover:text-[var(--accent-primary)] transition-colors'
-                  >
-                    Обновить Steam
-                  </button>
-                )}
+                <div className='flex items-center gap-3'>
+                  {game.steamAppId && (
+                    <Link
+                      to={`/library/app/${game.steamAppId}`}
+                      className='text-xs text-[var(--accent-primary)] hover:text-[var(--accent-secondary)] transition-colors'
+                    >
+                      Страница игры
+                    </Link>
+                  )}
+                  {editable && onUpdateSteam && game.steamAppId && (
+                    <button
+                      onClick={handleUpdateSteam}
+                      className='text-xs text-[var(--text-tertiary)] hover:text-[var(--accent-primary)] transition-colors'
+                    >
+                      Обновить Steam
+                    </button>
+                  )}
+                </div>
               </div>
 
               <p className='text-sm text-[var(--text-secondary)] italic line-clamp-3'>
@@ -313,24 +325,24 @@ export const GameCard: FC<GameCardProps> = ({
                   <label className='block text-xs font-medium text-[var(--text-secondary)] mb-1.5'>
                     Статус
                   </label>
-                  <select
+                  <Select
                     value={editedGame.status}
                     onChange={e => handleChange('status', e.target.value)}
-                    className='w-full rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] px-3 py-2 text-sm text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--input-focus)]'
+                    className='py-2 text-sm'
                   >
                     {statusOptions.map(option => (
                       <option key={option.value} value={option.value}>
                         {option.label}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 </div>
 
                 <div>
                   <label className='block text-xs font-medium text-[var(--text-secondary)] mb-1.5'>
                     Оценка
                   </label>
-                  <select
+                  <Select
                     value={editedGame.rating}
                     onChange={e =>
                       handleChange(
@@ -338,7 +350,7 @@ export const GameCard: FC<GameCardProps> = ({
                         e.target.value ? parseInt(e.target.value) : ''
                       )
                     }
-                    className='w-full rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] px-3 py-2 text-sm text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--input-focus)]'
+                    className='py-2 text-sm'
                   >
                     <option value=''>Без оценки</option>
                     {[...Array(10)].map((_, i) => (
@@ -346,7 +358,7 @@ export const GameCard: FC<GameCardProps> = ({
                         {i + 1}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 </div>
               </div>
 

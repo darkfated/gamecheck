@@ -24,6 +24,7 @@ type Activity struct {
 	ProgressID   *string      `json:"progressId,omitempty" gorm:"type:uuid;index;default:null"`
 	TargetUserID *string      `json:"targetUserId,omitempty" gorm:"type:uuid;default:null"`
 	TargetUser   *User        `json:"targetUser,omitempty" gorm:"foreignKey:TargetUserID"`
+	Progress     *Progress    `json:"progress,omitempty" gorm:"foreignKey:ProgressID"`
 	GameName     *string      `json:"gameName,omitempty" gorm:"default:null"`
 	Status       *GameStatus  `json:"status,omitempty" gorm:"default:null"`
 	Rating       *int         `json:"rating,omitempty" gorm:"default:null"`

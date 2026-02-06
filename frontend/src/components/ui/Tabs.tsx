@@ -18,9 +18,9 @@ interface TabsProps {
 }
 
 const sizeClasses = {
-  sm: 'px-4 py-2.5 text-sm rounded-2xl',
-  md: 'px-5 py-3 text-base rounded-2xl',
-  lg: 'px-6 py-3.5 text-base rounded-2xl',
+  sm: 'px-5 py-3 text-sm rounded-2xl',
+  md: 'px-6 py-3.5 text-base rounded-2xl',
+  lg: 'px-7 py-4 text-base rounded-2xl',
 }
 
 export function Tabs({
@@ -48,7 +48,7 @@ export function Tabs({
                     background:
                       'linear-gradient(90deg, rgba(var(--accent-primary-rgb),0.22), rgba(var(--accent-secondary-rgb),0.22))',
                     boxShadow:
-                      '0 6px 16px -12px rgba(var(--accent-primary-rgb),0.25)',
+                      '0 3px 10px -8px rgba(var(--accent-primary-rgb),0.24)',
                   }}
                   transition={{ type: 'spring', stiffness: 420, damping: 30 }}
                 />

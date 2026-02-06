@@ -3,6 +3,8 @@ import { Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { Footer } from './components/Footer'
 import Navbar from './components/Navbar'
 import Feed from './pages/Feed'
+import Library from './pages/Library'
+import LibraryGame from './pages/LibraryGame'
 import Profile from './pages/Profile'
 import QuizPage from './pages/QuizPage'
 import Users from './pages/Users'
@@ -45,6 +47,9 @@ function App() {
       <main className='flex-1'>
         <Routes>
           <Route path='/' element={<Feed />} />
+          <Route path='/library' element={<Library />} />
+          <Route path='/library/:id' element={<LibraryGame />} />
+          <Route path='/library/app/:appId' element={<LibraryGame />} />
           <Route path='/users' element={<Users />} />
           <Route path='/profile/:id' element={<Profile />} />
           <Route path='/quizzes' element={<QuizPage />} />

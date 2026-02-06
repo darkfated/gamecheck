@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { FC, useEffect, useMemo, useRef, useState } from 'react'
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
@@ -57,6 +57,7 @@ const Users: FC = () => {
   const [debouncedQuery, setDebouncedQuery] = useState('')
 
   const requestRef = useRef(0)
+  const hasLoadedRef = useRef(false)
 
   const [topPlaytime, setTopPlaytime] = useState<User[]>([])
   const [topRating, setTopRating] = useState<User[]>([])
@@ -69,38 +70,44 @@ const Users: FC = () => {
     return () => clearTimeout(t)
   }, [searchQuery])
 
-  const fetchUsers = async (offset: number) => {
-    const req = ++requestRef.current
-    const initialLoad = users.length === 0
-    try {
-      if (initialLoad) setLoading(true)
-      setIsFetching(true)
-      setError(null)
-      const response = await api.users.listUsers(limit, offset, sortBy, order)
-      if (requestRef.current !== req) return
-      const payload: UsersListResponse = response.data
-      setUsers(payload.data || [])
-      setTotal(payload.total || 0)
-    } catch (err: any) {
-      if (requestRef.current !== req) return
-      setError(
-        err?.response?.data?.message ||
-          err?.message ||
-          'Ошибка при загрузке пользователей'
-      )
-      setUsers([])
-      setTotal(0)
-    } finally {
-      if (requestRef.current === req) {
-        setIsFetching(false)
-        if (initialLoad) setLoading(false)
+  const fetchUsers = useCallback(
+    async (offset: number) => {
+      const req = ++requestRef.current
+      const initialLoad = !hasLoadedRef.current
+      try {
+        if (initialLoad) setLoading(true)
+        setIsFetching(true)
+        setError(null)
+        const response = await api.users.listUsers(limit, offset, sortBy, order)
+        if (requestRef.current !== req) return
+        const payload: UsersListResponse = response.data
+        setUsers(payload.data || [])
+        setTotal(payload.total || 0)
+      } catch (err: any) {
+        if (requestRef.current !== req) return
+        setError(
+          err?.response?.data?.message ||
+            err?.message ||
+            'Ошибка при загрузке пользователей'
+        )
+        setUsers([])
+        setTotal(0)
+      } finally {
+        if (requestRef.current === req) {
+          setIsFetching(false)
+          if (initialLoad) {
+            setLoading(false)
+            hasLoadedRef.current = true
+          }
+        }
       }
-    }
-  }
+    },
+    [limit, sortBy, order]
+  )
 
   useEffect(() => {
     fetchUsers(page * limit)
-  }, [page, limit, sortBy, order])
+  }, [fetchUsers, page, limit])
 
   useEffect(() => {
     let mounted = true
@@ -311,7 +318,7 @@ const Users: FC = () => {
                 </div>
 
                 <div className='flex items-center gap-2 w-full sm:w-auto'>
-                  <span className='text-xs text-[var(--text-secondary)] whitespace-nowrap'>
+                  <span className='text-xs text-[var(--text-secondary)] sm:whitespace-nowrap'>
                     На странице
                   </span>
                   <Select
@@ -320,7 +327,7 @@ const Users: FC = () => {
                       setLimit(Number(e.target.value))
                       setPage(0)
                     }}
-                    wrapperClassName='w-full sm:w-[140px]'
+                    wrapperClassName='flex-1 sm:w-[140px]'
                     className='h-10'
                   >
                     <option value={8}>8</option>

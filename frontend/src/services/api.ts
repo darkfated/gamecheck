@@ -55,6 +55,43 @@ interface Activity {
   createdAt: string
 }
 
+interface LibraryGame {
+  id: string
+  steamAppId: number
+  name: string
+  shortDescription?: string
+  description?: string
+  headerImage?: string
+  capsuleImage?: string
+  backgroundImage?: string
+  storeUrl?: string
+  primaryGenre?: string
+  genres?: string[]
+  categories?: string[]
+  tags?: string[]
+  averageRating?: number
+  ratingsCount?: number
+  reviewsCount?: number
+  progressCount?: number
+  createdAt?: string
+}
+
+interface LibraryComment {
+  id: string
+  review: string
+  rating?: number | null
+  createdAt: string
+  user: {
+    id: string
+    displayName: string
+    avatarUrl: string
+  }
+}
+
+interface LibraryGameDetail extends LibraryGame {
+  comments: LibraryComment[]
+}
+
 interface AuthCheckResponse {
   isAuthenticated: boolean
   user?: User
@@ -223,11 +260,40 @@ const usersApi = {
 
 const activitiesApi = {
   getAllActivities: (limit = 10, offset = 0) =>
-    axiosInstance.get<Activity[]>('/activity/all', { params: { limit, offset } }),
+    axiosInstance.get<Activity[]>('/activity/all', {
+      params: { limit, offset },
+    }),
   getFeed: (limit = 10, offset = 0) =>
-    axiosInstance.get<Activity[]>('/activity/feed', { params: { limit, offset } }),
+    axiosInstance.get<Activity[]>('/activity/feed', {
+      params: { limit, offset },
+    }),
   getUserActivity: (userId: string, limit = 10, offset = 0) =>
     axiosInstance.get<Activity[]>(`/activity/user/${userId}`, {
+      params: { limit, offset },
+    }),
+}
+
+const libraryApi = {
+  list: (
+    limit = 12,
+    offset = 0,
+    sort = 'createdAt',
+    order = 'desc',
+    search = '',
+    genre = ''
+  ) =>
+    axiosInstance.get<{
+      data: LibraryGame[]
+      total: number
+      limit: number
+      offset: number
+    }>('/library', { params: { limit, offset, sort, order, search, genre } }),
+  getGame: (id: string, limit = 10, offset = 0) =>
+    axiosInstance.get<LibraryGameDetail>(`/library/${id}`, {
+      params: { limit, offset },
+    }),
+  getGameByAppId: (appId: number | string, limit = 10, offset = 0) =>
+    axiosInstance.get<LibraryGameDetail>(`/library/app/${appId}`, {
       params: { limit, offset },
     }),
 }
@@ -248,6 +314,7 @@ const api = {
   progress: progressApi,
   users: usersApi,
   activities: activitiesApi,
+  library: libraryApi,
   subscriptions: subscriptionsApi,
   tokenService,
 }

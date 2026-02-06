@@ -28,8 +28,8 @@ export const Footer: FC = () => {
               GameCheck
             </h3>
             <p className='text-sm text-[var(--text-secondary)] leading-relaxed'>
-              Открытая платформа по отслеживанию игровой активности с
-              социальными функциями.
+              Платформа по отслеживанию игровой активности со социальными
+              функциями.
             </p>
 
             {user && (

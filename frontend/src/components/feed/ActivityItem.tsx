@@ -3,6 +3,7 @@ import { FC } from 'react'
 import { Link } from 'react-router-dom'
 import { GAME_STATUS_CONFIG, GAME_STATUS_LABELS } from '../../constants'
 import { timeAgo } from '../../utils/dateFormatter'
+import { ArcadeGlyph } from '../icons/ArcadeGlyph'
 
 interface User {
   id: string
@@ -17,6 +18,10 @@ interface Activity {
   userId: string
   user: User
   progressId?: string
+  progress?: {
+    steamAppId?: number | null
+    steamIconUrl?: string
+  }
   gameName?: string
   status?: string
   rating?: number
@@ -64,17 +69,47 @@ const StatusBadgeInline: FC<{ status: string }> = ({ status }) => {
 export const ActivityItem: FC<ActivityItemProps> = ({ activity }) => {
   const renderActivityContent = () => {
     const { type, gameName, status, rating } = activity
+    const steamAppId = activity.progress?.steamAppId
+    const steamIconUrl = activity.progress?.steamIconUrl
+
+    const renderGameLink = () => {
+      if (!gameName) return null
+      if (!steamAppId) {
+        return (
+          <span className='font-medium text-[var(--accent-tertiary)]'>
+            {gameName}
+          </span>
+        )
+      }
+
+      return (
+        <Link
+          to={`/library/app/${steamAppId}`}
+          className='inline-flex items-center gap-0 align-middle relative top-[1px] font-medium text-[var(--accent-tertiary)] hover:text-[var(--accent-secondary)] transition-colors'
+        >
+          <span className='w-7 h-7 ml-1 mr-1 rounded-lg border border-[var(--divider-color)] bg-[rgba(var(--bg-tertiary-rgb),0.55)] overflow-hidden flex items-center justify-center'>
+            {steamIconUrl ? (
+              <img
+                src={steamIconUrl}
+                alt=''
+                className='w-full h-full object-cover'
+              />
+            ) : (
+              <ArcadeGlyph className='w-4 h-4 text-[var(--accent-primary)]' />
+            )}
+          </span>
+          <span className='leading-snug'>{gameName}</span>
+        </Link>
+      )
+    }
 
     switch (type) {
       case 'add_game':
         if (!gameName) return <span>добавил(а) игру</span>
         return (
           <span>
-            добавил(а) игру{' '}
-            <span className='font-medium text-[var(--accent-tertiary)]'>
-              {gameName}
-            </span>{' '}
-            в {status && <StatusBadgeInline status={status} />}
+            добавил(а) игру {renderGameLink()} в{' '}
+            {status && <StatusBadgeInline status={status} />}
           </span>
         )
       case 'update_game':
@@ -82,21 +117,15 @@ export const ActivityItem: FC<ActivityItemProps> = ({ activity }) => {
         if (!gameName) return <span>изменил(а) статус игры</span>
         return (
           <span>
-            изменил(а) статус игры{' '}
-            <span className='font-medium text-[var(--accent-tertiary)]'>
-              {gameName}
-            </span>{' '}
-            на {status && <StatusBadgeInline status={status} />}
+            изменил(а) статус игры {renderGameLink()} на{' '}
+            {status && <StatusBadgeInline status={status} />}
           </span>
         )
       case 'rate_game':
         if (!gameName) return <span>оценил(а) игру</span>
         return (
           <span>
-            оценил(а) игру{' '}
-            <span className='font-medium text-[var(--accent-tertiary)]'>
-              {gameName}
-            </span>
+            оценил(а) игру {renderGameLink()}
             {rating && <StarRating rating={rating} />}
           </span>
         )

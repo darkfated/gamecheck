@@ -14,6 +14,7 @@ type Handlers struct {
 	User         *UserHandler
 	Progress     *ProgressHandler
 	Activity     *ActivityHandler
+	Library      *LibraryHandler
 	Subscription *SubscriptionHandler
 }
 
@@ -42,6 +43,9 @@ func New(
 			svcs.Activity,
 			svcs.Auth,
 		),
+		Library: NewLibraryHandler(
+			svcs.Library,
+		),
 		Subscription: NewSubscriptionHandler(
 			repos.Subscription,
 			svcs.Activity,
@@ -55,6 +59,7 @@ func (h *Handlers) RegisterRoutes(router *gin.RouterGroup) {
 	h.User.RegisterRoutes(router)
 	h.Progress.RegisterRoutes(router)
 	h.Activity.RegisterRoutes(router)
+	h.Library.RegisterRoutes(router)
 	h.Subscription.RegisterRoutes(router)
 
 	router.GET("/health", HealthHandler)

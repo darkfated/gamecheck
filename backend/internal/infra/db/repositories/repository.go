@@ -6,6 +6,7 @@ type Repository struct {
 	User         *UserRepository
 	Progress     *ProgressRepository
 	Activity     *ActivityRepository
+	Library      *LibraryRepository
 	Token        *TokenRepository
 	Subscription *SubscriptionRepository
 }
@@ -14,6 +15,7 @@ func New(
 	userRepo *UserRepository,
 	progressRepo *ProgressRepository,
 	activityRepo *ActivityRepository,
+	libraryRepo *LibraryRepository,
 	tokenRepo *TokenRepository,
 	subscriptionRepo *SubscriptionRepository,
 ) *Repository {
@@ -21,6 +23,7 @@ func New(
 		User:         userRepo,
 		Progress:     progressRepo,
 		Activity:     activityRepo,
+		Library:      libraryRepo,
 		Token:        tokenRepo,
 		Subscription: subscriptionRepo,
 	}
@@ -31,6 +34,7 @@ func NewRepositories(db *gorm.DB) *Repository {
 		NewUserRepository(db),
 		NewProgressRepository(db),
 		NewActivityRepository(db),
+		NewLibraryRepository(db),
 		NewTokenRepository(db),
 		NewSubscriptionRepository(db),
 	)

@@ -63,6 +63,7 @@ func (d *Database) Migrate() error {
 		&models.User{},
 		&models.Progress{},
 		&models.Activity{},
+		&models.LibraryGame{},
 		&models.Token{},
 		&models.Subscription{},
 	)

@@ -2,8 +2,8 @@ import { motion } from 'framer-motion'
 import { FC, useEffect, useRef, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import api from '../../services/api'
-import { ActivityItem } from './ActivityItem'
 import { Button } from '../ui/Button'
+import { ActivityItem } from './ActivityItem'
 
 interface ActivityData {
   id: string
@@ -15,6 +15,10 @@ interface ActivityData {
     avatarUrl: string
   }
   progressId?: string
+  progress?: {
+    steamAppId?: number | null
+    steamIconUrl?: string
+  }
   gameName?: string
   status?: string
   rating?: number

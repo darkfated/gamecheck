@@ -38,7 +38,7 @@ const tailwindConfig = {
   corePlugins: {
     focusVisible: false,
   },
-  plugins: [require('@tailwindcss/line-clamp')],
+  plugins: [],
 }
 
 export default tailwindConfig

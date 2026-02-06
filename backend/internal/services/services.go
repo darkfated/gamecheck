@@ -5,6 +5,7 @@ type Services struct {
 	User     *UserService
 	Progress *ProgressService
 	Activity *ActivityService
+	Library  *LibraryService
 	Steam    *SteamService
 }
 
@@ -13,6 +14,7 @@ func New(
 	userService *UserService,
 	progressService *ProgressService,
 	activityService *ActivityService,
+	libraryService *LibraryService,
 	steamService *SteamService,
 ) *Services {
 	return &Services{
@@ -20,6 +22,7 @@ func New(
 		User:     userService,
 		Progress: progressService,
 		Activity: activityService,
+		Library:  libraryService,
 		Steam:    steamService,
 	}
 }

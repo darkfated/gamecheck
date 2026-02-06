@@ -17,7 +17,7 @@ type Progress struct {
 	Status               GameStatus `json:"status" gorm:"not null"`
 	Rating               *int       `json:"rating,omitempty" gorm:"default:null"`
 	Review               string     `json:"review,omitempty" gorm:"type:text;default:null"`
-	SteamAppID           *int       `json:"steamAppId,omitempty" gorm:"default:null"`
+	SteamAppID           *int       `json:"steamAppId,omitempty" gorm:"default:null;index"`
 	SteamIconURL         string     `json:"steamIconUrl,omitempty" gorm:"default:null"`
 	SteamPlaytimeForever *int       `json:"steamPlaytimeForever,omitempty" gorm:"default:null"`
 	SteamStoreURL        string     `json:"steamStoreUrl,omitempty" gorm:"default:null"`

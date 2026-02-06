@@ -12,6 +12,9 @@ const Navbar: FC = () => {
   const location = useLocation()
 
   const isActive = (path: string): boolean => {
+    if (path === '/library') {
+      return location.pathname.startsWith('/library')
+    }
     return location.pathname === path
   }
 
@@ -30,10 +33,6 @@ const Navbar: FC = () => {
       window.removeEventListener('scroll', handleScroll)
     }
   }, [])
-
-  const handleLibraryClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault()
-  }
 
   return (
     <motion.nav
@@ -261,13 +260,31 @@ const Navbar: FC = () => {
                   transition={{ type: 'spring', stiffness: 400, damping: 10 }}
                 >
                   <div className='relative'>
-                    <a
-                      href='#'
-                      onClick={handleLibraryClick}
-                      className={`relative z-10 px-5 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] opacity-70`}
-                      style={{
-                        cursor: 'not-allowed',
-                      }}
+                    {isActive('/library') && (
+                      <motion.div
+                        layoutId='nav-active'
+                        className='absolute inset-0 rounded-xl'
+                        style={{
+                          background:
+                            'linear-gradient(to right, rgba(var(--accent-primary-rgb), 0.22), rgba(var(--accent-secondary-rgb), 0.18))',
+                          boxShadow:
+                            '0 6px 14px -4px rgba(var(--accent-primary-rgb), 0.35)',
+                        }}
+                        transition={{
+                          type: 'spring',
+                          stiffness: 400,
+                          damping: 30,
+                        }}
+                      />
+                    )}
+
+                    <Link
+                      to='/library'
+                      className={`relative z-10 px-5 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
+                        isActive('/library')
+                          ? 'text-[var(--text-primary)]'
+                          : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                      }`}
                     >
                       <svg
                         className='w-4 h-4'
@@ -278,10 +295,11 @@ const Navbar: FC = () => {
                         viewBox='0 0 24 24'
                         stroke='currentColor'
                       >
-                        <path d='M12 6.253v13m0-13C6.228 6.253 2.092 7.371 2.092 8.5c0 1.128 4.136 2.247 9.908 2.247m0-13c5.771 0 9.908 1.119 9.908 2.247c0 1.128-4.136 2.247-9.908 2.247m0 13c-5.771 0-9.908-1.119-9.908-2.247c0-1.128 4.136-2.247 9.908-2.247m0 0c5.771 0 9.908 1.119 9.908 2.247c0 1.128-4.136 2.247-9.908 2.247'></path>
+                        <path d='M7 7h10a4 4 0 013.9 4.8l-1 4A2 2 0 0117 18h-1l-1.5-2h-5L8 18H7a2 2 0 01-1.9-1.2l-1-4A4 4 0 017 7z'></path>
+                        <path d='M9 12h2M10 11v2M16 11.5h.01M17.5 12.5h.01'></path>
                       </svg>
-                      Библиотека (недоступно)
-                    </a>
+                      Библиотека
+                    </Link>
                   </div>
                 </motion.div>
               </div>
@@ -291,16 +309,20 @@ const Navbar: FC = () => {
           <div className='flex items-center space-x-4'>
             {user ? (
               <>
-                <div className='hidden md:flex items-center space-x-2'>
+                <Link
+                  to={`/profile/${user.id}`}
+                  className='hidden md:flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors'
+                  aria-label='Открыть профиль'
+                >
                   <img
                     src={user.avatarUrl}
                     alt={user.displayName}
                     className='w-8 h-8 rounded-full'
                   />
-                  <span className='text-sm text-[var(--text-secondary)]'>
+                  <span className='max-w-[140px] truncate'>
                     {user.displayName}
                   </span>
-                </div>
+                </Link>
                 <motion.div
                   whileHover={{ scale: 1.04 }}
                   whileTap={{ scale: 0.96 }}
@@ -465,10 +487,14 @@ const Navbar: FC = () => {
                   <span className='font-medium'>Тесты</span>
                 </Link>
 
-                <a
-                  href='#'
-                  onClick={handleLibraryClick}
-                  className='flex items-center gap-3 px-4 py-3 rounded-lg text-[var(--text-secondary)] opacity-50 cursor-not-allowed'
+                <Link
+                  to='/library'
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                    isActive('/library')
+                      ? 'bg-gradient-to-r from-cyan-500/20 to-amber-500/20 text-[var(--text-primary)]'
+                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                  }`}
                 >
                   <svg
                     className='w-5 h-5'
@@ -480,26 +506,36 @@ const Navbar: FC = () => {
                       strokeLinecap='round'
                       strokeLinejoin='round'
                       strokeWidth={2}
-                      d='M12 6.253v13m0-13C6.228 6.253 2.092 7.371 2.092 8.5c0 1.128 4.136 2.247 9.908 2.247m0-13c5.771 0 9.908 1.119 9.908 2.247c0 1.128-4.136 2.247-9.908 2.247m0 13c-5.771 0-9.908-1.119-9.908-2.247c0-1.128 4.136-2.247 9.908-2.247m0 0c5.771 0 9.908 1.119 9.908 2.247c0 1.128-4.136 2.247-9.908 2.247'
+                      d='M7 7h10a4 4 0 013.9 4.8l-1 4A2 2 0 0117 18h-1l-1.5-2h-5L8 18H7a2 2 0 01-1.9-1.2l-1-4A4 4 0 017 7z'
+                    />
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth={2}
+                      d='M9 12h2M10 11v2M16 11.5h.01M17.5 12.5h.01'
                     />
                   </svg>
-                  <span className='font-medium'>Библиотека (недоступно)</span>
-                </a>
+                  <span className='font-medium'>Библиотека</span>
+                </Link>
 
                 {user && (
                   <div className='border-t border-[var(--border-color)] mt-4 pt-4'>
-                    <div className='flex items-center gap-3 px-4 py-3 rounded-lg bg-[var(--bg-tertiary)]'>
+                    <Link
+                      to={`/profile/${user.id}`}
+                      onClick={() => setIsMenuOpen(false)}
+                      className='flex items-center gap-3 px-4 py-3 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors'
+                    >
                       <img
                         src={user.avatarUrl}
                         alt={user.displayName}
                         className='w-8 h-8 rounded-full'
                       />
                       <div className='flex-1 min-w-0'>
-                        <p className='text-sm font-medium text-[var(--text-primary)] truncate'>
+                        <p className='text-sm font-medium truncate'>
                           {user.displayName}
                         </p>
                       </div>
-                    </div>
+                    </Link>
                   </div>
                 )}
               </div>
