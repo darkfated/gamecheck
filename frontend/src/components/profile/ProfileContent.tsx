@@ -83,7 +83,12 @@ export const ProfileContent: FC<ProfileContentProps> = ({
         >
           <div>
             {activeTab === 'progress' && profileId && (
-              <GameProgressSection userId={profileId} isOwner={isOwnProfile} />
+              <div className='min-h-[100vh]'>
+                <GameProgressSection
+                  userId={profileId}
+                  isOwner={isOwnProfile}
+                />
+              </div>
             )}
 
             {activeTab === 'activity' && profileId && (

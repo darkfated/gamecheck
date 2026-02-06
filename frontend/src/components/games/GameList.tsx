@@ -429,26 +429,33 @@ export const GameList: FC<GameListProps> = ({
               Обновляем список...
             </motion.div>
           )}
-          <motion.div
-            layout
-            className={`grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 transition-opacity duration-200 ${
-              isRefreshing ? 'opacity-60 pointer-events-none' : 'opacity-100'
-            }`}
-          >
-            <AnimatePresence initial={false} mode='popLayout'>
+          <AnimatePresence mode='popLayout'>
+            <div
+              className={`grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 transition-opacity duration-200 ${
+                isRefreshing ? 'opacity-60 pointer-events-none' : 'opacity-100'
+              }`}
+            >
               {filteredGames.map(game => (
-                <GameCard
+                <motion.div
                   key={game.id}
-                  game={game}
-                  onUpdate={updateGame}
-                  onDelete={deleteGame}
-                  onUpdateSteam={handleUpdateSteam}
-                  editable={editable}
-                  statusOptions={statusOptions}
-                />
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  layout
+                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                >
+                  <GameCard
+                    game={game}
+                    onUpdate={updateGame}
+                    onDelete={deleteGame}
+                    onUpdateSteam={handleUpdateSteam}
+                    editable={editable}
+                    statusOptions={statusOptions}
+                  />
+                </motion.div>
               ))}
-            </AnimatePresence>
-          </motion.div>
+            </div>
+          </AnimatePresence>
           {onLoadMore && hasMore && (
             <div className='flex justify-center pt-4'>
               <Button
