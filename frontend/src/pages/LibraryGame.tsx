@@ -342,7 +342,7 @@ const LibraryGame: FC = () => {
                       <p className='text-[0.7rem] sm:text-xs text-[var(--text-tertiary)] leading-tight'>
                         Средний рейтинг
                       </p>
-                      <p className='text-base sm:text-lg font-semibold text-[var(--text-primary)]'>
+                      <p className='text-base sm:text-lg font-semibold text-[var(--accent-tertiary)]'>
                         {ratingValue || '-'}
                       </p>
                     </div>
@@ -350,7 +350,7 @@ const LibraryGame: FC = () => {
                       <p className='text-[0.7rem] sm:text-xs text-[var(--text-tertiary)] leading-tight'>
                         Комментариев
                       </p>
-                      <p className='text-base sm:text-lg font-semibold text-[var(--text-primary)]'>
+                      <p className='text-base sm:text-lg font-semibold text-[var(--accent-tertiary)]'>
                         {game.reviewsCount || 0}
                       </p>
                     </div>
@@ -358,7 +358,7 @@ const LibraryGame: FC = () => {
                       <p className='text-[0.7rem] sm:text-xs text-[var(--text-tertiary)] leading-tight'>
                         Игроков
                       </p>
-                      <p className='text-base sm:text-lg font-semibold text-[var(--text-primary)]'>
+                      <p className='text-base sm:text-lg font-semibold text-[var(--accent-tertiary)]'>
                         {game.progressCount || 0}
                       </p>
                     </div>
@@ -366,7 +366,7 @@ const LibraryGame: FC = () => {
                       <p className='text-[0.7rem] sm:text-xs text-[var(--text-tertiary)] leading-tight'>
                         Steam AppID
                       </p>
-                      <p className='text-xs sm:text-sm font-medium text-[var(--text-primary)]'>
+                      <p className='text-xs sm:text-sm font-medium text-[var(--accent-tertiary)]'>
                         {game.steamAppId}
                       </p>
                     </div>
