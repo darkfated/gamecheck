@@ -1,18 +1,48 @@
 import { motion } from 'framer-motion'
-import { FC } from 'react'
+import { FC, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { ArcadeGlyph } from './icons/ArcadeGlyph'
 
 export const Footer: FC = () => {
   const { user } = useAuth()
+  const [layoutDuration, setLayoutDuration] = useState(0.18)
+  const prevHeightRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (typeof ResizeObserver === 'undefined') return
+
+    const target = document.body
+    if (!target) return
+
+    const observer = new ResizeObserver(entries => {
+      const height = entries[0]?.contentRect?.height
+      if (typeof height !== 'number') return
+
+      if (prevHeightRef.current !== null) {
+        const shrinking = height < prevHeightRef.current
+        setLayoutDuration(shrinking ? 0.32 : 0.12)
+      }
+
+      prevHeightRef.current = height
+    })
+
+    observer.observe(target)
+    return () => observer.disconnect()
+  }, [])
 
   return (
     <motion.footer
       className='border-t border-[var(--border-color)] bg-[var(--bg-secondary)] mt-auto'
+      layout='position'
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.2 }}
+      transition={{
+        duration: 0.5,
+        delay: 0.2,
+        layout: { duration: layoutDuration, ease: 'easeOut' },
+      }}
     >
       <div className='container mx-auto px-4 py-8'>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
