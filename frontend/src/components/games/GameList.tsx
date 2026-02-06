@@ -34,6 +34,15 @@ interface GameListProps {
   onUpdate?: () => void
   editable?: boolean
   isOwner?: boolean
+  statusFilter: string
+  onStatusChange: (status: string) => void
+  statusCounts?: Record<string, number>
+  totalCount?: number
+  totalFiltered?: number
+  onLoadMore?: () => void
+  hasMore?: boolean
+  isLoadingMore?: boolean
+  isLoading?: boolean
 }
 
 type SortOption = 'default' | 'name' | 'rating' | 'playtime'
@@ -43,6 +52,15 @@ export const GameList: FC<GameListProps> = ({
   onUpdate = () => {},
   editable,
   isOwner,
+  statusFilter,
+  onStatusChange,
+  statusCounts,
+  totalCount,
+  totalFiltered,
+  onLoadMore,
+  hasMore = false,
+  isLoadingMore = false,
+  isLoading = false,
 }) => {
   const { isAuthenticated, authInitialized } = useAuth()
   const {
@@ -55,7 +73,6 @@ export const GameList: FC<GameListProps> = ({
   } = useGameManagement(onUpdate)
 
   const [isFormVisible, setIsFormVisible] = useState(false)
-  const [statusFilter, setStatusFilter] = useState('all')
   const [sortBy, setSortBy] = useState<SortOption>('default')
   const [query, setQuery] = useState('')
 
@@ -76,7 +93,7 @@ export const GameList: FC<GameListProps> = ({
     }
   }
 
-  const statusCounts = useMemo(() => {
+  const localStatusCounts = useMemo(() => {
     const counts: Record<string, number> = {}
     statusOptions.forEach(status => {
       counts[status.value] = 0
@@ -90,6 +107,16 @@ export const GameList: FC<GameListProps> = ({
 
     return counts
   }, [games, statusOptions])
+
+  const effectiveStatusCounts = useMemo(() => {
+    const merged: Record<string, number> = { ...localStatusCounts }
+    if (statusCounts) {
+      Object.keys(statusCounts).forEach(key => {
+        merged[key] = statusCounts[key]
+      })
+    }
+    return merged
+  }, [localStatusCounts, statusCounts])
 
   const getStatusIcon = (statusId: string) => {
     switch (statusId) {
@@ -181,25 +208,21 @@ export const GameList: FC<GameListProps> = ({
       {
         id: 'all',
         label: 'Все',
-        badge: games.length,
+        badge: totalCount ?? games.length,
         icon: getStatusIcon('all'),
       },
       ...statusOptions.map(status => ({
         id: status.value,
         label: status.label,
-        badge: statusCounts[status.value] || 0,
+        badge: effectiveStatusCounts[status.value] || 0,
         icon: getStatusIcon(status.value),
       })),
     ],
-    [games.length, statusCounts, statusOptions]
+    [games.length, totalCount, effectiveStatusCounts, statusOptions]
   )
 
   const filteredGames = useMemo(() => {
     let result = [...games]
-
-    if (statusFilter !== 'all') {
-      result = result.filter(game => game.status === statusFilter)
-    }
 
     const normalizedQuery = query.trim().toLowerCase()
     if (normalizedQuery) {
@@ -221,16 +244,20 @@ export const GameList: FC<GameListProps> = ({
     }
 
     return result
-  }, [games, query, sortBy, statusFilter])
+  }, [games, query, sortBy])
 
   const hasFilters =
     statusFilter !== 'all' || query.trim() !== '' || sortBy !== 'default'
 
   const resetFilters = () => {
-    setStatusFilter('all')
+    onStatusChange('all')
     setSortBy('default')
     setQuery('')
   }
+
+  const isRefreshing = isLoading && games.length > 0
+  const isInitialLoading = isLoading && games.length === 0
+  const isCollectionEmpty = !isLoading && (totalCount ?? games.length) === 0
 
   if (editable && !isAuthenticated && authInitialized) {
     return (
@@ -251,7 +278,7 @@ export const GameList: FC<GameListProps> = ({
     )
   }
 
-  if (games.length === 0) {
+  if (isCollectionEmpty) {
     return (
       <motion.div
         initial={{ opacity: 0, y: 10 }}
@@ -304,7 +331,7 @@ export const GameList: FC<GameListProps> = ({
             Коллекция игр
           </h2>
           <p className='text-sm text-[var(--text-secondary)]'>
-            Всего игр: {games.length}
+            Всего игр: {totalCount ?? games.length}
           </p>
         </div>
 
@@ -335,7 +362,7 @@ export const GameList: FC<GameListProps> = ({
         <Tabs
           tabs={statusTabs}
           activeTab={statusFilter}
-          onChange={setStatusFilter}
+          onChange={onStatusChange}
           layoutId='progress-tabs'
           size='md'
           className='flex-wrap'
@@ -362,7 +389,19 @@ export const GameList: FC<GameListProps> = ({
         </div>
       </Card>
 
-      {filteredGames.length === 0 ? (
+      {isInitialLoading ? (
+        <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4'>
+          {Array.from({ length: 6 }).map((_, index) => (
+            <Card
+              key={`skeleton-${index}`}
+              variant='glass'
+              className='h-[220px] animate-pulse'
+            >
+              <div />
+            </Card>
+          ))}
+        </div>
+      ) : filteredGames.length === 0 ? (
         <Card variant='glass' className='text-center'>
           <div className='flex flex-col items-center gap-3'>
             <ArcadeGlyph className='w-12 h-12 text-[var(--text-tertiary)]' />
@@ -380,19 +419,55 @@ export const GameList: FC<GameListProps> = ({
           </div>
         </Card>
       ) : (
-        <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4'>
-          {filteredGames.map(game => (
-            <GameCard
-              key={game.id}
-              game={game}
-              onUpdate={updateGame}
-              onDelete={deleteGame}
-              onUpdateSteam={handleUpdateSteam}
-              editable={editable}
-              statusOptions={statusOptions}
-            />
-          ))}
-        </div>
+        <>
+          {isRefreshing && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className='text-xs text-[var(--text-tertiary)]'
+            >
+              Обновляем список...
+            </motion.div>
+          )}
+          <motion.div
+            layout
+            className={`grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 transition-opacity duration-200 ${
+              isRefreshing ? 'opacity-60 pointer-events-none' : 'opacity-100'
+            }`}
+          >
+            <AnimatePresence initial={false} mode='popLayout'>
+              {filteredGames.map(game => (
+                <GameCard
+                  key={game.id}
+                  game={game}
+                  onUpdate={updateGame}
+                  onDelete={deleteGame}
+                  onUpdateSteam={handleUpdateSteam}
+                  editable={editable}
+                  statusOptions={statusOptions}
+                />
+              ))}
+            </AnimatePresence>
+          </motion.div>
+          {onLoadMore && hasMore && (
+            <div className='flex justify-center pt-4'>
+              <Button
+                onClick={onLoadMore}
+                variant='secondary'
+                size='md'
+                disabled={isLoadingMore}
+                className='min-w-[180px]'
+              >
+                {isLoadingMore ? 'Загрузка...' : 'Показать ещё'}
+              </Button>
+            </div>
+          )}
+          {typeof totalFiltered === 'number' && totalFiltered > 0 && (
+            <div className='text-center text-xs text-[var(--text-tertiary)]'>
+              Показано {games.length} из {totalFiltered}
+            </div>
+          )}
+        </>
       )}
     </div>
   )

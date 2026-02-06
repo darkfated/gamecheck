@@ -200,9 +200,11 @@ export const GameCard: FC<GameCardProps> = ({
 
   return (
     <motion.div
+      layout
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.2, ease: 'easeOut' }}
       className='group relative overflow-hidden rounded-2xl border border-[var(--card-border)] bg-[rgba(var(--bg-secondary-rgb),0.72)] shadow-[var(--shadow-soft)] transition-all duration-300 hover:border-[var(--border-color-hover)] hover:shadow-[var(--shadow-card)]'
     >
       <div className='absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-[rgba(var(--accent-primary-rgb),0.08)] via-transparent to-[rgba(var(--accent-secondary-rgb),0.08)]'></div>

@@ -59,14 +59,18 @@ func New(cfg *config.Config) (*Database, error) {
 }
 
 func (d *Database) Migrate() error {
-	return d.db.AutoMigrate(
+	if err := d.db.AutoMigrate(
 		&models.User{},
 		&models.Progress{},
 		&models.Activity{},
 		&models.LibraryGame{},
 		&models.Token{},
 		&models.Subscription{},
-	)
+	); err != nil {
+		return err
+	}
+
+	return d.ensureActivityTrimTrigger()
 }
 
 func (d *Database) GetDB() *gorm.DB {
@@ -79,4 +83,40 @@ func (d *Database) Close() error {
 		return err
 	}
 	return sqlDB.Close()
+}
+
+func (d *Database) ensureActivityTrimTrigger() error {
+	createFn := `
+CREATE OR REPLACE FUNCTION trim_user_activities() RETURNS trigger AS $$
+BEGIN
+	DELETE FROM activities
+	WHERE user_id = NEW.user_id
+	  AND id NOT IN (
+		SELECT id
+		FROM activities
+		WHERE user_id = NEW.user_id
+		ORDER BY created_at DESC, id DESC
+		LIMIT 30
+	  );
+	RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+`
+
+	if err := d.db.Exec(createFn).Error; err != nil {
+		return err
+	}
+
+	if err := d.db.Exec(`DROP TRIGGER IF EXISTS activities_trim_trigger ON activities;`).Error; err != nil {
+		return err
+	}
+
+	createTrigger := `
+CREATE TRIGGER activities_trim_trigger
+AFTER INSERT ON activities
+FOR EACH ROW
+EXECUTE PROCEDURE trim_user_activities();
+`
+
+	return d.db.Exec(createTrigger).Error
 }

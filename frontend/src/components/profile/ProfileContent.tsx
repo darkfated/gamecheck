@@ -6,17 +6,11 @@ import { GameStats } from './GameStats'
 import { ProfileInfo } from './ProfileInfo'
 import { ProfileSettings } from './ProfileSettings'
 
-interface Game {
-  id: string
-  name: string
-  status: string
-  rating?: number | null
-  review?: string
-  userId: string
-  steamAppId?: number | null
-  steamStoreUrl?: string
-  steamIconUrl?: string
-  steamPlaytimeForever?: number | null
+interface ProgressSummary {
+  total: number
+  avgRating: number
+  ratingCount: number
+  byStatus: Record<string, number>
 }
 
 interface ProfileData {
@@ -43,7 +37,7 @@ interface ProfileContentProps {
   activeTab: string
   onTabChange: (tabId: string) => void
   tabs: Tab[]
-  games: Game[]
+  progressSummary?: ProgressSummary | null
   isOwnProfile: boolean
   profile: ProfileData | null
   profileId?: string
@@ -65,7 +59,7 @@ export const ProfileContent: FC<ProfileContentProps> = ({
   activeTab,
   onTabChange,
   tabs,
-  games,
+  progressSummary,
   isOwnProfile,
   profile,
   profileId,
@@ -99,7 +93,10 @@ export const ProfileContent: FC<ProfileContentProps> = ({
             {activeTab === 'info' && profile && (
               <div className='space-y-8'>
                 <ProfileInfo profile={profile} isOwnProfile={isOwnProfile} />
-                <GameStats games={games} statusOptions={statusOptions} />
+                <GameStats
+                  summary={progressSummary || undefined}
+                  statusOptions={statusOptions}
+                />
               </div>
             )}
 

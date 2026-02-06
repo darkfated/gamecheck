@@ -24,17 +24,11 @@ interface ProfileData {
   averageRating?: number
 }
 
-interface Game {
-  id: string
-  name: string
-  status: string
-  rating?: number | null
-  review?: string
-  userId: string
-  steamAppId?: number | null
-  steamStoreUrl?: string
-  steamIconUrl?: string
-  steamPlaytimeForever?: number | null
+interface ProgressSummary {
+  total: number
+  avgRating: number
+  ratingCount: number
+  byStatus: Record<string, number>
 }
 
 interface Tab {
@@ -65,7 +59,8 @@ const Profile: FC = () => {
   const { user: currentUser } = useAuth()
 
   const [profile, setProfile] = useState<ProfileData | null>(null)
-  const [games, setGames] = useState<Game[]>([])
+  const [progressSummary, setProgressSummary] =
+    useState<ProgressSummary | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [followers, setFollowers] = useState<UserProfile[]>([])
@@ -84,11 +79,11 @@ const Profile: FC = () => {
 
   const profileTabs: Tab[] = useMemo(
     () => [
-      { id: 'progress', label: `Прогресс (${games.length})` },
+      { id: 'progress', label: `Прогресс (${progressSummary?.total || 0})` },
       { id: 'activity', label: 'Активность' },
       { id: 'info', label: 'Информация' },
     ],
-    [games.length]
+    [progressSummary?.total]
   )
 
   const tabs: Tab[] = useMemo(
@@ -111,8 +106,11 @@ const Profile: FC = () => {
       const currentProfile = profileResponse.data
       setProfile(currentProfile)
 
-      const [gamesData, followersData, followingData] = await Promise.all([
-        safeFetch(() => api.progress.getUserGames(id), [] as Game[]),
+      const [progressData, followersData, followingData] = await Promise.all([
+        safeFetch(
+          () => api.progress.getUserGames(id, { limit: 0, summary: true }),
+          { data: [], total: 0, limit: 0, offset: 0, summary: null } as any
+        ),
         safeFetch(
           () => api.subscriptions.getFollowers(id),
           [] as UserProfile[]
@@ -123,7 +121,8 @@ const Profile: FC = () => {
         ),
       ])
 
-      setGames(gamesData)
+      const summary = progressData?.summary || null
+      setProgressSummary(summary)
       setFollowers(followersData)
       setFollowing(followingData)
       setListsLoaded(true)
@@ -268,7 +267,7 @@ const Profile: FC = () => {
         onFollow={handleFollow}
         showFollowersModal={() => setShowFollowersModal(true)}
         showFollowingModal={() => setShowFollowingModal(true)}
-        gamesCount={games.length}
+        gamesCount={progressSummary?.total || 0}
         updateProfile={updateProfile}
         followersCount={profile.followersCount || 0}
         followingCount={profile.followingCount || 0}
@@ -305,7 +304,7 @@ const Profile: FC = () => {
               activeTab={activeTab}
               onTabChange={setActiveTab}
               tabs={tabs}
-              games={games}
+              progressSummary={progressSummary}
               isOwnProfile={isOwnProfile}
               profile={profile}
               profileId={id}

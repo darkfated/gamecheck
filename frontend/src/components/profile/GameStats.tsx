@@ -14,6 +14,12 @@ interface StatusOption {
 
 interface GameStatsProps {
   games?: Game[]
+  summary?: {
+    total: number
+    avgRating: number
+    ratingCount: number
+    byStatus: Record<string, number>
+  }
   statusOptions: StatusOption[]
 }
 
@@ -56,11 +62,30 @@ const getProgressColor = (status: string): string => {
 
 export const GameStats: FC<GameStatsProps> = ({
   games = [],
+  summary,
   statusOptions,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   const stats: Stats = useMemo(() => {
+    if (summary) {
+      const byStatus = statusOptions.reduce(
+        (acc, status) => {
+          acc[status.value] = summary.byStatus?.[status.value] || 0
+          return acc
+        },
+        {} as Record<string, number>
+      )
+      const avgRating =
+        summary.ratingCount > 0 ? summary.avgRating.toFixed(1) : 0
+      return {
+        total: summary.total || 0,
+        byStatus,
+        avgRating,
+        ratingCount: summary.ratingCount || 0,
+      }
+    }
+
     if (!Array.isArray(games) || games.length === 0) {
       return {
         total: 0,

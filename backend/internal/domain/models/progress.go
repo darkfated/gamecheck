@@ -11,16 +11,14 @@ type GameStatus string
 
 type Progress struct {
 	ID                   string     `json:"id" gorm:"type:uuid;primary_key"`
-	UserID               string     `json:"userId" gorm:"type:uuid;index;not null"`
+	UserID               string     `json:"userId" gorm:"type:uuid;index;not null;index:idx_progress_user_status,priority:1"`
 	User                 User       `json:"user" gorm:"foreignKey:UserID"`
 	Name                 string     `json:"name" gorm:"not null"`
-	Status               GameStatus `json:"status" gorm:"not null"`
+	Status               GameStatus `json:"status" gorm:"not null;index:idx_progress_user_status,priority:2"`
 	Rating               *int       `json:"rating,omitempty" gorm:"default:null"`
 	Review               string     `json:"review,omitempty" gorm:"type:text;default:null"`
 	SteamAppID           *int       `json:"steamAppId,omitempty" gorm:"default:null;index"`
-	SteamIconURL         string     `json:"steamIconUrl,omitempty" gorm:"default:null"`
 	SteamPlaytimeForever *int       `json:"steamPlaytimeForever,omitempty" gorm:"default:null"`
-	SteamStoreURL        string     `json:"steamStoreUrl,omitempty" gorm:"default:null"`
 	CreatedAt            time.Time  `json:"createdAt"`
 	UpdatedAt            time.Time  `json:"updatedAt"`
 }

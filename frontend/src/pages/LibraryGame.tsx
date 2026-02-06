@@ -357,7 +357,7 @@ const LibraryGame: FC = () => {
                 )}
               </div>
               <div>
-                <p className='text-sm text-[var(--text-tertiary)]'>
+                <p className='text-sm text-[var(--accent-secondary)]'>
                   {game.primaryGenre || game.genres?.[0] || 'Без жанра'}
                 </p>
                 <h2 className='text-2xl md:text-3xl font-semibold text-white'>

@@ -1,12 +1,10 @@
 package handlers
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
 
-	"gamecheck/internal/domain/models"
 	"gamecheck/internal/middleware"
 	"gamecheck/internal/services"
 	"gamecheck/pkg/utils"
@@ -51,17 +49,18 @@ func (h *ProgressHandler) GetUserGames(ctx *gin.Context) {
 		return
 	}
 
-	games, err := h.progressService.GetUserGames(userID)
+	req := getProgressListQuery(ctx)
+	page, err := h.progressService.GetUserGamesPage(userID, req.Status, req.Limit, req.Offset, req.Summary)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch games"})
 		return
 	}
 
-	if games == nil {
-		games = []*models.Progress{}
+	if page.Data == nil {
+		page.Data = []*services.ProgressGameResponse{}
 	}
 
-	ctx.JSON(http.StatusOK, games)
+	ctx.JSON(http.StatusOK, page)
 }
 
 func (h *ProgressHandler) GetUserGamesByID(ctx *gin.Context) {
@@ -71,17 +70,18 @@ func (h *ProgressHandler) GetUserGamesByID(ctx *gin.Context) {
 		return
 	}
 
-	games, err := h.progressService.GetUserGames(userID)
+	req := getProgressListQuery(ctx)
+	page, err := h.progressService.GetUserGamesPage(userID, req.Status, req.Limit, req.Offset, req.Summary)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch games"})
 		return
 	}
 
-	if games == nil {
-		games = []*models.Progress{}
+	if page.Data == nil {
+		page.Data = []*services.ProgressGameResponse{}
 	}
 
-	ctx.JSON(http.StatusOK, games)
+	ctx.JSON(http.StatusOK, page)
 }
 
 func (h *ProgressHandler) AddGame(ctx *gin.Context) {
@@ -92,13 +92,11 @@ func (h *ProgressHandler) AddGame(ctx *gin.Context) {
 	}
 
 	var req struct {
-		Name          string  `json:"name" binding:"required"`
-		Status        string  `json:"status" binding:"required"`
-		Rating        *int    `json:"rating"`
-		Review        string  `json:"review"`
-		SteamAppID    *int    `json:"steamAppId"`
-		SteamIconURL  *string `json:"steamIconUrl"`
-		SteamStoreURL *string `json:"steamStoreUrl"`
+		Name       string `json:"name" binding:"required"`
+		Status     string `json:"status" binding:"required"`
+		Rating     *int   `json:"rating"`
+		Review     string `json:"review"`
+		SteamAppID *int   `json:"steamAppId"`
 	}
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -126,8 +124,6 @@ func (h *ProgressHandler) AddGame(ctx *gin.Context) {
 	}
 
 	var steamAppID *int
-	var steamIconURL string
-	var steamStoreURL string
 	var playtimeForever *int
 
 	if req.SteamAppID != nil {
@@ -136,20 +132,10 @@ func (h *ProgressHandler) AddGame(ctx *gin.Context) {
 			return
 		}
 		steamAppID = req.SteamAppID
-		if req.SteamIconURL != nil {
-			steamIconURL = strings.TrimSpace(*req.SteamIconURL)
-		}
-		if req.SteamStoreURL != nil && strings.TrimSpace(*req.SteamStoreURL) != "" {
-			steamStoreURL = strings.TrimSpace(*req.SteamStoreURL)
-		} else {
-			steamStoreURL = fmt.Sprintf("https://store.steampowered.com/app/%d/", *req.SteamAppID)
-		}
 	} else {
 		steamGame, err := h.steamService.SearchGameByName(normalizedName)
 		if err == nil && steamGame != nil {
 			steamAppID = &steamGame.AppID
-			steamIconURL = steamGame.Icon
-			steamStoreURL = steamGame.StoreURL
 			if strings.TrimSpace(steamGame.Name) != "" {
 				normalizedName = strings.TrimSpace(steamGame.Name)
 			}
@@ -170,21 +156,14 @@ func (h *ProgressHandler) AddGame(ctx *gin.Context) {
 		}
 	}
 
-	existingGames, err := h.progressService.GetUserGames(userID)
+	exists, err := h.progressService.ExistsForUser(userID, steamAppID, normalizedName)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to check existing games"})
 		return
 	}
-
-	for _, existingGame := range existingGames {
-		if steamAppID != nil && existingGame.SteamAppID != nil && *steamAppID == *existingGame.SteamAppID {
-			ctx.JSON(http.StatusConflict, gin.H{"error": "game already exists in your library"})
-			return
-		}
-		if strings.EqualFold(existingGame.Name, normalizedName) {
-			ctx.JSON(http.StatusConflict, gin.H{"error": "game already exists in your library"})
-			return
-		}
+	if exists {
+		ctx.JSON(http.StatusConflict, gin.H{"error": "game already exists in your library"})
+		return
 	}
 
 	game, err := h.progressService.AddGameWithSteamData(
@@ -194,8 +173,6 @@ func (h *ProgressHandler) AddGame(ctx *gin.Context) {
 		req.Rating,
 		req.Review,
 		steamAppID,
-		steamIconURL,
-		steamStoreURL,
 		playtimeForever,
 	)
 	if err != nil {
@@ -232,8 +209,6 @@ func (h *ProgressHandler) UpdateGame(ctx *gin.Context) {
 		Rating               *int    `json:"rating"`
 		Review               *string `json:"review"`
 		SteamAppID           *int    `json:"steamAppId"`
-		SteamIconURL         *string `json:"steamIconUrl"`
-		SteamStoreURL        *string `json:"steamStoreUrl"`
 		SteamPlaytimeForever *int    `json:"steamPlaytimeForever"`
 	}
 
@@ -280,8 +255,6 @@ func (h *ProgressHandler) UpdateGame(ctx *gin.Context) {
 		req.Rating,
 		req.Review,
 		req.SteamAppID,
-		req.SteamIconURL,
-		req.SteamStoreURL,
 		req.SteamPlaytimeForever,
 	)
 	if err != nil {
@@ -354,11 +327,42 @@ func (h *ProgressHandler) UpdateSteamData(ctx *gin.Context) {
 		}
 	}
 
-	updated, err := h.progressService.UpdateSteamData(gameID, game.SteamAppID, game.SteamIconURL, playtimeForever, game.SteamStoreURL)
+	updated, err := h.progressService.UpdateSteamData(gameID, game.SteamAppID, playtimeForever)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update steam data"})
 		return
 	}
 
 	ctx.JSON(http.StatusOK, updated)
+}
+
+type progressListQuery struct {
+	Limit   int    `form:"limit,default=30"`
+	Offset  int    `form:"offset,default=0"`
+	Status  string `form:"status"`
+	Summary bool   `form:"summary"`
+}
+
+func getProgressListQuery(ctx *gin.Context) progressListQuery {
+	var req progressListQuery
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		req.Limit = 30
+		req.Offset = 0
+	}
+
+	if req.Limit > 50 {
+		req.Limit = 50
+	}
+	if req.Limit < 0 {
+		req.Limit = 0
+	}
+	if req.Offset < 0 {
+		req.Offset = 0
+	}
+
+	if strings.EqualFold(req.Status, "all") {
+		req.Status = ""
+	}
+
+	return req
 }

@@ -3,7 +3,6 @@ package handlers
 import (
 	"net/http"
 
-	"gamecheck/internal/domain/models"
 	"gamecheck/internal/middleware"
 	"gamecheck/internal/services"
 
@@ -43,7 +42,7 @@ func (h *ActivityHandler) GetAllActivities(ctx *gin.Context) {
 	}
 
 	if activities == nil {
-		activities = []*models.Activity{}
+		activities = []*services.ActivityResponse{}
 	}
 
 	ctx.JSON(http.StatusOK, activities)
@@ -64,7 +63,7 @@ func (h *ActivityHandler) GetFeed(ctx *gin.Context) {
 	}
 
 	if activities == nil {
-		activities = []*models.Activity{}
+		activities = []*services.ActivityResponse{}
 	}
 
 	ctx.JSON(http.StatusOK, activities)
@@ -85,7 +84,7 @@ func (h *ActivityHandler) GetUserActivity(ctx *gin.Context) {
 	}
 
 	if activities == nil {
-		activities = []*models.Activity{}
+		activities = []*services.ActivityResponse{}
 	}
 
 	ctx.JSON(http.StatusOK, activities)

@@ -18,7 +18,7 @@ const (
 
 type Activity struct {
 	ID           string       `json:"id" gorm:"type:uuid;primary_key"`
-	UserID       string       `json:"userId" gorm:"type:uuid;index"`
+	UserID       string       `json:"userId" gorm:"type:uuid;index:idx_activity_user_created,priority:1"`
 	User         User         `json:"user" gorm:"foreignKey:UserID"`
 	Type         ActivityType `json:"type"`
 	ProgressID   *string      `json:"progressId,omitempty" gorm:"type:uuid;index;default:null"`
@@ -28,7 +28,7 @@ type Activity struct {
 	GameName     *string      `json:"gameName,omitempty" gorm:"default:null"`
 	Status       *GameStatus  `json:"status,omitempty" gorm:"default:null"`
 	Rating       *int         `json:"rating,omitempty" gorm:"default:null"`
-	CreatedAt    time.Time    `json:"createdAt"`
+	CreatedAt    time.Time    `json:"createdAt" gorm:"index:idx_activity_user_created,priority:2"`
 }
 
 func (a *Activity) BeforeCreate(tx *gorm.DB) error {

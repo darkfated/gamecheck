@@ -55,7 +55,7 @@ export const useGameManagement = (
     if (isSubmitting) return false
 
     if (!checkAuth()) {
-      alert('Authentication required to add game')
+      alert('Авторизация требуется для добавления игры')
       return false
     }
 
@@ -83,37 +83,22 @@ export const useGameManagement = (
     try {
       setIsSubmitting(true)
 
-      const gamesResponse = await api.progress.getUserGames()
-      const existingGames = gamesResponse.data
-
-      const duplicateGameByName = existingGames.find(
-        g => g.name.toLowerCase() === gameData.name.toLowerCase()
-      )
-
-      const duplicateGameByAppId =
-        gameData.steamAppId != null
-          ? existingGames.find(g => g.steamAppId === gameData.steamAppId)
-          : null
-
-      if (duplicateGameByAppId || duplicateGameByName) {
-        alert(`Игра "${gameData.name}" уже добавлена в вашу библиотеку`)
-        return false
-      }
-
       await api.progress.addGame(gameData)
       onUpdateCallback()
       return true
     } catch (error: any) {
-      console.error('Error adding game:', error)
+      console.error('Ошибка добавления игры:', error)
 
       if (error.response?.status === 401) {
         setAuthError(true)
-        alert('Authentication required to add game')
+        alert('Авторизация требуется для добавления игры')
+      } else if (error.response?.status === 409) {
+        alert('Игра уже находится в твоём прогрессе')
       } else if (error.response?.status === 429) {
         alert('Слишком много запросов. Подожди немного и попробуй снова')
       } else {
         alert(
-          `Error adding game: ${
+          `Ошибка добавления игры: ${
             error.response?.data?.error || error.message || 'Unknown error'
           }`
         )
@@ -129,7 +114,7 @@ export const useGameManagement = (
     updates: Partial<GameData>
   ): Promise<boolean> => {
     if (!checkAuth()) {
-      alert('Authentication required to update game')
+      alert('Авторизация требуется для обновления игры')
       return false
     }
 
@@ -159,15 +144,15 @@ export const useGameManagement = (
       onUpdateCallback()
       return true
     } catch (error: any) {
-      console.error('Error updating game:', error)
+      console.error('Ошибка обновления игры:', error)
       if (error.response?.status === 401) {
         setAuthError(true)
-        alert('Authentication required to update game')
+        alert('Авторизация требуется для обновления игры')
       } else if (error.response?.status === 429) {
         alert('Слишком много запросов. Подожди немного и попробуй снова')
       } else {
         alert(
-          `Error updating game: ${
+          `Ошибка обновления игры: ${
             error.response?.data?.error || error.message || 'Unknown error'
           }`
         )
@@ -182,7 +167,7 @@ export const useGameManagement = (
     }
 
     if (!checkAuth()) {
-      alert('Authentication required to delete game')
+      alert('Авторизация требуется для удаления игры')
       return false
     }
 
@@ -191,15 +176,15 @@ export const useGameManagement = (
       onUpdateCallback()
       return true
     } catch (error: any) {
-      console.error('Error deleting game:', error)
+      console.error('Ошибка удаления игры:', error)
       if (error.response?.status === 401) {
         setAuthError(true)
-        alert('Authentication required to delete game')
+        alert('Авторизация требуется для удаления игры')
       } else if (error.response?.status === 429) {
         alert('Слишком много запросов. Подожди немного и попробуй снова')
       } else {
         alert(
-          `Error deleting game: ${
+          `Ошибка удаления игры: ${
             error.response?.data?.error || error.message || 'Unknown error'
           }`
         )
@@ -210,7 +195,7 @@ export const useGameManagement = (
 
   const updateSteamData = async (gameId: string): Promise<boolean> => {
     if (!checkAuth()) {
-      alert('Authentication required to update Steam data')
+      alert('Авторизация требуется для обновления данных Steam')
       return false
     }
 
@@ -219,15 +204,15 @@ export const useGameManagement = (
       onUpdateCallback()
       return true
     } catch (error: any) {
-      console.error('Error updating Steam data:', error)
+      console.error('Ошибка обновления данных Steam:', error)
       if (error.response?.status === 401) {
         setAuthError(true)
-        alert('Authentication required to update Steam data')
+        alert('Авторизация требуется для обновления данных Steam')
       } else if (error.response?.status === 429) {
         alert('Слишком много запросов. Подожди немного и попробуй снова')
       } else {
         alert(
-          `Error updating Steam data: ${
+          `Ошибка обновления данных Steam: ${
             error.response?.data?.error || error.message || 'Unknown error'
           }`
         )

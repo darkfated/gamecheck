@@ -36,6 +36,21 @@ interface Game extends GameData {
   steamPlaytimeForever?: number | null
 }
 
+interface ProgressSummary {
+  total: number
+  avgRating: number
+  ratingCount: number
+  byStatus: Record<string, number>
+}
+
+interface ProgressListResponse {
+  data: Game[]
+  total: number
+  limit: number
+  offset: number
+  summary?: ProgressSummary
+}
+
 interface Activity {
   id: string
   type: string
@@ -226,9 +241,18 @@ const authApi = {
 }
 
 const progressApi = {
-  getUserGames: (userId?: string) =>
-    axiosInstance.get<Game[]>(
-      userId ? `/progress/user/${userId}` : '/progress'
+  getUserGames: (
+    userId?: string,
+    params?: {
+      limit?: number
+      offset?: number
+      status?: string
+      summary?: boolean
+    }
+  ) =>
+    axiosInstance.get<ProgressListResponse>(
+      userId ? `/progress/user/${userId}` : '/progress',
+      { params }
     ),
 
   addGame: (data: GameData) => {

@@ -27,11 +27,11 @@ export const FeedHeader: FC<FeedHeaderProps> = ({
       try {
         const [profileRes, gamesRes] = await Promise.all([
           api.users.getProfile(userId),
-          api.progress.getUserGames(userId),
+          api.progress.getUserGames(userId, { limit: 0, summary: true }),
         ])
         setFollowersCount(profileRes.data.followersCount || 0)
         setFollowingCount(profileRes.data.followingCount || 0)
-        setGamesCount(gamesRes.data.length || 0)
+        setGamesCount(gamesRes.data.summary?.total || 0)
       } catch (error) {
         console.error('Error loading stats:', error)
       }
