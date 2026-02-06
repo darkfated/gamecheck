@@ -1,7 +1,7 @@
 import { ReactNode } from 'react'
 
 interface SectionHeaderProps {
-  title: string
+  title: ReactNode
   subtitle?: string
   action?: ReactNode
   className?: string
@@ -31,4 +31,3 @@ export function SectionHeader({
     </div>
   )
 }
-

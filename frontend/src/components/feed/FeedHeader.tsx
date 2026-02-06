@@ -43,7 +43,14 @@ export const FeedHeader: FC<FeedHeaderProps> = ({
   return (
     <>
       <SectionHeader
-        title={`С возвращением, ${displayName}`}
+        title={
+          <>
+            С возвращением,{' '}
+            <span className='bg-gradient-to-r from-cyan-400 via-teal-300 to-amber-400 bg-clip-text text-transparent'>
+              {displayName}
+            </span>
+          </>
+        }
         subtitle='Свежая активность, подписки и новые игры в одном месте.'
         action={
           <Link to='/users'>
